@@ -72,6 +72,7 @@ export default function AcompanhamentoProducao() {
     setores: 0,
     linhas: 0,
   });
+  const [programacoesPorSetorLinha, setProgramacoesPorSetorLinha] = useState<Map<string, number>>(new Map());
   // setores removido - não usado
   const [showModalAtualizacao, setShowModalAtualizacao] = useState(false);
   const [producaoSelecionada, setProducaoSelecionada] = useState<ProducaoResumo | null>(null);
@@ -232,6 +233,14 @@ export default function AcompanhamentoProducao() {
       setores: setoresUnicos.size,
       linhas: linhasUnicas.size,
     });
+
+    // Calcular programações por setor e linha (sempre da logística)
+    const programacoesMap = new Map<string, number>();
+    programacoes.forEach(prog => {
+      const chave = `${prog.setor}_${prog.linha}`;
+      programacoesMap.set(chave, (programacoesMap.get(chave) || 0) + prog.quantidadeProgramada);
+    });
+    setProgramacoesPorSetorLinha(programacoesMap);
   };
 
   const handleAtualizarProducao = (resumo: ProducaoResumo) => {
@@ -338,12 +347,14 @@ export default function AcompanhamentoProducao() {
   }));
 
   // Métricas detalhadas por setor e linha
+  // Usar sempre o valor programado da logística (ProgramacaoPedido)
   const metricasDetalhadas = Array.from(
     new Set(resumoProducao.map(r => `${r.setor}_${r.linha}`))
   ).map(_chave => {
     const [setor, linha] = _chave.split('_');
     const resumosSetorLinha = resumoProducao.filter(r => r.setor === setor && r.linha === linha);
-    const programadoSetorLinha = resumosSetorLinha.reduce((sum, r) => sum + r.quantidadeProgramada, 0);
+    // Usar sempre o valor programado da logística (ProgramacaoPedido) - o que a logística pediu
+    const programadoSetorLinha = programacoesPorSetorLinha.get(_chave) || 0;
     const realizadoSetorLinha = resumosSetorLinha.reduce((sum, r) => sum + r.quantidadeRealizada, 0);
     const porcentagemRealizacao = programadoSetorLinha > 0 
       ? (realizadoSetorLinha / programadoSetorLinha) * 100 
