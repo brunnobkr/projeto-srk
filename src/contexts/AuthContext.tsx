@@ -38,13 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Limpar sessão ao fechar a aba
-    const handleBeforeUnload = () => {
-      sessaoStorage.clear();
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
     // Criar usuário admin inicial se não existir nenhum
     const todosUsuarios = usuariosStorage.getAll();
     if (todosUsuarios.length === 0) {
@@ -59,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         segurancaTrabalho: false,
         dashboardAdmin: false,
         gerenciarUsuarios: false,
-        programarPedidos: false,
         criar: false,
         editar: false,
         excluir: false,
@@ -90,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 5000); // A cada 5 segundos
     return () => {
       clearInterval(interval);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 

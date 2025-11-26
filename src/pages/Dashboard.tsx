@@ -339,7 +339,6 @@ export default function Dashboard() {
   ];
 
   const totalProducaoHoje = producaoAtual.reduce((sum, p) => sum + (p.quantidadeHora || 0), 0);
-  const totalProducao30min = producaoAtual.reduce((sum, p) => sum + (p.quantidade30min || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -381,14 +380,10 @@ export default function Dashboard() {
             <span>Atualiza a cada 30 segundos</span>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
             <p className="text-sm opacity-90">Total Produzido (Hora)</p>
             <p className="text-4xl font-bold mt-2">{totalProducaoHoje.toLocaleString('pt-BR')}</p>
-          </div>
-          <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
-            <p className="text-sm opacity-90">Total Produzido (30min)</p>
-            <p className="text-4xl font-bold mt-2">{totalProducao30min.toLocaleString('pt-BR')}</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
             <p className="text-sm opacity-90">Registros de Produção</p>

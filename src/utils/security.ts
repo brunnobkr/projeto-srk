@@ -190,9 +190,13 @@ export const initSecurity = () => {
     return;
   }
 
-  // Verificar senha primeiro
-  if (!checkSecurityPassword()) {
-    return;
+  // Verificar senha primeiro (não bloquear se já estiver autenticado)
+  // A senha é salva no sessionStorage, então persiste durante o refresh
+  const savedPassword = sessionStorage.getItem('srk_dev_password');
+  if (savedPassword !== DEV_PASSWORD) {
+    if (!checkSecurityPassword()) {
+      return;
+    }
   }
 
   // Aplicar proteções
