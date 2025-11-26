@@ -605,7 +605,7 @@ export const mensagensStorage = {
   getAll: (): Mensagem[] => storage.get(STORAGE_KEYS.mensagens, []),
   add: (mensagem: Mensagem) => storage.add(STORAGE_KEYS.mensagens, mensagem),
   update: (id: string, updates: Partial<Mensagem>, motivo?: string) =>
-    storage.update(STORAGE_KEYS.mensagens, id, updates, 'mensagem' as TipoItem, motivo),
+    storage.update(STORAGE_KEYS.mensagens, id, updates, 'mensagem', motivo),
   delete: (id: string) => storage.delete(STORAGE_KEYS.mensagens, id),
   getByConversa: (conversaId: string): Mensagem[] => {
     return mensagensStorage.getAll().filter(m => m.conversaId === conversaId);
@@ -626,7 +626,7 @@ export const conversasStorage = {
   getAll: (): Conversa[] => storage.get(STORAGE_KEYS.conversas, []),
   add: (conversa: Conversa) => storage.add(STORAGE_KEYS.conversas, conversa),
   update: (id: string, updates: Partial<Conversa>, motivo?: string) =>
-    storage.update(STORAGE_KEYS.conversas, id, updates, 'conversa' as TipoItem, motivo),
+    storage.update(STORAGE_KEYS.conversas, id, updates, 'conversa', motivo),
   delete: (id: string) => storage.delete(STORAGE_KEYS.conversas, id),
   getByUsuario: (usuarioId: string): Conversa[] => {
     return conversasStorage.getAll().filter(c =>
@@ -660,7 +660,7 @@ export const notificacoesStorage = {
   getAll: (): Notificacao[] => storage.get(STORAGE_KEYS.notificacoes, []),
   add: (notificacao: Notificacao) => storage.add(STORAGE_KEYS.notificacoes, notificacao),
   update: (id: string, updates: Partial<Notificacao>, motivo?: string) =>
-    storage.update(STORAGE_KEYS.notificacoes, id, updates, 'notificacao' as TipoItem, motivo),
+    storage.update(STORAGE_KEYS.notificacoes, id, updates, 'notificacao', motivo),
   delete: (id: string) => storage.delete(STORAGE_KEYS.notificacoes, id),
   getByUsuario: (usuarioId: string): Notificacao[] => {
     return notificacoesStorage.getAll().filter(n => n.usuarioId === usuarioId);
@@ -682,7 +682,7 @@ export const chamadasStorage = {
   getAll: (): Chamada[] => storage.get(STORAGE_KEYS.chamadas, []),
   add: (chamada: Chamada) => storage.add(STORAGE_KEYS.chamadas, chamada),
   update: (id: string, updates: Partial<Chamada>, motivo?: string) =>
-    storage.update(STORAGE_KEYS.chamadas, id, updates, 'chamada' as TipoItem, motivo),
+    storage.update(STORAGE_KEYS.chamadas, id, updates, 'chamada', motivo),
   delete: (id: string) => storage.delete(STORAGE_KEYS.chamadas, id),
   getByUsuario: (usuarioId: string): Chamada[] => {
     return chamadasStorage.getAll().filter(c =>

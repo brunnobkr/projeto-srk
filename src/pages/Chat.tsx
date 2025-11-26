@@ -25,7 +25,7 @@ export default function Chat() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const intervaloAudioRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervaloAudioRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,12 +74,12 @@ export default function Chat() {
 
       return {
         ...conv,
-        participante1: (conv.participante1Id === usuario.id 
+        participante1: conv.participante1Id === usuario.id 
           ? usuario 
-          : outroUsuario) || undefined,
-        participante2: (conv.participante2Id === usuario.id 
+          : outroUsuario,
+        participante2: conv.participante2Id === usuario.id 
           ? usuario 
-          : outroUsuario) || undefined,
+          : outroUsuario,
         ultimaMensagem: ultimaMsg,
         naoLidas,
         dataUltimaMensagem: ultimaMsg?.dataEnvio,
@@ -88,7 +88,7 @@ export default function Chat() {
       const dataA = a.dataUltimaMensagem || a.dataCriacao;
       const dataB = b.dataUltimaMensagem || b.dataCriacao;
       return new Date(dataB).getTime() - new Date(dataA).getTime();
-    }) as Conversa[];
+    });
 
     setConversas(conversasEnriquecidas);
   };
@@ -106,11 +106,11 @@ export default function Chat() {
     // Enriquecer com dados dos usuários
     const msgsEnriquecidas = msgs.map(msg => ({
       ...msg,
-      remetente: usuariosStorage.getById(msg.remetenteId) || undefined,
-      destinatario: usuariosStorage.getById(msg.destinatarioId) || undefined,
+      remetente: usuariosStorage.getById(msg.remetenteId),
+      destinatario: usuariosStorage.getById(msg.destinatarioId),
     })).sort((a, b) => 
       new Date(a.dataEnvio).getTime() - new Date(b.dataEnvio).getTime()
-    ) as Mensagem[];
+    );
 
     setMensagens(msgsEnriquecidas);
 

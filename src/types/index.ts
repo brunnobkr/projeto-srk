@@ -161,7 +161,6 @@ export interface ControleProducao {
   linha?: string;
   data: string;
   hora: string;
-  turno?: '1' | '2' | '3' | 'central';
   quantidade30min: number;
   quantidadeHora: number;
   tempoMontagem: number; // em minutos
@@ -370,11 +369,7 @@ export type TipoItem =
   | 'instrucao' 
   | 'componente' 
   | 'seguranca'
-  | 'chamado'
-  | 'mensagem'
-  | 'conversa'
-  | 'notificacao'
-  | 'chamada';
+  | 'chamado';
 
 // Chamados de Manutenção
 export interface ChamadoManutencao {
@@ -418,9 +413,9 @@ export interface Mensagem {
   id: string;
   conversaId: string;
   remetenteId: string;
-  remetente?: Usuario | null;
+  remetente?: Usuario;
   destinatarioId: string;
-  destinatario?: Usuario | null;
+  destinatario?: Usuario;
   tipo: 'texto' | 'audio' | 'foto' | 'video';
   conteudo: string; // Texto ou base64 para mídia
   audioUrl?: string; // URL do áudio (base64)
@@ -435,9 +430,9 @@ export interface Mensagem {
 export interface Conversa {
   id: string;
   participante1Id: string;
-  participante1?: Usuario | null;
+  participante1?: Usuario;
   participante2Id: string;
-  participante2?: Usuario | null;
+  participante2?: Usuario;
   ultimaMensagem?: Mensagem;
   naoLidas: number; // Número de mensagens não lidas
   dataUltimaMensagem?: string;

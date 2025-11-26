@@ -22,6 +22,7 @@ import ChamadosTI from './pages/ChamadosTI';
 import Registro from './pages/Registro';
 import Chat from './pages/Chat';
 import Equipe from './pages/Equipe';
+import AcompanhamentoProducao from './pages/AcompanhamentoProducao';
 
 function AppRoutes() {
   const { usuario } = useAuth();
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/receitas-maquina" element={<ProtectedRoute requiredPermission="receitasMaquina"><ReceitasMaquina /></ProtectedRoute>} />
         <Route path="/controle-producao" element={<ProtectedRoute requiredPermission="controleProducao"><ControleProducao /></ProtectedRoute>} />
+        <Route path="/acompanhamento-producao" element={<ProtectedRoute requiredPermission="controleProducao"><AcompanhamentoProducao /></ProtectedRoute>} />
         <Route path="/controle-funcionarios" element={<ProtectedRoute requiredPermission="controleFuncionarios"><ControleFuncionarios /></ProtectedRoute>} />
         <Route path="/problemas-tecnicos" element={<ProtectedRoute requiredPermission="problemasTecnicos"><ProblemasTecnicos /></ProtectedRoute>} />
         <Route path="/mudancas-melhorias" element={<ProtectedRoute requiredPermission="mudancasMelhorias"><MudancasMelhorias /></ProtectedRoute>} />

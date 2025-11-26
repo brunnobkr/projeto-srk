@@ -62,7 +62,8 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
 
   const loadSetores = () => {
     const setoresData = setoresStorage.getAll();
-    setSetores(setoresData);
+    // Filtrar apenas setores ativos
+    setSetores(setoresData.filter(s => s.ativo));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -440,7 +441,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Selecione um setor</option>
-                      {setores.map(setor => (
+                      {setores.filter(s => s.ativo).map(setor => (
                         <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                       ))}
                     </select>

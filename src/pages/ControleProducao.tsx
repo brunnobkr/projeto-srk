@@ -33,8 +33,14 @@ export default function ControleProducao() {
 
   useEffect(() => {
     loadControles();
-    setSetores(setoresStorage.getAll());
+    loadSetores();
   }, []);
+
+  const loadSetores = () => {
+    const todosSetores = setoresStorage.getAll();
+    // Filtrar apenas setores ativos
+    setSetores(todosSetores.filter(s => s.ativo));
+  };
 
   const loadControles = () => {
     setControles(producaoStorage.getAll());
@@ -58,7 +64,7 @@ export default function ControleProducao() {
       quantidadeTotalLogistica: formData.quantidadeTotalLogistica ? parseFloat(formData.quantidadeTotalLogistica) : undefined,
       preparador: formData.preparador || undefined,
       atualizacaoHora: formData.atualizacaoHora,
-      turno: (formData.turno || determinarTurno(formData.hora) || undefined) as '1' | '2' | '3' | 'central' | undefined,
+      turno: formData.turno || determinarTurno(formData.hora) || undefined,
       observacoes: formData.observacoes || undefined,
     };
 
@@ -263,7 +269,7 @@ export default function ControleProducao() {
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="">Selecione um setor...</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                     ))}
                   </select>

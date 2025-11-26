@@ -41,8 +41,14 @@ export default function InstrucoesTrabalho() {
 
   useEffect(() => {
     loadInstrucoes();
-    setSetores(setoresStorage.getAll());
+    loadSetores();
   }, []);
+
+  const loadSetores = () => {
+    const todosSetores = setoresStorage.getAll();
+    // Filtrar apenas setores ativos
+    setSetores(todosSetores.filter(s => s.ativo));
+  };
 
   const loadInstrucoes = () => {
     const todasInstrucoes = instrucoesStorage.getAll();
@@ -405,7 +411,7 @@ export default function InstrucoesTrabalho() {
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="">Selecione um setor...</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                     ))}
                   </select>

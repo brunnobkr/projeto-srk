@@ -21,7 +21,6 @@ export default function MudancasMelhorias() {
     hora: format(new Date(), 'HH:mm'),
     turno: determinarTurno() as '1' | '2' | '3' | 'central',
     interrompeuProducao: false,
-    engenheiro: '',
     status: 'planejado' as 'planejado' | 'em-execucao' | 'concluido',
     observacoes: '',
   });
@@ -47,7 +46,7 @@ export default function MudancasMelhorias() {
       hora: formData.hora,
       turno: turno,
       interrompeuProducao: formData.interrompeuProducao,
-      engenheiro: formData.engenheiro || usuario?.nome || 'Engenheiro não identificado',
+      engenheiro: usuario?.nome || 'Engenheiro não identificado',
       status: formData.status,
       dataConclusao: formData.status === 'concluido' ? new Date().toISOString() : undefined,
       observacoes: formData.observacoes || undefined,

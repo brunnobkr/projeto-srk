@@ -51,8 +51,14 @@ export default function ReceitasMaquina() {
 
   useEffect(() => {
     loadReceitas();
-    setSetores(setoresStorage.getAll());
+    loadSetores();
   }, []);
+
+  const loadSetores = () => {
+    const todosSetores = setoresStorage.getAll();
+    // Filtrar apenas setores ativos
+    setSetores(todosSetores.filter(s => s.ativo));
+  };
 
   const loadReceitas = () => {
     setReceitas(receitasStorage.getAll());
@@ -191,8 +197,6 @@ export default function ReceitasMaquina() {
   const resetForm = () => {
     setFormData({
       codigoTubo: '',
-      setor: '',
-      linha: '',
       angulacao: '',
       velocidade: '',
       distancia: '',
@@ -490,7 +494,7 @@ export default function ReceitasMaquina() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="">Selecione um setor...</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                     ))}
                   </select>

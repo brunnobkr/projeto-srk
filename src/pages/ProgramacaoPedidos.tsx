@@ -44,7 +44,9 @@ export default function ProgramacaoPedidos() {
   const loadData = () => {
     setProgramacoes(programacoesPedidosStorage.getAll());
     setComponentes(componentesStorage.getAll());
-    setSetores(setoresStorage.getAll());
+    const todosSetores = setoresStorage.getAll();
+    // Filtrar apenas setores ativos
+    setSetores(todosSetores.filter(s => s.ativo));
   };
 
   const loadProblemasProducao = () => {
@@ -470,7 +472,7 @@ export default function ProgramacaoPedidos() {
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="">Selecione um setor...</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                     ))}
                   </select>
@@ -568,7 +570,7 @@ export default function ProgramacaoPedidos() {
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="">Selecione um setor...</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.nome}>{setor.nome}</option>
                     ))}
                   </select>

@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronRight,
   MessageCircle,
-  Bell
+  Bell,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ReactNode, useState, useEffect } from 'react';
@@ -34,6 +35,7 @@ const menuItems = [
   { path: '/chat', label: 'Chat', icon: MessageCircle },
   { path: '/receitas-maquina', label: 'Receitas de Máquina', icon: Settings },
   { path: '/controle-producao', label: 'Controle de Produção', icon: ClipboardList },
+  { path: '/acompanhamento-producao', label: 'Acompanhamento de Produção', icon: TrendingUp },
   { path: '/controle-funcionarios', label: 'Controle de Funcionários', icon: Users },
   { path: '/problemas-tecnicos', label: 'Problemas Técnicos', icon: AlertTriangle },
   { path: '/mudancas-melhorias', label: 'Mudanças e Melhorias', icon: Wrench },

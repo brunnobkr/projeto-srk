@@ -44,7 +44,9 @@ export default function ProblemasTecnicos() {
   }, [editingProblema]);
 
   const loadSetores = () => {
-    setSetores(setoresStorage.getAll());
+    const todosSetores = setoresStorage.getAll();
+    // Filtrar apenas setores ativos
+    setSetores(todosSetores.filter(s => s.ativo));
   };
 
   useEffect(() => {
@@ -351,7 +353,7 @@ export default function ProblemasTecnicos() {
                   <label className="block text-sm font-medium mb-1">Setor *</label>
                   <select required value={formData.setor} onChange={(e) => setFormData({ ...formData, setor: e.target.value })} className="w-full px-3 py-2 border rounded-lg">
                     <option value="">Selecione um setor</option>
-                    {setores.map(setor => (
+                    {setores.filter(s => s.ativo).map(setor => (
                       <option key={setor.id} value={setor.id}>{setor.nome}</option>
                     ))}
                   </select>

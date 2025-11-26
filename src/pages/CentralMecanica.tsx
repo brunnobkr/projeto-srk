@@ -97,7 +97,7 @@ export default function CentralMecanica() {
                     </div>
                   </div>
                   <button
-                    onClick={() => {/* Ver detalhes do problema */}}
+                    onClick={() => setProblemaDetalhes(problema)}
                     className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                   >
                     <Eye className="w-5 h-5" />
