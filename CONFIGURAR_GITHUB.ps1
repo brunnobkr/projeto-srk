@@ -158,3 +158,4 @@ Write-Host "   - GUIA_GITHUB_PAGES.md" -ForegroundColor Yellow
 Write-Host "   - ARQUIVOS_PARA_UPLOAD.md" -ForegroundColor Yellow
 
 
+9

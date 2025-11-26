@@ -44,3 +44,6 @@ security.config.js
 dist/
 dist-ssr/
 *.local
+
+# Pastas problemáticas
+Projeto-srk-/
