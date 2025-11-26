@@ -3,8 +3,6 @@ import { Plus, Edit, Trash2, Search, PlusCircle, X } from 'lucide-react';
 import { componentesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { ComponenteProduto, Presilha, Marcacao, CorComponente } from '../types';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
 
 export default function ComponentesProduto() {
   const { canCreate, canEdit, isEngenharia } = useAuth();
@@ -16,17 +14,17 @@ export default function ComponentesProduto() {
   const podeCriarEditar = canCreate('componentesProduto') || canEdit('componentesProduto') || isEngenharia();
   const [formData, setFormData] = useState({
     codigo: '',
-    tubos: [] as { nome: string; quantidade: number }[],
-    conectores: [] as { nome: string; quantidade: number }[],
+    tubos: [] as { nome: string; quantidade: number; codigos?: string[] }[],
+    conectores: [] as { nome: string; quantidade: number; codigos?: string[] }[],
     presilhas: [] as Presilha[],
-    fitas: [] as { nome: string; quantidade: number }[],
-    guianas: [] as { nome: string; quantidade: number }[],
-    aneis: [] as { nome: string; quantidade: number }[],
+    fitas: [] as { nome: string; quantidade: number; codigos?: string[] }[],
+    guianas: [] as { nome: string; quantidade: number; codigos?: string[] }[],
+    aneis: [] as { nome: string; quantidade: number; codigos?: string[] }[],
     marcacoes: [] as Marcacao[],
     recalques: '',
     cores: [] as CorComponente[],
-    valvulas: [] as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB' }[],
-    filtros: [] as { nome: string; quantidade: number }[],
+    valvulas: [] as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] }[],
+    filtros: [] as { nome: string; quantidade: number; codigos?: string[] }[],
     observacoes: '',
     quantidadeProgramada: '',
   });
@@ -547,12 +545,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Tubos</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.tubos.map((t, i) => (
+                  {formData.tubos.map((t, i) => {
+                    const tWithCodigos = t as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{t.quantidade}x {t.nome}{t.codigos && t.codigos.length > 0 ? ` (Códigos: ${t.codigos.join(', ')})` : ''}</span>
+                      <span>{t.quantidade}x {t.nome}{tWithCodigos.codigos && tWithCodigos.codigos.length > 0 ? ` (Códigos: ${tWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeTubo(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome do tubo" value={novoTubo.nome} onChange={(e) => setNovoTubo({ ...novoTubo, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -566,12 +567,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Conectores</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.conectores.map((c, i) => (
+                  {formData.conectores.map((c, i) => {
+                    const cWithCodigos = c as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{c.quantidade}x {c.nome}{c.codigos && c.codigos.length > 0 ? ` (Códigos: ${c.codigos.join(', ')})` : ''}</span>
+                      <span>{c.quantidade}x {c.nome}{cWithCodigos.codigos && cWithCodigos.codigos.length > 0 ? ` (Códigos: ${cWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeConector(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome do conector" value={novoConector.nome} onChange={(e) => setNovoConector({ ...novoConector, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -585,12 +589,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Válvulas</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.valvulas.map((v, i) => (
+                  {formData.valvulas.map((v, i) => {
+                    const vWithCodigos = v as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{v.quantidade}x {v.nome} {v.tipo === 'A' ? '(A)' : v.tipo === 'B' ? '(B)' : '(A e B)'}{v.codigos && v.codigos.length > 0 ? ` - Códigos: ${v.codigos.join(', ')}` : ''}</span>
+                      <span>{v.quantidade}x {v.nome} {v.tipo === 'A' ? '(A)' : v.tipo === 'B' ? '(B)' : '(A e B)'}{vWithCodigos.codigos && vWithCodigos.codigos.length > 0 ? ` - Códigos: ${vWithCodigos.codigos.join(', ')}` : ''}</span>
                       <button type="button" onClick={() => removeValvula(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                   <input type="text" placeholder="Nome da válvula" value={novaValvula.nome} onChange={(e) => setNovaValvula({ ...novaValvula, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -609,12 +616,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Fitas</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.fitas.map((f, i) => (
+                  {formData.fitas.map((f, i) => {
+                    const fWithCodigos = f as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{f.quantidade}x {f.nome}{f.codigos && f.codigos.length > 0 ? ` (Códigos: ${f.codigos.join(', ')})` : ''}</span>
+                      <span>{f.quantidade}x {f.nome}{fWithCodigos.codigos && fWithCodigos.codigos.length > 0 ? ` (Códigos: ${fWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeFita(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome da fita" value={novaFita.nome} onChange={(e) => setNovaFita({ ...novaFita, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -628,12 +638,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Guianas e Borrachas</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.guianas.map((g, i) => (
+                  {formData.guianas.map((g, i) => {
+                    const gWithCodigos = g as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{g.quantidade}x {g.nome}{g.codigos && g.codigos.length > 0 ? ` (Códigos: ${g.codigos.join(', ')})` : ''}</span>
+                      <span>{g.quantidade}x {g.nome}{gWithCodigos.codigos && gWithCodigos.codigos.length > 0 ? ` (Códigos: ${gWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeGuiana(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome da guiana" value={novaGuiana.nome} onChange={(e) => setNovaGuiana({ ...novaGuiana, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -647,12 +660,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Anéis</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.aneis.map((a, i) => (
+                  {formData.aneis.map((a, i) => {
+                    const aWithCodigos = a as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{a.quantidade}x {a.nome}{a.codigos && a.codigos.length > 0 ? ` (Códigos: ${a.codigos.join(', ')})` : ''}</span>
+                      <span>{a.quantidade}x {a.nome}{aWithCodigos.codigos && aWithCodigos.codigos.length > 0 ? ` (Códigos: ${aWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeAnei(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome do anel" value={novoAnei.nome} onChange={(e) => setNovoAnei({ ...novoAnei, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />
@@ -666,12 +682,15 @@ export default function ComponentesProduto() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Filtros</h3>
                 <div className="space-y-2 mb-3">
-                  {formData.filtros.map((f, i) => (
+                  {formData.filtros.map((f, i) => {
+                    const fWithCodigos = f as { nome: string; quantidade: number; codigos?: string[] };
+                    return (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{f.quantidade}x {f.nome}{f.codigos && f.codigos.length > 0 ? ` (Códigos: ${f.codigos.join(', ')})` : ''}</span>
+                      <span>{f.quantidade}x {f.nome}{fWithCodigos.codigos && fWithCodigos.codigos.length > 0 ? ` (Códigos: ${fWithCodigos.codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeFiltro(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <input type="text" placeholder="Nome do filtro" value={novoFiltro.nome} onChange={(e) => setNovoFiltro({ ...novoFiltro, nome: e.target.value })} className="px-3 py-2 border rounded-lg" />

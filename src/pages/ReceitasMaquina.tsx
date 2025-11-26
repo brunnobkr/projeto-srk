@@ -197,6 +197,8 @@ export default function ReceitasMaquina() {
   const resetForm = () => {
     setFormData({
       codigoTubo: '',
+      setor: '',
+      linha: '',
       angulacao: '',
       velocidade: '',
       distancia: '',

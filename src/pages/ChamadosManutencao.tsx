@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, X, CheckCircle, Clock, AlertCircle, Wrench, Zap, Hammer, Monitor } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
 import { chamadosStorage } from '../utils/storage';
 import { setoresStorage } from '../utils/storage';
-import { usuariosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';

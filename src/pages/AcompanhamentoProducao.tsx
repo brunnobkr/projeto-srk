@@ -4,24 +4,22 @@ import {
   TrendingDown,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  BarChart3,
-  Factory,
-  Target,
-  Activity,
   RefreshCw,
   Edit,
   Save,
   X,
+  Target,
+  Activity,
+  Factory,
 } from 'lucide-react';
 import {
   programacoesPedidosStorage,
   producaoStorage,
-  setoresStorage,
   problemasStorage,
 } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { ProgramacaoPedido, ControleProducao, Setor, ProblemaTecnico } from '../types';
+import type { ControleProducao, ProblemaTecnico } from '../types';
+// ProgramacaoPedido removido - não usado
 import { format, startOfDay, endOfDay, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import {
@@ -74,7 +72,7 @@ export default function AcompanhamentoProducao() {
     setores: 0,
     linhas: 0,
   });
-  const [setores, setSetores] = useState<Setor[]>([]);
+  // setores removido - não usado
   const [showModalAtualizacao, setShowModalAtualizacao] = useState(false);
   const [producaoSelecionada, setProducaoSelecionada] = useState<ProducaoResumo | null>(null);
   const [formAtualizacao, setFormAtualizacao] = useState({
@@ -85,7 +83,6 @@ export default function AcompanhamentoProducao() {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(new Date());
 
   useEffect(() => {
-    loadSetores();
     loadDados();
   }, [dataSelecionada]);
 
@@ -99,10 +96,10 @@ export default function AcompanhamentoProducao() {
     return () => clearInterval(interval);
   }, [dataSelecionada]);
 
-  const loadSetores = () => {
-    const todosSetores = setoresStorage.getAll();
-    setSetores(todosSetores.filter(s => s.ativo));
-  };
+  // const loadSetores = () => {
+  //   const todosSetores = setoresStorage.getAll();
+  //   setSetores(todosSetores.filter(s => s.ativo));
+  // }; // Não usado
 
   const loadDados = () => {
     const dataInicio = startOfDay(parseISO(dataSelecionada));
@@ -192,7 +189,6 @@ export default function AcompanhamentoProducao() {
     // Associar problemas técnicos
     problemas.forEach(prob => {
       if (!prob.setor || !prob.linha) return;
-      const chave = `${prob.setor}_${prob.linha}_${prob.maquina || 'geral'}`;
       // Buscar resumo mais próximo (mesmo setor e linha)
       Array.from(resumoMap.values())
         .filter(r => r.setor === prob.setor && r.linha === prob.linha)
@@ -344,8 +340,8 @@ export default function AcompanhamentoProducao() {
   // Métricas detalhadas por setor e linha
   const metricasDetalhadas = Array.from(
     new Set(resumoProducao.map(r => `${r.setor}_${r.linha}`))
-  ).map(chave => {
-    const [setor, linha] = chave.split('_');
+  ).map(_chave => {
+    const [setor, linha] = _chave.split('_');
     const resumosSetorLinha = resumoProducao.filter(r => r.setor === setor && r.linha === linha);
     const programadoSetorLinha = resumosSetorLinha.reduce((sum, r) => sum + r.quantidadeProgramada, 0);
     const realizadoSetorLinha = resumosSetorLinha.reduce((sum, r) => sum + r.quantidadeRealizada, 0);
@@ -583,13 +579,13 @@ export default function AcompanhamentoProducao() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {dadosGraficoContribuicao.map((entry, index) => (
+                {dadosGraficoContribuicao.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS_PIE[index % COLORS_PIE.length]} />
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: number, name: string, props: any) => [
-                  `${value.toLocaleString('pt-BR')} (${props.payload.porcentagem}% do total)`,
+                formatter={(value: number) => [
+                  `${value.toLocaleString('pt-BR')}`,
                   'Programado'
                 ]}
               />

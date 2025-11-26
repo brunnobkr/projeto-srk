@@ -34,7 +34,7 @@ export default function InstrucoesTrabalho() {
     fotos: [] as string[],
   });
   const [funcionarioAutorizado, setFuncionarioAutorizado] = useState('');
-  const [fotoPassoIndex, setFotoPassoIndex] = useState<number | null>(null);
+  const [_fotoPassoIndex, setFotoPassoIndex] = useState<number | null>(null);
   const [showFotoModal, setShowFotoModal] = useState(false);
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);

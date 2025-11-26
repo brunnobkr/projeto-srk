@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Settings, 
@@ -19,7 +19,6 @@ import {
   ChevronDown,
   ChevronRight,
   MessageCircle,
-  Bell,
   TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

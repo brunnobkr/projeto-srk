@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { X, History } from 'lucide-react';
 import type { HistoricoVersao } from '../types';
 import { format } from 'date-fns';

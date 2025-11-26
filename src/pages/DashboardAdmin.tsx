@@ -20,14 +20,12 @@ import {
   problemasStorage,
   acidentesStorage,
   funcionariosStorage,
-  setoresStorage,
   programacoesPedidosStorage,
 } from '../utils/storage';
 import { perfilStorage } from '../utils/storage';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import { useNavigate } from 'react-router-dom';
-import type { ControleProducao, ControleFuncionarios, ProblemaTecnico, Acidente, Funcionario, Setor, ProgramacaoPedido } from '../types';
+import type { ProblemaTecnico, Acidente } from '../types';
 import {
   LineChart,
   Line,
@@ -48,7 +46,6 @@ import {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
 
 export default function DashboardAdmin() {
-  const navigate = useNavigate();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +62,6 @@ export default function DashboardAdmin() {
   const [producaoPorLinhaDetalhado, setProducaoPorLinhaDetalhado] = useState<any[]>([]);
   const [producaoPorSetorLinha, setProducaoPorSetorLinha] = useState<any[]>([]);
   const [producaoTemporal, setProducaoTemporal] = useState<any[]>([]);
-  const [setores, setSetores] = useState<Setor[]>([]);
   
   // Dados de Programação vs Realização
   const [totalProgramadoFabrica, setTotalProgramadoFabrica] = useState(0);
@@ -73,7 +69,6 @@ export default function DashboardAdmin() {
   const [totalControleProducaoFabrica, setTotalControleProducaoFabrica] = useState(0);
   const [porcentagemRealizacao, setPorcentagemRealizacao] = useState(0);
   const [programadoVsRealizadoSetor, setProgramadoVsRealizadoSetor] = useState<any[]>([]);
-  const [programadoVsRealizadoLinha, setProgramadoVsRealizadoLinha] = useState<any[]>([]);
   const [producaoPorHora, setProducaoPorHora] = useState<any[]>([]);
   const [contribuicaoPorSetor, setContribuicaoPorSetor] = useState<any[]>([]);
   const [metricasSetorLinha, setMetricasSetorLinha] = useState<any[]>([]);
@@ -105,9 +100,6 @@ export default function DashboardAdmin() {
     const dataInicio = startOfDay(subDays(new Date(), periodo));
     const dataFim = endOfDay(new Date());
 
-    // Carregar setores
-    const setoresData = setoresStorage.getAll();
-    setSetores(setoresData);
 
     // Carregar dados de produção
     const producoes = producaoStorage.getAll();
@@ -134,15 +126,12 @@ export default function DashboardAdmin() {
       .filter(p => p.atualizacaoHora)
       .reduce((sum, p) => sum + (p.quantidadeHora || 0), 0);
     // Calcular total controle de produção (todos os registros)
-    const totalControleProducao = producoesFiltradas.reduce((sum, p) => sum + (p.quantidadeHora || 0), 0);
+    const totalControleProducaoFabrica = producoesFiltradas.reduce((sum, p) => sum + (p.quantidadeHora || 0), 0);
     
     setTotalProgramadoFabrica(totalProgramado);
     setTotalRealizadoFabrica(totalRealizado);
-    setTotalControleProducaoFabrica(totalControleProducao);
+    setTotalControleProducaoFabrica(totalControleProducaoFabrica);
     setPorcentagemRealizacao(totalProgramado > 0 ? (totalRealizado / totalProgramado) * 100 : 0);
-
-    // Calcular total de controle de produção (todos os registros de produção)
-    const totalControleProducao = producoesFiltradas.reduce((sum, p) => sum + (p.quantidadeHora || 0), 0);
 
     // Programado vs Realizado vs Controle de Produção por Setor
     const setorMap = new Map<string, { programado: number; realizado: number; controleProducao: number }>();
@@ -191,19 +180,19 @@ export default function DashboardAdmin() {
       // Controle de Produção: todos os registros
       linhaMap.set(chave, { ...atual, controleProducao: atual.controleProducao + (p.quantidadeHora || 0) });
     });
-    setProgramadoVsRealizadoLinha(
-      Array.from(linhaMap.entries())
-        .map(([, dados]) => ({
-          ...dados,
-          porcentagem: dados.programado > 0 ? (dados.realizado / dados.programado) * 100 : 0,
-          porcentagemContribuicao: totalProgramado > 0 ? (dados.programado / totalProgramado) * 100 : 0,
-          diferenca: dados.realizado - dados.programado,
-        }))
-        .sort((a, b) => {
-          if (a.setor !== b.setor) return a.setor.localeCompare(b.setor);
-          return b.programado - a.programado;
-        })
-    );
+    // setProgramadoVsRealizadoLinha(
+    //   Array.from(linhaMap.entries())
+    //     .map(([, dados]) => ({
+    //       ...dados,
+    //       porcentagem: dados.programado > 0 ? (dados.realizado / dados.programado) * 100 : 0,
+    //       porcentagemContribuicao: totalProgramado > 0 ? (dados.programado / totalProgramado) * 100 : 0,
+    //       diferenca: dados.realizado - dados.programado,
+    //     }))
+    //     .sort((a, b) => {
+    //       if (a.setor !== b.setor) return a.setor.localeCompare(b.setor);
+    //       return b.programado - a.programado;
+    //     })
+    // ); // Não usado
 
     // Produção por Hora (Realizado e Controle de Produção)
     const horaMapRealizado = new Map<string, number>();
@@ -781,12 +770,12 @@ export default function DashboardAdmin() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {contribuicaoPorSetor.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {contribuicaoPorSetor.map((_entry, _index) => (
+                  <Cell key={`cell-${_index}`} fill={COLORS[_index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: number, name: string, props: any) => [
+                formatter={(value: number, _name: string, props: any) => [
                   `${value.toLocaleString('pt-BR')} (${props.payload.porcentagem}% do total)`,
                   'Programado'
                 ]}

@@ -21,7 +21,6 @@ import CentralMecanica from './pages/CentralMecanica';
 import ChamadosTI from './pages/ChamadosTI';
 import Registro from './pages/Registro';
 import Chat from './pages/Chat';
-import Equipe from './pages/Equipe';
 import AcompanhamentoProducao from './pages/AcompanhamentoProducao';
 
 function AppRoutes() {

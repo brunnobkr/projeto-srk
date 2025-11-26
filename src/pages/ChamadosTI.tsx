@@ -80,6 +80,9 @@ export default function ChamadosTI() {
       descricao: formNovoChamado.descricao || `Problema reincidente na máquina ${problemaSelecionado.maquina}`,
       data: format(new Date(), 'yyyy-MM-dd'),
       hora: format(new Date(), 'HH:mm'),
+      turno: problemaSelecionado.turno || '1',
+      setor: problemaSelecionado.setor || 'Sem Setor', // Obrigatório no tipo
+      linha: problemaSelecionado.linha || 'Sem Linha', // Obrigatório no tipo
       status: 'aberto',
       reportadoPor: usuario?.nome || 'Sistema',
       causa: formNovoChamado.causa || undefined,

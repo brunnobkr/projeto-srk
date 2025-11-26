@@ -13,7 +13,7 @@ import type {
   PerfilUsuario,
   Acidente,
   Usuario,
-  Permissoes,
+  // Permissoes, // Não usado
   ProgramacaoPedido,
   Setor,
   Linha,
@@ -128,7 +128,7 @@ export const historicoStorage = {
     const historico = storage.get<HistoricoVersao<T>>(STORAGE_KEYS.historico, []);
     return historico.filter(h => h.itemId === itemId).sort((a, b) => b.versao - a.versao);
   },
-  getByTipo: <T>(tipoItem: TipoItem, itemId: string): HistoricoVersao<T>[] => {
+  getByTipo: <T>(_tipoItem: TipoItem | undefined, itemId: string): HistoricoVersao<T>[] => {
     const historico = storage.get<HistoricoVersao<T>>(STORAGE_KEYS.historico, []);
     return historico.filter(h => h.itemId === itemId).sort((a, b) => b.versao - a.versao);
   },

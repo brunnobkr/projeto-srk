@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { usuariosStorage, mapeamentoFuncoesStorage, setoresStorage } from '../utils/storage';
 import type { Usuario, Permissoes } from '../types';
 

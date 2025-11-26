@@ -5,7 +5,7 @@ const DEV_PASSWORD = 'SRK2024DEV@SECURE';
 
 // Verificar se está em modo desenvolvimento
 const isDevMode = () => {
-  return import.meta.env.DEV || window.location.hostname === 'localhost';
+  return (import.meta.env?.DEV as boolean) || window.location.hostname === 'localhost';
 };
 
 // Proteção contra DevTools

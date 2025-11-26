@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Upload, Mail, Save, X, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { programacoesPedidosStorage, componentesStorage, setoresStorage, problemasStorage, producaoStorage } from '../utils/storage';
+import { programacoesPedidosStorage, componentesStorage, setoresStorage, problemasStorage } from '../utils/storage';
+// producaoStorage removido - não usado
 import { useAuth } from '../contexts/AuthContext';
-import type { ProgramacaoPedido, ComponenteProduto, Setor, ProblemaTecnico, ControleProducao } from '../types';
+import type { ProgramacaoPedido, ComponenteProduto, Setor, ProblemaTecnico } from '../types';
+// ControleProducao removido - não usado
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -30,9 +32,9 @@ export default function ProgramacaoPedidos() {
     atencao: '',
     codigos: '', // Códigos separados por vírgula
   });
-  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [_excelFile, setExcelFile] = useState<File | null>(null);
   const [problemasProducao, setProblemasProducao] = useState<ProblemaTecnico[]>([]);
-  const [problemasProducaoList, setProblemasProducaoList] = useState<ControleProducao[]>([]);
+  // const [problemasProducaoList, setProblemasProducaoList] = useState<ControleProducao[]>([]); // Não usado
 
   useEffect(() => {
     if (isLogistica()) {
@@ -58,14 +60,14 @@ export default function ProgramacaoPedidos() {
     setProblemasProducao(problemasAtivos);
 
     // Carregar problemas de produção (produções com problemas)
-    const todasProducoes = producaoStorage.getAll();
+    // const todasProducoes = producaoStorage.getAll(); // Não usado
     // Filtrar produções recentes (últimos 7 dias) que podem ter problemas
-    const dataLimite = new Date();
-    dataLimite.setDate(dataLimite.getDate() - 7);
-    const producoesRecentes = todasProducoes.filter(p => 
-      new Date(p.data) >= dataLimite
-    );
-    setProblemasProducaoList(producoesRecentes);
+    // const dataLimite = new Date(); // Não usado
+    // dataLimite.setDate(dataLimite.getDate() - 7); // Não usado
+    // const producoesRecentes = todasProducoes.filter(p => // Não usado
+    //   new Date(p.data) >= dataLimite // Não usado
+    // ); // Não usado
+    // setProblemasProducaoList(producoesRecentes); // Não usado
   };
 
   const handleSubmit = (e: React.FormEvent) => {

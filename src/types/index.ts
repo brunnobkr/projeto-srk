@@ -161,6 +161,7 @@ export interface ControleProducao {
   linha?: string;
   data: string;
   hora: string;
+  turno?: '1' | '2' | '3' | 'central'; // Turno do registro
   quantidade30min: number;
   quantidadeHora: number;
   tempoMontagem: number; // em minutos
@@ -369,7 +370,11 @@ export type TipoItem =
   | 'instrucao' 
   | 'componente' 
   | 'seguranca'
-  | 'chamado';
+  | 'chamado'
+  | 'mensagem'
+  | 'conversa'
+  | 'notificacao'
+  | 'chamada';
 
 // Chamados de Manutenção
 export interface ChamadoManutencao {

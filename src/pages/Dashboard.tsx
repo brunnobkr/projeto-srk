@@ -11,10 +11,8 @@ import {
   Shield,
   TrendingUp,
   Clock,
-  CheckCircle,
   BarChart3,
   Activity,
-  Calendar,
   RefreshCw,
 } from 'lucide-react';
 import {
@@ -26,8 +24,6 @@ import {
   instrucoesStorage,
   componentesStorage,
   segurancaStorage,
-  acidentesStorage,
-  setoresStorage,
 } from '../utils/storage';
 import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -47,7 +43,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { ControleProducao, ProblemaTecnico, ControleFuncionarios } from '../types';
+import type { ControleProducao } from '../types';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
@@ -467,8 +463,8 @@ export default function Dashboard() {
                 fill="#8884d8"
                 dataKey="problemas"
               >
-                {problemasPorSetor.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {problemasPorSetor.map((_entry, _index) => (
+                  <Cell key={`cell-${_index}`} fill={COLORS[_index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />

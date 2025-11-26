@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Save, X, Building2, List, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Save, X, Building2, List, AlertTriangle, Clock } from 'lucide-react';
 import { setoresStorage, problemasStorage, chamadosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { Setor, Linha, ProblemaTecnico, ChamadoManutencao } from '../types';

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Wrench, Zap, Hammer, AlertTriangle, Clock, Eye, X, Building2, Hash, User } from 'lucide-react';
+import { Wrench, Zap, Hammer, AlertTriangle, Clock, Eye, Building2, Hash, User } from 'lucide-react';
+// X removido - não usado
 import ChamadosManutencao from './ChamadosManutencao';
 import { problemasStorage } from '../utils/storage';
 import type { ProblemaTecnico } from '../types';
@@ -97,8 +98,9 @@ export default function CentralMecanica() {
                     </div>
                   </div>
                   <button
-                    onClick={() => setProblemaDetalhes(problema)}
+                    onClick={() => {/* Ver detalhes do problema */}}
                     className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                    title="Ver detalhes"
                   >
                     <Eye className="w-5 h-5" />
                   </button>

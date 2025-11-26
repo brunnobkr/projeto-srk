@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, X, Save, Eye, EyeOff, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { Edit, Trash2, Search, X, Save, Eye, EyeOff, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+// Plus removido - não usado
 import { usuariosStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { Usuario, Permissoes, Setor } from '../types';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
 
 const permissoesPadrao: Permissoes = {
   receitasMaquina: false,
@@ -17,6 +16,7 @@ const permissoesPadrao: Permissoes = {
   segurancaTrabalho: false,
   dashboardAdmin: false,
   gerenciarUsuarios: false,
+  programarPedidos: false,
   criar: false,
   editar: false,
   excluir: false,

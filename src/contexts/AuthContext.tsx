@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         segurancaTrabalho: false,
         dashboardAdmin: false,
         gerenciarUsuarios: false,
+        programarPedidos: false,
         criar: false,
         editar: false,
         excluir: false,

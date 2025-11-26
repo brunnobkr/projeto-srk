@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Image as ImageIcon, Video, Mic, Search, X, Play, Pause } from 'lucide-react';
+import { Send, Image as ImageIcon, Video, Mic, Search, X, Pause } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { mensagensStorage, conversasStorage, usuariosStorage, notificacoesStorage } from '../utils/storage';
 import type { Mensagem, Conversa, Usuario, Notificacao } from '../types';
@@ -19,13 +19,12 @@ export default function Chat() {
   const [duracaoAudio, setDuracaoAudio] = useState(0);
   const [mostrarUsuarios, setMostrarUsuarios] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   
   const mensagensEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const intervaloAudioRef = useRef<NodeJS.Timeout | null>(null);
+  const intervaloAudioRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,10 +75,10 @@ export default function Chat() {
         ...conv,
         participante1: conv.participante1Id === usuario.id 
           ? usuario 
-          : outroUsuario,
+          : (outroUsuario ?? undefined),
         participante2: conv.participante2Id === usuario.id 
           ? usuario 
-          : outroUsuario,
+          : (outroUsuario ?? undefined),
         ultimaMensagem: ultimaMsg,
         naoLidas,
         dataUltimaMensagem: ultimaMsg?.dataEnvio,
@@ -106,8 +105,8 @@ export default function Chat() {
     // Enriquecer com dados dos usuários
     const msgsEnriquecidas = msgs.map(msg => ({
       ...msg,
-      remetente: usuariosStorage.getById(msg.remetenteId),
-      destinatario: usuariosStorage.getById(msg.destinatarioId),
+      remetente: usuariosStorage.getById(msg.remetenteId) ?? undefined,
+      destinatario: usuariosStorage.getById(msg.destinatarioId) ?? undefined,
     })).sort((a, b) => 
       new Date(a.dataEnvio).getTime() - new Date(b.dataEnvio).getTime()
     );
@@ -125,7 +124,7 @@ export default function Chat() {
   const loadNotificacoes = () => {
     if (!usuario) return;
     const notifs = notificacoesStorage.getNaoLidas(usuario.id);
-    setNotificacoes(notifs);
+    // setNotificacoes(notifs); // Comentado pois não é usado
     
     // Mostrar notificações do navegador
     if (notifs.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
