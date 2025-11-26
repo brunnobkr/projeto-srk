@@ -193,8 +193,8 @@ export default function ComponentesProduto() {
         tubos: [...formData.tubos, { 
           nome: novoTubo.nome, 
           quantidade: parseInt(novoTubo.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovoTubo({ nome: '', quantidade: '', codigos: '' });
     }
@@ -212,8 +212,8 @@ export default function ComponentesProduto() {
         conectores: [...formData.conectores, { 
           nome: novoConector.nome, 
           quantidade: parseInt(novoConector.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovoConector({ nome: '', quantidade: '', codigos: '' });
     }
@@ -231,8 +231,8 @@ export default function ComponentesProduto() {
         fitas: [...formData.fitas, { 
           nome: novaFita.nome, 
           quantidade: parseInt(novaFita.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovaFita({ nome: '', quantidade: '', codigos: '' });
     }
@@ -250,8 +250,8 @@ export default function ComponentesProduto() {
         guianas: [...formData.guianas, { 
           nome: novaGuiana.nome, 
           quantidade: parseInt(novaGuiana.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovaGuiana({ nome: '', quantidade: '', codigos: '' });
     }
@@ -269,8 +269,8 @@ export default function ComponentesProduto() {
         aneis: [...formData.aneis, { 
           nome: novoAnei.nome, 
           quantidade: parseInt(novoAnei.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovoAnei({ nome: '', quantidade: '', codigos: '' });
     }
@@ -289,8 +289,8 @@ export default function ComponentesProduto() {
           nome: novaValvula.nome, 
           quantidade: parseInt(novaValvula.quantidade) || 1,
           tipo: novaValvula.tipo,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] }],
       });
       setNovaValvula({ nome: '', quantidade: '', tipo: 'AB', codigos: '' });
     }
@@ -308,8 +308,8 @@ export default function ComponentesProduto() {
         filtros: [...formData.filtros, { 
           nome: novoFiltro.nome, 
           quantidade: parseInt(novoFiltro.quantidade) || 1,
-          codigos: codigos && codigos.length > 0 ? codigos : undefined
-        }],
+          ...(codigos && codigos.length > 0 ? { codigos } : {})
+        } as { nome: string; quantidade: number; codigos?: string[] }],
       });
       setNovoFiltro({ nome: '', quantidade: '', codigos: '' });
     }
@@ -549,7 +549,7 @@ export default function ComponentesProduto() {
                 <div className="space-y-2 mb-3">
                   {formData.tubos.map((t, i) => (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{t.quantidade}x {t.nome}{t.codigos && t.codigos.length > 0 ? ` (Códigos: ${t.codigos.join(', ')})` : ''}</span>
+                      <span>{t.quantidade}x {t.nome}{(t as any).codigos && (t as any).codigos.length > 0 ? ` (Códigos: ${(t as any).codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeTubo(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
                   ))}
@@ -568,7 +568,7 @@ export default function ComponentesProduto() {
                 <div className="space-y-2 mb-3">
                   {formData.conectores.map((c, i) => (
                     <div key={i} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                      <span>{c.quantidade}x {c.nome}{c.codigos && c.codigos.length > 0 ? ` (Códigos: ${c.codigos.join(', ')})` : ''}</span>
+                      <span>{c.quantidade}x {c.nome}{(c as any).codigos && (c as any).codigos.length > 0 ? ` (Códigos: ${(c as any).codigos.join(', ')})` : ''}</span>
                       <button type="button" onClick={() => removeConector(i)} className="text-red-600"><X className="w-4 h-4" /></button>
                     </div>
                   ))}

@@ -58,7 +58,7 @@ export default function ControleProducao() {
       quantidadeTotalLogistica: formData.quantidadeTotalLogistica ? parseFloat(formData.quantidadeTotalLogistica) : undefined,
       preparador: formData.preparador || undefined,
       atualizacaoHora: formData.atualizacaoHora,
-      turno: formData.turno || determinarTurno(formData.hora) || undefined,
+      turno: (formData.turno || determinarTurno(formData.hora) || undefined) as '1' | '2' | '3' | 'central' | undefined,
       observacoes: formData.observacoes || undefined,
     };
 
