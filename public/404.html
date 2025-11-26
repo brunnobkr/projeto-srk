@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sumitomo S-riko - Controle ITCC</title>
+    <title>Redirecionando...</title>
     <script>
       // Redireciona para index.html para permitir que React Router gerencie as rotas
       // Necessário para SPAs no GitHub Pages
@@ -12,38 +12,30 @@
         var search = window.location.search;
         var hash = window.location.hash;
         
-        // Detecta o base path (ex: /repositorio/)
-        // Se o 404.html está em /repositorio/404.html, o base path é /repositorio/
-        var basePath = '';
-        var scriptPath = document.currentScript ? document.currentScript.src : '';
-        var currentPath = window.location.pathname;
+        // Nome do repositório
+        var repoName = 'projeto-srk';
+        var basePath = '/' + repoName + '/';
         
-        // Se estiver em um subdiretório (GitHub Pages), detecta o base path
-        var pathSegments = currentPath.split('/').filter(Boolean);
-        if (pathSegments.length > 1) {
-          // Assume que o primeiro segmento é o nome do repositório
-          basePath = '/' + pathSegments[0] + '/';
+        // Remove o base path do path atual
+        var route = path.replace(basePath, '').replace(/^\/+/, '').replace(/\/+$/, '');
+        
+        // Se não tem rota ou é 404.html, vai para a raiz
+        if (!route || route === '404.html') {
+          route = '';
         }
         
-        // Se não encontrou base path, tenta detectar pelo caminho do 404.html
-        if (!basePath && currentPath.includes('/404.html')) {
-          var pathBefore404 = currentPath.substring(0, currentPath.indexOf('/404.html'));
-          if (pathBefore404) {
-            basePath = pathBefore404 + '/';
-          }
-        }
-        
-        // Constrói a URL para index.html
+        // Constrói a URL completa
         var indexPath = basePath + 'index.html';
-        var redirectPath = path.replace(basePath, '').replace('/404.html', '');
         
-        // Se houver um caminho além do base path, mantém para o React Router
-        if (redirectPath && redirectPath !== '/') {
-          // Adiciona o caminho como hash ou query para o React Router processar
-          window.location.replace(indexPath + (hash || '') + search);
-        } else {
-          window.location.replace(indexPath + hash + search);
+        // Redireciona para index.html mantendo a rota no pathname
+        // O React Router vai processar a rota corretamente
+        if (route) {
+          // Mantém a rota no pathname para o React Router processar
+          window.history.replaceState(null, '', basePath + route + search + hash);
         }
+        
+        // Carrega o index.html
+        window.location.replace(indexPath + search + hash);
       })();
     </script>
   </head>
@@ -51,6 +43,7 @@
     <p>Redirecionando...</p>
     <noscript>
       <p>Por favor, habilite JavaScript para acessar o aplicativo.</p>
+      <p><a href="/projeto-srk/">Clique aqui para ir para a página inicial</a></p>
     </noscript>
   </body>
 </html>
