@@ -91,14 +91,6 @@ export default function ProgramacaoPedidos() {
       programacoesPedidosStorage.add(programacao);
     }
 
-    // Atualizar componente com quantidade programada
-    const componente = componentes.find(c => c.codigo === formData.codigoProduto);
-    if (componente) {
-      componentesStorage.update(componente.id, {
-        quantidadeProgramada: parseInt(formData.quantidadeProgramada) || 0,
-      });
-    }
-
     alert(editingProgramacao ? 'Programação atualizada com sucesso!' : 'Programação criada com sucesso!');
     resetForm();
     loadData();
@@ -125,13 +117,6 @@ export default function ProgramacaoPedidos() {
 
       programacoesPedidosStorage.add(programacao);
 
-      // Atualizar componente
-      const componente = componentes.find(c => c.codigo === codigo);
-      if (componente) {
-        componentesStorage.update(componente.id, {
-          quantidadeProgramada: parseInt(emailData.quantidadeProgramada) || 0,
-        });
-      }
     });
 
     alert(`${codigos.length} programação(ões) criada(s) com sucesso!`);
@@ -358,11 +343,6 @@ export default function ProgramacaoPedidos() {
               }`}></div>
               {componente.notificacao && (
                 <p className="text-xs text-gray-600 mt-1">{componente.notificacao}</p>
-              )}
-              {componente.quantidadeProgramada && (
-                <p className="text-sm text-gray-700 mt-1">
-                  <strong>Qtd Programada:</strong> {componente.quantidadeProgramada}
-                </p>
               )}
             </div>
           ))}

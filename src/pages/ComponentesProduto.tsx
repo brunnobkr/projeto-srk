@@ -26,7 +26,6 @@ export default function ComponentesProduto() {
     valvulas: [] as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] }[],
     filtros: [] as { nome: string; quantidade: number; codigos?: string[] }[],
     observacoes: '',
-    quantidadeProgramada: '',
   });
 
   const [novoTubo, setNovoTubo] = useState({ nome: '', quantidade: '', codigos: '' });
@@ -66,7 +65,6 @@ export default function ComponentesProduto() {
       valvulas: formData.valvulas,
       filtros: formData.filtros,
       observacoes: formData.observacoes || undefined,
-      quantidadeProgramada: formData.quantidadeProgramada ? parseInt(formData.quantidadeProgramada) : undefined,
     };
 
     if (editingComponente) {
@@ -121,7 +119,6 @@ export default function ComponentesProduto() {
       valvulas: migrarValvulas(componente.valvulas as any),
       filtros: migrarArray(componente.filtros as any),
       observacoes: componente.observacoes || '',
-      quantidadeProgramada: componente.quantidadeProgramada?.toString() || '',
     });
     setShowModal(true);
   };
@@ -317,62 +314,6 @@ export default function ComponentesProduto() {
     setFormData({ ...formData, filtros: formData.filtros.filter((_, i) => i !== index) });
   };
 
-  // Calcular quantidades necessárias para pedido
-  const calcularPedidos = (componente: ComponenteProduto) => {
-    const qtdProgramada = componente.quantidadeProgramada || 1;
-    const pedidos: { tipo: string; nome: string; quantidade: number; detalhes?: string }[] = [];
-
-    componente.tubos.forEach(t => {
-      const codigosInfo = t.codigos && t.codigos.length > 0 ? ` (Códigos: ${t.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Tubo', nome: `${t.nome}${codigosInfo}`, quantidade: t.quantidade * qtdProgramada });
-    });
-
-    componente.conectores.forEach(c => {
-      const codigosInfo = c.codigos && c.codigos.length > 0 ? ` (Códigos: ${c.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Conector', nome: `${c.nome}${codigosInfo}`, quantidade: c.quantidade * qtdProgramada });
-    });
-
-    componente.presilhas.forEach(p => {
-      pedidos.push({ 
-        tipo: 'Presilha', 
-        nome: `${p.tipo === 'plastico' ? 'Plástico' : 'Metal'}${p.descricao ? ` - ${p.descricao}` : ''}`, 
-        quantidade: p.quantidade * qtdProgramada 
-      });
-    });
-
-    componente.fitas.forEach(f => {
-      const codigosInfo = f.codigos && f.codigos.length > 0 ? ` (Códigos: ${f.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Fita', nome: `${f.nome}${codigosInfo}`, quantidade: f.quantidade * qtdProgramada });
-    });
-
-    componente.guianas.forEach(g => {
-      const codigosInfo = g.codigos && g.codigos.length > 0 ? ` (Códigos: ${g.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Guiana', nome: `${g.nome}${codigosInfo}`, quantidade: g.quantidade * qtdProgramada });
-    });
-
-    componente.aneis.forEach(a => {
-      const codigosInfo = a.codigos && a.codigos.length > 0 ? ` (Códigos: ${a.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Anel', nome: `${a.nome}${codigosInfo}`, quantidade: a.quantidade * qtdProgramada });
-    });
-
-    componente.valvulas.forEach(v => {
-      const tipoLabel = v.tipo === 'A' ? 'Válvula A' : v.tipo === 'B' ? 'Válvula B' : 'Válvula A e B';
-      const codigosInfo = v.codigos && v.codigos.length > 0 ? ` - Códigos: ${v.codigos.join(', ')}` : '';
-      pedidos.push({ 
-        tipo: 'Válvula', 
-        nome: `${v.nome}${codigosInfo}`, 
-        quantidade: v.quantidade * qtdProgramada,
-        detalhes: tipoLabel
-      });
-    });
-
-    componente.filtros.forEach(f => {
-      const codigosInfo = f.codigos && f.codigos.length > 0 ? ` (Códigos: ${f.codigos.join(', ')})` : '';
-      pedidos.push({ tipo: 'Filtro', nome: `${f.nome}${codigosInfo}`, quantidade: f.quantidade * qtdProgramada });
-    });
-
-    return pedidos;
-  };
 
   const resetForm = () => {
     setFormData({
@@ -389,7 +330,6 @@ export default function ComponentesProduto() {
       valvulas: [],
       filtros: [],
       observacoes: '',
-      quantidadeProgramada: '',
     });
     setNovaPresilha({ tipo: 'plastico', quantidade: '', descricao: '' });
     setNovaMarcacao({ tipo: 'pincel', descricao: '', localizacao: '' });
@@ -415,7 +355,7 @@ export default function ComponentesProduto() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Componentes por Código</h1>
           <p className="mt-2 text-gray-600">
-            Controle de componentes necessários para cada código de produto
+            Consulta de componentes necessários para cada código final de produto. A engenharia cadastra os detalhes para consulta dos preparadores.
           </p>
         </div>
         {podeCriarEditar && (
@@ -503,21 +443,6 @@ export default function ComponentesProduto() {
                     ? componente.filtros.map((f: any) => `${f.quantidade}x ${f.nome}${f.codigos && f.codigos.length > 0 ? ` (Códigos: ${f.codigos.join(', ')})` : ''}`).join(', ') || '-'
                     : (componente.filtros as any).join(', ') || '-'
                 }</div>
-                {componente.quantidadeProgramada && (
-                  <div className="mt-3 pt-3 border-t">
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <strong className="text-blue-900">Quantidade Programada:</strong> {componente.quantidadeProgramada} unidades
-                      <div className="mt-2 text-xs text-blue-700">
-                        <strong>Pedidos Necessários:</strong>
-                        <ul className="mt-1 space-y-1">
-                          {calcularPedidos(componente).map((pedido, idx) => (
-                            <li key={idx}>• {pedido.tipo}: {pedido.nome} - {pedido.quantidade} unidades{pedido.detalhes ? ` (${pedido.detalhes})` : ''}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))
@@ -529,16 +454,10 @@ export default function ComponentesProduto() {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">{editingComponente ? 'Editar' : 'Novo'} Componente</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Código do Produto *</label>
-                  <input type="text" required value={formData.codigo} onChange={(e) => setFormData({ ...formData, codigo: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Quantidade Programada</label>
-                  <input type="number" value={formData.quantidadeProgramada} onChange={(e) => setFormData({ ...formData, quantidadeProgramada: e.target.value })} placeholder="Ex: 100" className="w-full px-3 py-2 border rounded-lg" />
-                  <p className="text-xs text-gray-500 mt-1">Quantidade de produtos a serem produzidos</p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Código do Produto Final *</label>
+                <input type="text" required value={formData.codigo} onChange={(e) => setFormData({ ...formData, codigo: e.target.value })} className="w-full px-3 py-2 border rounded-lg" placeholder="Ex: JKDND" />
+                <p className="text-xs text-gray-500 mt-1">Código final do produto que será construído</p>
               </div>
 
               {/* Tubos */}
