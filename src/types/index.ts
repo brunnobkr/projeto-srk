@@ -164,15 +164,16 @@ export interface ControleProducao {
   turno?: '1' | '2' | '3' | 'central'; // Turno do registro
   quantidade30min: number;
   quantidadeHora: number;
-  tempoMontagem: number; // em minutos
-  maoObra: number;
-  pessoasPorMaquina: number;
+  tempoMontagem: number; // em minutos (preenchido automaticamente da receita)
+  maoObra: number; // (preenchido automaticamente da receita)
+  maoObraPorLinha: number; // Mão de obra necessária por linha (substitui pessoasPorMaquina)
   processo: string;
   // Novos campos
   quantidadeTotalLogistica?: number;
   preparador?: string;
   atualizacaoHora?: boolean;
   observacoes?: string;
+  justificativaFaltaFuncionario?: string; // Justificativa para não realização do programado por falta de funcionário
 }
 
 export interface Funcionario {

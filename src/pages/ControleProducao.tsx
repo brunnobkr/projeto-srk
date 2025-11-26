@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import { producaoStorage, setoresStorage } from '../utils/storage';
+import { producaoStorage, setoresStorage, receitasStorage } from '../utils/storage';
 import type { ControleProducao, Setor } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -22,13 +22,14 @@ export default function ControleProducao() {
     quantidadeHora: '',
     tempoMontagem: '',
     maoObra: '',
-    pessoasPorMaquina: '',
+    maoObraPorLinha: '',
     processo: '',
     quantidadeTotalLogistica: '',
     preparador: '',
     atualizacaoHora: false,
     turno: determinarTurno() as '' | '1' | '2' | '3' | 'central',
     observacoes: '',
+    justificativaFaltaFuncionario: '',
   });
 
   useEffect(() => {
@@ -46,6 +47,30 @@ export default function ControleProducao() {
     setControles(producaoStorage.getAll());
   };
 
+  // Buscar receita de máquina automaticamente quando o código for informado
+  const buscarReceitaPorCodigo = (codigo: string) => {
+    if (!codigo) return;
+    
+    const receitas = receitasStorage.getAll();
+    const receita = receitas.find(r => r.codigoTubo === codigo);
+    
+    if (receita) {
+      // Preencher automaticamente tempo de montagem e mão de obra da receita
+      if (receita.tempoMontagem) {
+        setFormData(prev => ({
+          ...prev,
+          tempoMontagem: receita.tempoMontagem!.toString(),
+        }));
+      }
+      if (receita.maoObraNecessaria) {
+        setFormData(prev => ({
+          ...prev,
+          maoObra: receita.maoObraNecessaria!.toString(),
+        }));
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const controle: ControleProducao = {
@@ -59,13 +84,14 @@ export default function ControleProducao() {
       quantidadeHora: parseInt(formData.quantidadeHora),
       tempoMontagem: parseFloat(formData.tempoMontagem),
       maoObra: parseFloat(formData.maoObra),
-      pessoasPorMaquina: parseInt(formData.pessoasPorMaquina),
+      maoObraPorLinha: parseFloat(formData.maoObraPorLinha),
       processo: formData.processo,
       quantidadeTotalLogistica: formData.quantidadeTotalLogistica ? parseFloat(formData.quantidadeTotalLogistica) : undefined,
       preparador: formData.preparador || undefined,
       atualizacaoHora: formData.atualizacaoHora,
       turno: (formData.turno || determinarTurno(formData.hora) || undefined) as '1' | '2' | '3' | 'central' | undefined,
       observacoes: formData.observacoes || undefined,
+      justificativaFaltaFuncionario: formData.justificativaFaltaFuncionario || undefined,
     };
 
     if (editingControle) {
@@ -93,13 +119,14 @@ export default function ControleProducao() {
       quantidadeHora: controle.quantidadeHora.toString(),
       tempoMontagem: controle.tempoMontagem.toString(),
       maoObra: controle.maoObra.toString(),
-      pessoasPorMaquina: controle.pessoasPorMaquina.toString(),
+      maoObraPorLinha: controle.maoObraPorLinha?.toString() || (controle as any).pessoasPorMaquina?.toString() || '',
       processo: controle.processo,
       quantidadeTotalLogistica: controle.quantidadeTotalLogistica?.toString() || '',
       preparador: controle.preparador || '',
       turno: controle.turno || determinarTurno(controle.hora) || '',
       atualizacaoHora: controle.atualizacaoHora || false,
       observacoes: controle.observacoes || '',
+      justificativaFaltaFuncionario: controle.justificativaFaltaFuncionario || '',
     });
     setShowModal(true);
   };
@@ -122,13 +149,14 @@ export default function ControleProducao() {
       quantidadeHora: '',
       tempoMontagem: '',
       maoObra: '',
-      pessoasPorMaquina: '',
+      maoObraPorLinha: '',
       processo: '',
       quantidadeTotalLogistica: '',
       preparador: '',
       atualizacaoHora: false,
       turno: determinarTurno(),
       observacoes: '',
+      justificativaFaltaFuncionario: '',
     });
     setEditingControle(null);
     setShowModal(false);
@@ -185,7 +213,7 @@ export default function ControleProducao() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Hora</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Montagem</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mão de Obra</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pessoas</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mão de Obra por Linha</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Processo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Total Logística</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preparador</th>
@@ -220,7 +248,7 @@ export default function ControleProducao() {
                     <td className="px-6 py-4 whitespace-nowrap">{controle.quantidadeHora}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{controle.tempoMontagem} min</td>
                     <td className="px-6 py-4 whitespace-nowrap">{controle.maoObra}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{controle.pessoasPorMaquina}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{controle.maoObraPorLinha || (controle as any).pessoasPorMaquina || '-'}</td>
                     <td className="px-6 py-4">{controle.processo}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {controle.quantidadeTotalLogistica || '-'}
@@ -259,7 +287,19 @@ export default function ControleProducao() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Código do Produto *</label>
-                  <input type="text" required value={formData.codigoTubo} onChange={(e) => setFormData({ ...formData, codigoTubo: e.target.value })} className="w-full px-3 py-2 border rounded-lg" placeholder="Digite o código do produto" />
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.codigoTubo} 
+                    onChange={(e) => {
+                      setFormData({ ...formData, codigoTubo: e.target.value });
+                      // Buscar receita automaticamente quando o código for informado
+                      buscarReceitaPorCodigo(e.target.value);
+                    }} 
+                    className="w-full px-3 py-2 border rounded-lg" 
+                    placeholder="Digite o código do produto"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tempo de montagem e mão de obra serão preenchidos automaticamente da receita</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Setor</label>
@@ -336,15 +376,40 @@ export default function ControleProducao() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Tempo Montagem (min) *</label>
-                  <input type="number" step="0.1" required value={formData.tempoMontagem} onChange={(e) => setFormData({ ...formData, tempoMontagem: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    required 
+                    value={formData.tempoMontagem} 
+                    onChange={(e) => setFormData({ ...formData, tempoMontagem: e.target.value })} 
+                    className="w-full px-3 py-2 border rounded-lg" 
+                    readOnly={!!formData.codigoTubo && formData.tempoMontagem !== ''}
+                    title={formData.codigoTubo && formData.tempoMontagem !== '' ? 'Preenchido automaticamente da receita de máquina' : ''}
+                  />
+                  {formData.codigoTubo && formData.tempoMontagem !== '' && (
+                    <p className="text-xs text-green-600 mt-1">✓ Preenchido automaticamente da receita</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Mão de Obra *</label>
-                  <input type="number" step="0.1" required value={formData.maoObra} onChange={(e) => setFormData({ ...formData, maoObra: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    required 
+                    value={formData.maoObra} 
+                    onChange={(e) => setFormData({ ...formData, maoObra: e.target.value })} 
+                    className="w-full px-3 py-2 border rounded-lg" 
+                    readOnly={!!formData.codigoTubo && formData.maoObra !== ''}
+                    title={formData.codigoTubo && formData.maoObra !== '' ? 'Preenchido automaticamente da receita de máquina' : ''}
+                  />
+                  {formData.codigoTubo && formData.maoObra !== '' && (
+                    <p className="text-xs text-green-600 mt-1">✓ Preenchido automaticamente da receita</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Pessoas por Máquina *</label>
-                  <input type="number" required value={formData.pessoasPorMaquina} onChange={(e) => setFormData({ ...formData, pessoasPorMaquina: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  <label className="block text-sm font-medium mb-1">Mão de Obra por Linha *</label>
+                  <input type="number" step="0.1" required value={formData.maoObraPorLinha} onChange={(e) => setFormData({ ...formData, maoObraPorLinha: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  <p className="text-xs text-gray-500 mt-1">Mão de obra necessária por linha</p>
                 </div>
               </div>
 
@@ -390,6 +455,22 @@ export default function ControleProducao() {
               <div>
                 <label className="block text-sm font-medium mb-1">Observações</label>
                 <textarea value={formData.observacoes} onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+
+              {/* Justificativa de Falta de Funcionário */}
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Justificativa de Não Realização</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Justificativa por Falta de Funcionário</label>
+                  <textarea 
+                    value={formData.justificativaFaltaFuncionario} 
+                    onChange={(e) => setFormData({ ...formData, justificativaFaltaFuncionario: e.target.value })} 
+                    rows={3} 
+                    className="w-full px-3 py-2 border rounded-lg" 
+                    placeholder="Justifique a não realização do programado pela logística por motivos de falta de funcionário..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Use este campo para justificar quando não foi possível atingir a meta programada devido à falta de funcionários</p>
+                </div>
               </div>
               <div className="flex justify-end space-x-4 pt-4">
                 <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>

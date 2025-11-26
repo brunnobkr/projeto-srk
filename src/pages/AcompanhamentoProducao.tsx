@@ -16,6 +16,7 @@ import {
   programacoesPedidosStorage,
   producaoStorage,
   problemasStorage,
+  receitasStorage,
 } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { ControleProducao, ProblemaTecnico } from '../types';
@@ -257,6 +258,10 @@ export default function AcompanhamentoProducao() {
     e.preventDefault();
     if (!producaoSelecionada) return;
 
+    // Buscar receita de máquina para preencher automaticamente tempo de montagem e mão de obra
+    const receitas = receitasStorage.getAll();
+    const receita = receitas.find(r => r.codigoTubo === producaoSelecionada.codigoProduto);
+
     const novaProducao: ControleProducao = {
       id: Date.now().toString(),
       codigoTubo: producaoSelecionada.codigoProduto,
@@ -266,9 +271,9 @@ export default function AcompanhamentoProducao() {
       hora: formAtualizacao.hora,
       quantidade30min: 0,
       quantidadeHora: parseInt(formAtualizacao.quantidade) || 0,
-      tempoMontagem: 0,
-      maoObra: 0,
-      pessoasPorMaquina: 0,
+      tempoMontagem: receita?.tempoMontagem || 0,
+      maoObra: receita?.maoObraNecessaria || 0,
+      maoObraPorLinha: 0, // Será preenchido pelo preparador se necessário
       processo: 'Atualização horária',
       preparador: usuario?.nome || 'Preparador',
       atualizacaoHora: true,
