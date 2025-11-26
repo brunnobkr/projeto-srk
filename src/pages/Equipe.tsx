@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, User, Mail, Phone, Calendar, MessageCircle, Building2, Briefcase, Hash } from 'lucide-react';
-import { usuariosStorage } from '../utils/storage';
+import { Search, User, Mail, Phone, Calendar, MessageCircle, Building2, Briefcase, Hash, Users, Send } from 'lucide-react';
+import { usuariosStorage, conversasStorage, mensagensStorage, notificacoesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import type { Usuario } from '../types';
+import type { Usuario, Mensagem, Notificacao } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -92,10 +92,104 @@ export default function Equipe() {
     u.setor?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Agrupar usuários por cargo/setor
+  const agruparPorCargo = () => {
+    const grupos: Record<string, Usuario[]> = {};
+    
+    filteredUsuarios.forEach(usuario => {
+      // Determinar o grupo baseado no cargo
+      let grupo = 'Outros';
+      const cargoLower = usuario.cargo?.toLowerCase() || '';
+      const setorLower = usuario.setor?.toLowerCase() || '';
+      
+      if (cargoLower.includes('engen') || setorLower.includes('engenharia')) {
+        grupo = 'Engenharia';
+      } else if (cargoLower.includes('logist') || setorLower.includes('logistica')) {
+        grupo = 'Logística';
+      } else if (cargoLower.includes('mecan') || cargoLower.includes('eletr') || cargoLower.includes('ferrament') || 
+                 setorLower.includes('mecanica') || setorLower.includes('eletrica') || setorLower.includes('ferramentaria')) {
+        grupo = 'Central de Mecânica';
+      } else if (cargoLower.includes('ti') || cargoLower.includes('tecnologia') || setorLower.includes('ti')) {
+        grupo = 'TI';
+      } else if (cargoLower.includes('seguranca') || cargoLower.includes('segurança') || setorLower.includes('seguranca')) {
+        grupo = 'Segurança do Trabalho';
+      } else if (cargoLower.includes('preparador') || cargoLower.includes('operador') || cargoLower.includes('produção')) {
+        grupo = 'Produção';
+      } else if (cargoLower.includes('lider') || cargoLower.includes('líder') || cargoLower.includes('coordenador') || cargoLower.includes('gerente')) {
+        grupo = 'Gestão';
+      } else if (usuario.setor) {
+        grupo = usuario.setor;
+      }
+      
+      if (!grupos[grupo]) {
+        grupos[grupo] = [];
+      }
+      grupos[grupo].push(usuario);
+    });
+    
+    return grupos;
+  };
+
+  const gruposUsuarios = agruparPorCargo();
+  const gruposOrdenados = Object.keys(gruposUsuarios).sort();
+
   const handleEnviarMensagem = (usuario: Usuario) => {
     // Salvar no localStorage para o Chat abrir automaticamente
     localStorage.setItem('srk_chat_conversa_selecionada', usuario.id);
     navigate('/chat');
+  };
+
+  const handleEnviarMensagemGrupo = (grupo: string, usuariosGrupo: Usuario[]) => {
+    if (!usuarioLogado) return;
+    
+    const mensagem = prompt(`Digite a mensagem para enviar a todos de ${grupo} (${usuariosGrupo.length} pessoa(s)):`);
+    if (!mensagem) return;
+
+    let enviadas = 0;
+    usuariosGrupo.forEach(usuario => {
+      if (usuario.id === usuarioLogado.id) return; // Não enviar para si mesmo
+      
+      // Criar ou obter conversa
+      const conversa = conversasStorage.criarOuObter(usuarioLogado.id, usuario.id);
+      
+      // Criar mensagem
+      const novaMensagem: Mensagem = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        conversaId: conversa.id,
+        remetenteId: usuarioLogado.id,
+        destinatarioId: usuario.id,
+        tipo: 'texto',
+        conteudo: mensagem,
+        lida: false,
+        dataEnvio: new Date().toISOString(),
+      };
+      
+      mensagensStorage.add(novaMensagem);
+      
+      // Criar notificação
+      const notificacao: Notificacao = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        usuarioId: usuario.id,
+        tipo: 'mensagem',
+        titulo: `Mensagem de ${usuarioLogado.nome} (${grupo})`,
+        mensagem: mensagem,
+        lida: false,
+        dataCriacao: new Date().toISOString(),
+        link: `/chat?conversa=${conversa.id}`,
+        dadosExtras: { conversaId: conversa.id },
+      };
+      notificacoesStorage.add(notificacao);
+      
+      // Atualizar conversa
+      conversasStorage.update(conversa.id, {
+        ultimaMensagem: novaMensagem,
+        dataUltimaMensagem: novaMensagem.dataEnvio,
+      });
+      
+      enviadas++;
+    });
+    
+    alert(`Mensagem enviada para ${enviadas} pessoa(s) de ${grupo}!`);
   };
 
   const getTituloSecao = () => {
@@ -132,64 +226,107 @@ export default function Equipe() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUsuarios.map((usuario) => (
-          <div
-            key={usuario.id}
-            className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => setUsuarioSelecionado(usuario)}
-          >
-            <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0">
-                {usuario.fotoPerfil ? (
-                  <img
-                    src={usuario.fotoPerfil}
-                    alt={usuario.nome}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center">
-                    <User className="w-8 h-8 text-primary-600" />
+      {/* Grupos por Cargo */}
+      <div className="space-y-6">
+        {gruposOrdenados.map((grupo) => {
+          const usuariosGrupo = gruposUsuarios[grupo];
+          const usuariosFiltradosGrupo = usuariosGrupo.filter(u =>
+            u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.matricula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.setor?.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+
+          if (usuariosFiltradosGrupo.length === 0) return null;
+
+          return (
+            <div key={grupo} className="bg-white rounded-lg shadow-sm overflow-hidden">
+              {/* Cabeçalho do Grupo */}
+              <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Users className="w-6 h-6 text-white" />
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{grupo}</h2>
+                    <p className="text-sm text-primary-100">
+                      {usuariosFiltradosGrupo.length} {usuariosFiltradosGrupo.length === 1 ? 'pessoa' : 'pessoas'}
+                    </p>
                   </div>
-                )}
+                </div>
+                <button
+                  onClick={() => handleEnviarMensagemGrupo(grupo, usuariosFiltradosGrupo)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+                  title={`Enviar mensagem para todos de ${grupo}`}
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Enviar para Todos</span>
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">{usuario.nome}</h3>
-                <p className="text-sm text-gray-600 flex items-center mt-1">
-                  <Briefcase className="w-4 h-4 mr-1" />
-                  {usuario.cargo}
-                </p>
-                {usuario.setor && (
-                  <p className="text-sm text-gray-600 flex items-center mt-1">
-                    <Building2 className="w-4 h-4 mr-1" />
-                    {usuario.setor}
-                  </p>
-                )}
-                {usuario.matricula && (
-                  <p className="text-sm text-gray-600 flex items-center mt-1">
-                    <Hash className="w-4 h-4 mr-1" />
-                    {usuario.matricula}
-                  </p>
-                )}
+
+              {/* Lista de Usuários do Grupo */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {usuariosFiltradosGrupo.map((usuario) => (
+                    <div
+                      key={usuario.id}
+                      className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200"
+                      onClick={() => setUsuarioSelecionado(usuario)}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          {usuario.fotoPerfil ? (
+                            <img
+                              src={usuario.fotoPerfil}
+                              alt={usuario.nome}
+                              className="w-12 h-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                              <User className="w-6 h-6 text-primary-600" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-gray-900 truncate">{usuario.nome}</h3>
+                          <p className="text-xs text-gray-600 flex items-center mt-1">
+                            <Briefcase className="w-3 h-3 mr-1" />
+                            {usuario.cargo}
+                          </p>
+                          {usuario.setor && (
+                            <p className="text-xs text-gray-500 flex items-center mt-1">
+                              <Building2 className="w-3 h-3 mr-1" />
+                              {usuario.setor}
+                            </p>
+                          )}
+                          {usuario.matricula && (
+                            <p className="text-xs text-gray-500 flex items-center mt-1">
+                              <Hash className="w-3 h-3 mr-1" />
+                              {usuario.matricula}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEnviarMensagem(usuario);
+                          }}
+                          className="w-full flex items-center justify-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Enviar Mensagem
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="mt-4 flex space-x-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEnviarMensagem(usuario);
-                }}
-                className="flex-1 flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Mensagem
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {filteredUsuarios.length === 0 && (
+      {gruposOrdenados.length === 0 && (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Nenhuma pessoa encontrada</p>
