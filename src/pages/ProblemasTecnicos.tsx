@@ -1,0 +1,448 @@
+import { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, Search, CheckCircle } from 'lucide-react';
+import { problemasStorage, setoresStorage } from '../utils/storage';
+import { useAuth } from '../contexts/AuthContext';
+import type { ProblemaTecnico, Setor } from '../types';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { determinarTurno } from '../utils/turno';
+
+export default function ProblemasTecnicos() {
+  const { usuario } = useAuth();
+  const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
+  const [setores, setSetores] = useState<Setor[]>([]);
+  const [linhas, setLinhas] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    tipo: 'mecanico' as 'mecanico' | 'eletrico' | 'sistema',
+    maquina: '',
+    setor: '',
+    linha: '',
+    descricao: '',
+    causa: '',
+    data: format(new Date(), 'yyyy-MM-dd'),
+    hora: format(new Date(), 'HH:mm'),
+    turno: determinarTurno() as '1' | '2' | '3' | 'central',
+    status: 'aberto' as 'aberto' | 'em-andamento' | 'resolvido',
+    resolvidoPor: '',
+    observacoes: '',
+    engenhariaChamada: false,
+  });
+
+  useEffect(() => {
+    loadProblemas();
+    loadSetores();
+    // Atualizar turno a cada minuto
+    const interval = setInterval(() => {
+      if (!editingProblema) {
+        setFormData(prev => ({ ...prev, turno: determinarTurno() }));
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [editingProblema]);
+
+  const loadSetores = () => {
+    setSetores(setoresStorage.getAll());
+  };
+
+  useEffect(() => {
+    if (formData.setor) {
+      const setorSelecionado = setores.find(s => s.id === formData.setor);
+      if (setorSelecionado) {
+        setLinhas(setorSelecionado.linhas || []);
+      } else {
+        setLinhas([]);
+      }
+    } else {
+      setLinhas([]);
+    }
+  }, [formData.setor, setores]);
+
+  const loadProblemas = () => {
+    setProblemas(problemasStorage.getAll());
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Determinar turno se não foi definido
+    const turno = formData.turno || determinarTurno(formData.hora);
+    
+    const problema: ProblemaTecnico = {
+      id: editingProblema?.id || Date.now().toString(),
+      tipo: formData.tipo,
+      maquina: formData.maquina,
+      setor: formData.setor,
+      linha: formData.linha,
+      descricao: formData.descricao,
+      causa: formData.causa || undefined,
+      data: formData.data,
+      hora: formData.hora,
+      turno: turno,
+      status: formData.status,
+      reportadoPor: editingProblema?.reportadoPor || usuario?.nome || undefined,
+      resolvidoPor: formData.resolvidoPor || undefined,
+      dataResolucao: formData.status === 'resolvido' ? new Date().toISOString() : undefined,
+      observacoes: formData.observacoes || undefined,
+      engenhariaChamada: formData.engenhariaChamada,
+      dataChamadaEngenharia: formData.engenhariaChamada && !editingProblema?.engenhariaChamada 
+        ? new Date().toISOString() 
+        : editingProblema?.dataChamadaEngenharia,
+      chamadoPor: formData.engenhariaChamada && !editingProblema?.engenhariaChamada
+        ? usuario?.nome || undefined
+        : editingProblema?.chamadoPor,
+    };
+
+    if (editingProblema) {
+      problemasStorage.update(editingProblema.id, problema);
+    } else {
+      problemasStorage.add(problema);
+    }
+
+    resetForm();
+    loadProblemas();
+  };
+
+  const handleEdit = (problema: ProblemaTecnico) => {
+    setEditingProblema(problema);
+    setFormData({
+      tipo: problema.tipo,
+      maquina: problema.maquina,
+      setor: problema.setor || '',
+      linha: problema.linha || '',
+      descricao: problema.descricao,
+      causa: problema.causa || '',
+      data: problema.data,
+      hora: problema.hora,
+      turno: problema.turno || determinarTurno(problema.hora),
+      status: problema.status,
+      resolvidoPor: problema.resolvidoPor || '',
+      observacoes: problema.observacoes || '',
+      engenhariaChamada: problema.engenhariaChamada || false,
+    });
+    setShowModal(true);
+  };
+
+  const handleResolve = (id: string) => {
+    const problema = problemas.find(p => p.id === id);
+    if (problema) {
+      const resolvidoPor = prompt('Quem resolveu o problema?');
+      if (resolvidoPor) {
+        problemasStorage.update(id, {
+          status: 'resolvido',
+          resolvidoPor,
+          dataResolucao: new Date().toISOString(),
+        });
+        loadProblemas();
+      }
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este problema?')) {
+      problemasStorage.delete(id);
+      loadProblemas();
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      tipo: 'mecanico',
+      maquina: '',
+      setor: '',
+      linha: '',
+      descricao: '',
+      causa: '',
+      data: format(new Date(), 'yyyy-MM-dd'),
+      hora: format(new Date(), 'HH:mm'),
+      turno: determinarTurno(),
+      status: 'aberto',
+      resolvidoPor: '',
+      observacoes: '',
+      engenhariaChamada: false,
+    });
+    setEditingProblema(null);
+    setShowModal(false);
+    setLinhas([]);
+  };
+
+  const getTipoLabel = (tipo: string) => {
+    const labels: Record<string, string> = {
+      mecanico: 'Mecânico',
+      eletrico: 'Elétrico',
+      sistema: 'Sistema',
+    };
+    return labels[tipo] || tipo;
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      aberto: 'Aberto',
+      'em-andamento': 'Em Andamento',
+      resolvido: 'Resolvido',
+    };
+    return labels[status] || status;
+  };
+
+  const filteredProblemas = problemas.filter(p =>
+    p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Problemas Técnicos</h1>
+          <p className="mt-2 text-gray-600">
+            Registre e acompanhe problemas mecânicos, elétricos e de sistema
+          </p>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Novo Problema
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Buscar por máquina ou descrição..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Máquina</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turno</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Engenharia</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Resolvido Por</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredProblemas.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                    Nenhum problema encontrado
+                  </td>
+                </tr>
+              ) : (
+                filteredProblemas.map((problema) => (
+                  <tr key={problema.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        problema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        problema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(problema.tipo)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap font-medium">{problema.maquina}</td>
+                    <td className="px-6 py-4">{problema.descricao}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {format(new Date(problema.data), 'dd/MM/yyyy', { locale: ptBR })} {problema.hora}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {problema.turno ? (
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          problema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          problema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          problema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {problema.turno === '1' ? '1º Turno' :
+                           problema.turno === '2' ? '2º Turno' :
+                           problema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        problema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        problema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(problema.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {problema.engenhariaChamada ? (
+                        <div className="flex flex-col">
+                          <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
+                            Chamada
+                          </span>
+                          {problema.dataChamadaEngenharia && (
+                            <span className="text-xs text-gray-500 mt-1">
+                              {format(new Date(problema.dataChamadaEngenharia), 'dd/MM HH:mm', { locale: ptBR })}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{problema.resolvidoPor || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      {problema.status !== 'resolvido' && (
+                        <button
+                          onClick={() => handleResolve(problema.id)}
+                          className="text-green-600 hover:text-green-900 mr-4"
+                          title="Marcar como resolvido"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
+                      )}
+                      <button onClick={() => handleEdit(problema)} className="text-primary-600 hover:text-primary-900 mr-4">
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => handleDelete(problema.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">{editingProblema ? 'Editar' : 'Novo'} Problema</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tipo *</label>
+                  <select required value={formData.tipo} onChange={(e) => setFormData({ ...formData, tipo: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
+                    <option value="mecanico">Mecânico</option>
+                    <option value="eletrico">Elétrico</option>
+                    <option value="sistema">Sistema</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Máquina *</label>
+                  <input type="text" required value={formData.maquina} onChange={(e) => setFormData({ ...formData, maquina: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Setor *</label>
+                  <select required value={formData.setor} onChange={(e) => setFormData({ ...formData, setor: e.target.value })} className="w-full px-3 py-2 border rounded-lg">
+                    <option value="">Selecione um setor</option>
+                    {setores.map(setor => (
+                      <option key={setor.id} value={setor.id}>{setor.nome}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Linha *</label>
+                  <select required value={formData.linha} onChange={(e) => setFormData({ ...formData, linha: e.target.value })} className="w-full px-3 py-2 border rounded-lg" disabled={!formData.setor}>
+                    <option value="">Selecione uma linha</option>
+                    {linhas.map(linha => (
+                      <option key={linha.id} value={linha.nome}>{linha.nome}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Data *</label>
+                  <input type="date" required value={formData.data} onChange={(e) => setFormData({ ...formData, data: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Hora *</label>
+                  <input 
+                    type="time" 
+                    required 
+                    value={formData.hora} 
+                    onChange={(e) => {
+                      setFormData({ ...formData, hora: e.target.value, turno: determinarTurno(e.target.value) });
+                    }} 
+                    className="w-full px-3 py-2 border rounded-lg" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Turno *</label>
+                  <select
+                    required
+                    value={formData.turno}
+                    onChange={(e) => setFormData({ ...formData, turno: e.target.value as '1' | '2' | '3' | 'central' })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
+                    <option value="1">1º Turno (06:30 às 16:18)</option>
+                    <option value="2">2º Turno (16:18 às 01:30)</option>
+                    <option value="3">3º Turno (01:30 às 06:30)</option>
+                    <option value="central">Central</option>
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">Status *</label>
+                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
+                    <option value="aberto">Aberto</option>
+                    <option value="em-andamento">Em Andamento</option>
+                    <option value="resolvido">Resolvido</option>
+                  </select>
+                </div>
+                {formData.status === 'resolvido' && (
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium mb-1">Resolvido Por</label>
+                    <input type="text" value={formData.resolvidoPor} onChange={(e) => setFormData({ ...formData, resolvidoPor: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Descrição *</label>
+                <textarea required value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} rows={4} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Causa (se conhecida)</label>
+                <textarea value={formData.causa} onChange={(e) => setFormData({ ...formData, causa: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" placeholder="Descreva a causa do problema, se já identificada..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Observações</label>
+                <textarea value={formData.observacoes} onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="engenhariaChamada"
+                  checked={formData.engenhariaChamada}
+                  onChange={(e) => setFormData({ ...formData, engenhariaChamada: e.target.checked })}
+                  className="mr-2"
+                />
+                <label htmlFor="engenhariaChamada" className="text-sm font-medium">
+                  Chamar Engenharia
+                </label>
+              </div>
+              <div className="flex justify-end space-x-4 pt-4">
+                <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingProblema ? 'Atualizar' : 'Criar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

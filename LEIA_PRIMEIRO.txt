@@ -1,0 +1,49 @@
+========================================
+  APP ITCC - SUMITOMO S-RIKO
+  Guia de Instalação Rápida
+========================================
+
+PASSO 1: INSTALAR DEPENDÊNCIAS
+--------------------------------
+Execute o arquivo: INSTALAR_APP.bat
+(ou no terminal: npm install)
+
+PASSO 2: INICIAR O APP
+--------------------------------
+Execute o arquivo: INICIAR_APP.bat
+(ou no terminal: npm run dev)
+
+O app estará em: http://localhost:5173
+
+PASSO 3: INSTALAR COMO APP (PWA)
+--------------------------------
+1. Abra http://localhost:5173 no Chrome/Edge
+2. Clique no ícone de instalação na barra de endereços
+3. Confirme a instalação
+4. O app aparecerá como um aplicativo!
+
+COMPARTILHAR NA REDE
+--------------------------------
+1. Execute: INICIAR_APP.bat
+2. Encontre seu IP: ipconfig
+3. Compartilhe: http://SEU_IP:5173
+4. Outros dispositivos podem instalar o app também!
+
+BUILD DE PRODUÇÃO
+--------------------------------
+Execute: BUILD_APP.bat
+(ou: npm run build)
+
+Os arquivos estarão na pasta: dist\
+
+========================================
+  DOCUMENTAÇÃO COMPLETA
+========================================
+
+- INICIO_RAPIDO.md      → Guia rápido
+- GUIA_INSTALACAO.md    → Instruções detalhadas
+- README_APP.md         → Documentação completa
+- CRIAR_ICONES.md       → Como criar ícones personalizados
+
+========================================
+

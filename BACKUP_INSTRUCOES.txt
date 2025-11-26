@@ -1,0 +1,61 @@
+========================================
+  COMO FAZER BACKUP DO PROJETO
+========================================
+
+OPÇÃO 1: COPIA MANUAL (Mais Simples)
+-------------------------------------
+1. Feche todos os programas que estão usando o projeto
+2. Copie a pasta inteira do projeto:
+   C:\Users\br998\Documents\projeto srk
+3. Cole em outro local (ex: pendrive, outro computador, etc.)
+4. Pronto! Backup completo feito
+
+OPÇÃO 2: ZIP DO PROJETO
+-------------------------------------
+1. Clique com botão direito na pasta "projeto srk"
+2. Selecione "Enviar para" → "Pasta compactada (em zip)"
+3. Um arquivo .zip será criado
+4. Guarde esse arquivo em local seguro
+
+OPÇÃO 3: USAR GIT (Se Instalado)
+-------------------------------------
+1. Instale Git: https://git-scm.com/download/win
+2. Abra o terminal na pasta do projeto
+3. Execute:
+   git init
+   git add .
+   git commit -m "Backup do projeto"
+4. Para criar repositório remoto:
+   - Crie conta no GitHub/GitLab
+   - Siga as instruções para fazer push
+
+OPÇÃO 4: BACKUP AUTOMÁTICO WINDOWS
+-------------------------------------
+1. Use o Histórico de Arquivos do Windows
+2. Ou use o Backup do Windows
+3. Configure para fazer backup automático da pasta
+
+========================================
+  ARQUIVOS IMPORTANTES PARA BACKUP
+========================================
+
+✓ Toda a pasta src/          - Código fonte
+✓ public/                     - Arquivos públicos (ícones, manifest)
+✓ package.json                - Dependências
+✓ vite.config.ts              - Configuração do Vite
+✓ index.html                  - HTML principal
+✓ *.bat                       - Scripts de automação
+✓ *.md                        - Documentação
+✓ node_modules/               - (Opcional, pode reinstalar)
+
+========================================
+  RECOMENDAÇÃO
+========================================
+
+Faça backup regularmente, especialmente antes de:
+- Fazer mudanças grandes
+- Atualizar dependências
+- Testar novas funcionalidades
+
+========================================
+

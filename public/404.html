@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sumitomo S-riko - Controle ITCC</title>
+    <script>
+      // Redireciona para index.html para permitir que React Router gerencie as rotas
+      // Necessário para SPAs no GitHub Pages
+      (function() {
+        var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
+        
+        // Detecta o base path (ex: /repositorio/)
+        // Se o 404.html está em /repositorio/404.html, o base path é /repositorio/
+        var basePath = '';
+        var scriptPath = document.currentScript ? document.currentScript.src : '';
+        var currentPath = window.location.pathname;
+        
+        // Se estiver em um subdiretório (GitHub Pages), detecta o base path
+        var pathSegments = currentPath.split('/').filter(Boolean);
+        if (pathSegments.length > 1) {
+          // Assume que o primeiro segmento é o nome do repositório
+          basePath = '/' + pathSegments[0] + '/';
+        }
+        
+        // Se não encontrou base path, tenta detectar pelo caminho do 404.html
+        if (!basePath && currentPath.includes('/404.html')) {
+          var pathBefore404 = currentPath.substring(0, currentPath.indexOf('/404.html'));
+          if (pathBefore404) {
+            basePath = pathBefore404 + '/';
+          }
+        }
+        
+        // Constrói a URL para index.html
+        var indexPath = basePath + 'index.html';
+        var redirectPath = path.replace(basePath, '').replace('/404.html', '');
+        
+        // Se houver um caminho além do base path, mantém para o React Router
+        if (redirectPath && redirectPath !== '/') {
+          // Adiciona o caminho como hash ou query para o React Router processar
+          window.location.replace(indexPath + (hash || '') + search);
+        } else {
+          window.location.replace(indexPath + hash + search);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecionando...</p>
+    <noscript>
+      <p>Por favor, habilite JavaScript para acessar o aplicativo.</p>
+    </noscript>
+  </body>
+</html>
+
