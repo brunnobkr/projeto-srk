@@ -129,7 +129,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     // Verificar permissões explícitas
-    return usuario.permissoes[permission] || false;
+    const permissao = usuario.permissoes[permission];
+    // Se for boolean, retornar diretamente
+    if (typeof permissao === 'boolean') {
+      return permissao;
+    }
+    // Se for PermissoesModulo, retornar false (não é uma permissão simples)
+    return false;
   };
 
   const hasAnyPermission = (permissions: (keyof Permissoes)[]): boolean => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { usuariosStorage, mapeamentoFuncoesStorage, setoresStorage } from '../utils/storage';
-import type { Usuario, Permissoes } from '../types';
+import type { Usuario, Permissoes, PermissoesModulo } from '../types';
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -99,16 +99,24 @@ export default function Registro() {
     if (mapeamento) {
       permissoes = mapeamento.permissoes;
     } else {
+      // Função auxiliar para converter boolean em PermissoesModulo
+      const boolToPermissao = (valor: boolean): PermissoesModulo => ({
+        visualizar: valor,
+        criar: valor,
+        editar: valor,
+        excluir: valor,
+      });
+      
       // Permissões padrão se não encontrar mapeamento
       permissoes = {
-        receitasMaquina: false,
-        controleProducao: true,
-        controleFuncionarios: false,
-        problemasTecnicos: false,
-        mudancasMelhorias: false,
-        instrucoesTrabalho: true,
-        componentesProduto: true,
-        segurancaTrabalho: false,
+        receitasMaquina: boolToPermissao(false),
+        controleProducao: boolToPermissao(true),
+        controleFuncionarios: boolToPermissao(false),
+        problemasTecnicos: boolToPermissao(false),
+        mudancasMelhorias: boolToPermissao(false),
+        instrucoesTrabalho: boolToPermissao(true),
+        componentesProduto: boolToPermissao(true),
+        segurancaTrabalho: boolToPermissao(false),
         dashboardAdmin: false,
         gerenciarUsuarios: false,
         programarPedidos: false,
