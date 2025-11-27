@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, PlusCircle, X, Image, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, PlusCircle, X, Image, Eye, FileText } from 'lucide-react';
 import { instrucoesStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { InstrucaoTrabalho, PassoInstrucao, Setor } from '../types';
+import type { InstrucaoTrabalho, PassoInstrucao, Setor, AnexoPDF } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -39,6 +39,7 @@ export default function InstrucoesTrabalho() {
   const [showFotoModal, setShowFotoModal] = useState(false);
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
+  const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
 
   useEffect(() => {
     loadInstrucoes();
@@ -61,6 +62,44 @@ export default function InstrucoesTrabalho() {
     setInstrucoes(instrucoesMigradas);
   };
 
+  const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type === 'application/pdf') {
+        // Verificar tamanho (máximo 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`O arquivo ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const novoAnexo: AnexoPDF = {
+            nome: file.name,
+            conteudo: base64String,
+            dataUpload: new Date().toISOString(),
+            tamanho: file.size,
+          };
+          setAnexosPDF((prev) => [...prev, novoAnexo]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar o PDF. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos PDF.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removePDF = (index: number) => {
+    setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const instrucao: InstrucaoTrabalho = {
@@ -73,6 +112,7 @@ export default function InstrucoesTrabalho() {
       passos: formData.passos,
       preparador: formData.preparador,
       funcionario: formData.funcionario,
+      anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
       dataCriacao: editingInstrucao?.dataCriacao || new Date().toISOString(),
       dataAtualizacao: new Date().toISOString(),
       criadoPor: 'Usuário',
@@ -108,6 +148,7 @@ export default function InstrucoesTrabalho() {
       funcionario: instrucao.funcionario,
       passos: passosMigrados,
     });
+    setAnexosPDF(instrucao.anexosPDF || []);
     setShowModal(true);
   };
 
@@ -231,6 +272,7 @@ export default function InstrucoesTrabalho() {
     setShowFotoModal(false);
     setFotoSelecionada(null);
     setFotosModalAtual([]);
+    setAnexosPDF([]);
     setEditingInstrucao(null);
     setShowModal(false);
   };
@@ -623,6 +665,51 @@ export default function InstrucoesTrabalho() {
                 </div>
               </div>
 
+              {/* Seção de Anexos PDF */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4">Anexos PDF</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Adicionar Arquivo PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    multiple
+                    onChange={handlePDFUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
+                </div>
+                {anexosPDF.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Anexos adicionados ({anexosPDF.length}):</p>
+                    <div className="space-y-2">
+                      {anexosPDF.map((anexo, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                              {anexo.tamanho && (
+                                <p className="text-xs text-gray-500">
+                                  {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePDF(index)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-4 pt-4 border-t">
                 <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingInstrucao ? 'Atualizar' : 'Criar'}</button>
@@ -749,6 +836,38 @@ export default function InstrucoesTrabalho() {
                     ))}
                 </div>
               </div>
+
+              {/* Anexos PDF */}
+              {viewingInstrucao.anexosPDF && viewingInstrucao.anexosPDF.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingInstrucao.anexosPDF.length})</h3>
+                  <div className="space-y-2">
+                    {viewingInstrucao.anexosPDF.map((anexo, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-6 h-6 text-red-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                            {anexo.tamanho && (
+                              <p className="text-xs text-gray-500">
+                                {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                {anexo.dataUpload && ` - ${format(new Date(anexo.dataUpload), 'dd/MM/yyyy', { locale: ptBR })}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={anexo.conteudo}
+                          download={anexo.nome}
+                          className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end mt-6 pt-4 border-t">

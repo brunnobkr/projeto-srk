@@ -77,6 +77,7 @@ export interface ProgramacaoPedido {
   atencao?: string; // Observações/atenções
   importadoDe?: 'excel' | 'email' | 'manual';
   arquivoOrigem?: string; // Nome do arquivo Excel ou assunto do email
+  anexosPDF?: AnexoPDF[];
   criadoPor: string;
   dataCriacao: string;
 }
@@ -149,6 +150,7 @@ export interface ReceitaMaquina {
   fotos?: string[];
   fotosLadoA?: string[];
   fotosLadoB?: string[];
+  anexosPDF?: AnexoPDF[];
   dataCriacao: string;
   dataAtualizacao: string;
   criadoPor: string;
@@ -234,6 +236,7 @@ export interface ProblemaTecnico {
   engenhariaChamada?: boolean; // Se a engenharia foi chamada
   dataChamadaEngenharia?: string; // Data/hora que a engenharia foi chamada
   chamadoPor?: string; // Quem chamou a engenharia
+  anexosPDF?: AnexoPDF[];
 }
 
 export interface MudancaMelhoria {
@@ -249,6 +252,14 @@ export interface MudancaMelhoria {
   status: 'planejado' | 'em-execucao' | 'concluido';
   dataConclusao?: string;
   observacoes?: string;
+  anexosPDF?: AnexoPDF[];
+}
+
+export interface AnexoPDF {
+  nome: string;
+  conteudo: string; // base64
+  dataUpload: string;
+  tamanho?: number; // em bytes
 }
 
 export interface InstrucaoTrabalho {
@@ -261,6 +272,7 @@ export interface InstrucaoTrabalho {
   passos: PassoInstrucao[];
   preparador: boolean;
   funcionario: boolean;
+  anexosPDF?: AnexoPDF[];
   dataCriacao: string;
   dataAtualizacao: string;
   criadoPor: string;
@@ -292,6 +304,7 @@ export interface ComponenteProduto {
   valvulas: { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] }[];
   filtros: { nome: string; quantidade: number; codigos?: string[] }[];
   observacoes?: string;
+  anexosPDF?: AnexoPDF[];
   // Quantidade programada para produção
   quantidadeProgramada?: number;
   // Status e notificações (Logística)
