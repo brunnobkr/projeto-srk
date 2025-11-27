@@ -25,8 +25,9 @@ import type {
   Chamada,
   PermissoesModulo,
 } from '../types';
+import { cloudStorage } from './cloudStorage';
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   receitas: 'srk_receitas_maquina',
   producao: 'srk_controle_producao',
   funcionarios: 'srk_funcionarios',
@@ -51,9 +52,10 @@ const STORAGE_KEYS = {
   chamadas: 'srk_chamadas',
 } as const;
 
-// Funções genéricas de armazenamento
+// Funções genéricas de armazenamento (híbrido: Firebase + localStorage)
 export const storage = {
   get: <T>(key: string, defaultValue: T[]): T[] => {
+    // Versão síncrona para compatibilidade (usa localStorage)
     try {
       const item = localStorage.getItem(key);
       return item ? JSON.parse(item) : defaultValue;
@@ -62,18 +64,60 @@ export const storage = {
     }
   },
 
+  // Sincronizar com Firebase em background
+  syncFromCloud: async <T extends { id: string }>(key: string): Promise<T[]> => {
+    if (cloudStorage.isAvailable()) {
+      try {
+        const items = await cloudStorage.getAll<T>(key);
+        if (items.length > 0) {
+          // Atualizar localStorage
+          try {
+            localStorage.setItem(key, JSON.stringify(items));
+          } catch (e) {
+            console.warn('Erro ao atualizar localStorage:', e);
+          }
+          return items;
+        }
+      } catch (error) {
+        console.warn('Erro ao buscar do Firebase:', error);
+      }
+    }
+    return storage.get<T>(key, []);
+  },
+
   set: <T>(key: string, value: T[]): void => {
+    // Salvar no localStorage primeiro (para resposta rápida)
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.error('Erro ao salvar no localStorage:', error);
+    }
+
+    // Sincronizar com Firebase em background (não bloqueia)
+    if (cloudStorage.isAvailable()) {
+      cloudStorage.syncFromLocal(key, value).catch((error) => {
+        console.warn('Erro ao sincronizar com Firebase:', error);
+      });
     }
   },
 
   add: <T extends { id: string }>(key: string, item: T): void => {
     const items = storage.get<T>(key, []);
     items.push(item);
-    storage.set(key, items);
+    
+    // Salvar localmente
+    try {
+      localStorage.setItem(key, JSON.stringify(items));
+    } catch (error) {
+      console.error('Erro ao salvar no localStorage:', error);
+    }
+
+    // Adicionar no Firebase em background
+    if (cloudStorage.isAvailable()) {
+      cloudStorage.add(key, item).catch((error) => {
+        console.warn('Erro ao adicionar no Firebase:', error);
+      });
+    }
   },
 
   update: <T extends { id: string }>(
@@ -111,14 +155,40 @@ export const storage = {
 
       // Atualizar item
       items[index] = { ...items[index], ...updates };
-      storage.set(key, items);
+      
+      // Salvar localmente
+      try {
+        localStorage.setItem(key, JSON.stringify(items));
+      } catch (error) {
+        console.error('Erro ao salvar no localStorage:', error);
+      }
+
+      // Atualizar no Firebase em background
+      if (cloudStorage.isAvailable()) {
+        cloudStorage.update(key, id, updates).catch((error) => {
+          console.warn('Erro ao atualizar no Firebase:', error);
+        });
+      }
     }
   },
 
   delete: <T extends { id: string }>(key: string, id: string): void => {
     const items = storage.get<T>(key, []);
     const filtered = items.filter(item => item.id !== id);
-    storage.set(key, filtered);
+    
+    // Salvar localmente
+    try {
+      localStorage.setItem(key, JSON.stringify(filtered));
+    } catch (error) {
+      console.error('Erro ao salvar no localStorage:', error);
+    }
+
+    // Deletar no Firebase em background
+    if (cloudStorage.isAvailable()) {
+      cloudStorage.delete(key, id).catch((error) => {
+        console.warn('Erro ao deletar no Firebase:', error);
+      });
+    }
   },
 };
 

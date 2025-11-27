@@ -23,6 +23,7 @@ import Registro from './pages/Registro';
 import Chat from './pages/Chat';
 import Equipe from './pages/Equipe';
 import AcompanhamentoProducao from './pages/AcompanhamentoProducao';
+import ConfiguracaoCloud from './pages/ConfiguracaoCloud';
 
 function AppRoutes() {
   const { usuario } = useAuth();
@@ -61,6 +62,7 @@ function AppRoutes() {
         <Route path="/chamados-ti" element={<ProtectedRoute><ChamadosTI /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/equipe" element={<ProtectedRoute><Equipe /></ProtectedRoute>} />
+        <Route path="/configuracao-cloud" element={<ProtectedRoute requireAdminPadrao><ConfiguracaoCloud /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );

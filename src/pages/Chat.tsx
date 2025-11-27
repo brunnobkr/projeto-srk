@@ -269,7 +269,7 @@ export default function Chat() {
 
       intervaloAudioRef.current = setInterval(() => {
         setDuracaoAudio(prev => prev + 1);
-      }, 1000);
+      }, 1000) as unknown as number;
     } catch (error) {
       console.error('Erro ao iniciar gravação:', error);
       alert('Erro ao acessar o microfone. Verifique as permissões.');

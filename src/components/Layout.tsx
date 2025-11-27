@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronRight,
   MessageCircle,
-  TrendingUp
+  TrendingUp,
+  Cloud
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ReactNode, useState, useEffect } from 'react';
@@ -172,19 +173,34 @@ export default function Layout({ children }: LayoutProps) {
                 </li>
               )}
               {usuario?.id === 'admin_inicial' && (
-                <li>
-                  <Link
-                    to="/gerenciar-usuarios"
-                    className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                      location.pathname === '/gerenciar-usuarios'
-                        ? 'bg-primary-50 text-primary-700 font-semibold'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <Users className="w-5 h-5 mr-3" />
-                    <span>Gerenciar Usuários</span>
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link
+                      to="/gerenciar-usuarios"
+                      className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                        location.pathname === '/gerenciar-usuarios'
+                          ? 'bg-primary-50 text-primary-700 font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Users className="w-5 h-5 mr-3" />
+                      <span>Gerenciar Usuários</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/configuracao-cloud"
+                      className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                        location.pathname === '/configuracao-cloud'
+                          ? 'bg-primary-50 text-primary-700 font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Cloud className="w-5 h-5 mr-3" />
+                      <span>Configuração Cloud</span>
+                    </Link>
+                  </li>
+                </>
               )}
               {isLogistica() && (
                 <li>
