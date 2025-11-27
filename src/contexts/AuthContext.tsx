@@ -18,6 +18,7 @@ interface AuthContextType {
   isSegurancaTrabalho: () => boolean;
   isCentralMecanica: () => boolean;
   isTI: () => boolean;
+  isPreparador: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -292,6 +293,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
            setor.includes('informática') || setor.includes('informatica');
   };
 
+  const isPreparador = (): boolean => {
+    if (!usuario) return false;
+    if (usuario.id === 'admin_inicial') return true; // Admin padrão tem acesso a tudo
+    const cargo = usuario.cargo?.toLowerCase() || '';
+    const setor = usuario.setor?.toLowerCase() || '';
+    return cargo.includes('preparador') || cargo.includes('preparadora') ||
+           setor.includes('preparação') || setor.includes('preparacao');
+  };
+
   return (
     <AuthContext.Provider value={{ 
       usuario, 
@@ -308,7 +318,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isEngenharia,
       isSegurancaTrabalho,
       isCentralMecanica,
-      isTI
+      isTI,
+      isPreparador
     }}>
       {children}
     </AuthContext.Provider>

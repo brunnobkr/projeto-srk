@@ -46,7 +46,7 @@ const menuItems = [
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const { usuario, logout, isAdmin, isLogistica, isEngenharia, isSegurancaTrabalho, isCentralMecanica, isTI } = useAuth();
+  const { usuario, logout, isAdmin, isLogistica, isEngenharia, isSegurancaTrabalho, isCentralMecanica, isTI, isPreparador } = useAuth();
   const [setoresExpandidos, setSetoresExpandidos] = useState<Record<string, boolean>>({
     setores: false,
     centralMecanica: false,
@@ -202,7 +202,7 @@ export default function Layout({ children }: LayoutProps) {
                   </li>
                 </>
               )}
-              {isLogistica() && (
+              {(isLogistica() || isPreparador()) && (
                 <li>
                   <Link
                     to="/programacao-pedidos"

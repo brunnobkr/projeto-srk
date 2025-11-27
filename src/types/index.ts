@@ -82,11 +82,24 @@ export interface ProgramacaoPedido {
   quantidadeProgramada: number;
   dataProgramacao: string;
   atencao?: string; // Observações/atenções
-  importadoDe?: 'excel' | 'email' | 'manual';
+  importadoDe?: 'excel' | 'email' | 'manual' | 'ia';
   arquivoOrigem?: string; // Nome do arquivo Excel ou assunto do email
   anexosPDF?: AnexoPDF[];
   criadoPor: string;
   dataCriacao: string;
+  estadoPedido?: 'critico' | 'alerta' | 'normal'; // Estado do pedido identificado pela IA
+  revisado?: boolean; // Se foi revisado pelo usuário
+  dadosExtraidosIA?: DadosExtraidosIA; // Dados extraídos pela IA antes da revisão
+}
+
+export interface DadosExtraidosIA {
+  codigoProduto?: string;
+  quantidade?: number;
+  setor?: string;
+  linha?: string;
+  estadoPedido?: 'critico' | 'alerta' | 'normal';
+  confianca?: number; // Nível de confiança da extração (0-100)
+  observacoes?: string;
 }
 
 export interface Linha {
@@ -166,6 +179,30 @@ export interface ReceitaMaquina {
   criadoPor: string;
 }
 
+export interface AtualizacaoHora {
+  id: string;
+  hora: string; // Hora da atualização (ex: "08:00", "09:00")
+  quantidadeRealizada: number; // Quantidade realizada nessa hora
+  dataAtualizacao: string; // Data/hora completa da atualização
+  atualizadoPor: string; // Nome do preparador que atualizou
+}
+
+export interface CodigoAtivoLinha {
+  id: string; // ID do controle de produção ou programação
+  codigoProduto: string;
+  quantidadePedida: number;
+  quantidadeRealizada: number;
+  eficiencia?: number;
+  atualizacoesHora?: AtualizacaoHora[];
+  dataInicio: string; // Quando começou a rodar este código
+  status: 'rodando' | 'pausado' | 'finalizado';
+  pausaAlmoco?: {
+    inicio: string; // Hora de início da pausa
+    fim?: string; // Hora de fim da pausa (se já retornou)
+    duracaoMinutos?: number; // Duração da pausa em minutos
+  };
+}
+
 export interface ControleProducao {
   id: string;
   codigoTubo: string;
@@ -181,7 +218,10 @@ export interface ControleProducao {
   maoObraPorLinha: number; // Mão de obra necessária por linha (substitui pessoasPorMaquina)
   processo: string;
   // Novos campos
-  quantidadeTotalLogistica?: number;
+  quantidadeTotalLogistica?: number; // Quantidade pedida pela logística
+  quantidadeFinalRealizada?: number; // Quantidade final realizada (soma de todas as horas)
+  atualizacoesHora?: AtualizacaoHora[]; // Histórico de atualizações por hora
+  eficiencia?: number; // Eficiência calculada (quantidadeFinalRealizada / quantidadeTotalLogistica * 100)
   preparador?: string;
   atualizacaoHora?: boolean;
   observacoes?: string;

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Upload, Mail, Save, X, AlertCircle, CheckCircle, Clock, Eye, FileText } from 'lucide-react';
-import { programacoesPedidosStorage, componentesStorage, setoresStorage, problemasStorage } from '../utils/storage';
-// producaoStorage removido - não usado
+import { Plus, Edit, Trash2, Search, Upload, Mail, Save, X, AlertCircle, CheckCircle, Clock, Eye, FileText, Sparkles, Loader2 } from 'lucide-react';
+import { programacoesPedidosStorage, componentesStorage, setoresStorage, problemasStorage, producaoStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { ProgramacaoPedido, ComponenteProduto, Setor, ProblemaTecnico, AnexoPDF } from '../types';
-// ControleProducao removido - não usado
+import type { ProgramacaoPedido, ComponenteProduto, Setor, ProblemaTecnico, AnexoPDF, DadosExtraidosIA, ControleProducao } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { processarExcel, processarPDF, criarAIBackend, obterOpenAIKey, salvarOpenAIKey } from '../utils/aiExtraction';
+import { determinarTurno } from '../utils/turno';
 
 export default function ProgramacaoPedidos() {
-  const { isLogistica, usuario } = useAuth();
+  const { isLogistica, isPreparador, usuario } = useAuth();
   const [programacoes, setProgramacoes] = useState<ProgramacaoPedido[]>([]);
   const [componentes, setComponentes] = useState<ComponenteProduto[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
@@ -36,12 +36,19 @@ export default function ProgramacaoPedidos() {
   });
   const [_excelFile, setExcelFile] = useState<File | null>(null);
   const [problemasProducao, setProblemasProducao] = useState<ProblemaTecnico[]>([]);
-  // const [problemasProducaoList, setProblemasProducaoList] = useState<ControleProducao[]>([]); // Não usado
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [dadosExtraidosIA, setDadosExtraidosIA] = useState<DadosExtraidosIA[]>([]);
+  const [processandoIA, setProcessandoIA] = useState(false);
+  const [arquivoProcessando, setArquivoProcessando] = useState<File | null>(null);
+  const [openAIKey, setOpenAIKey] = useState<string>(obterOpenAIKey() || '');
+  const [showConfigAI, setShowConfigAI] = useState(false);
 
   useEffect(() => {
-    if (isLogistica()) {
+    if (isLogistica() || isPreparador()) {
       loadData();
-      loadProblemasProducao();
+      if (isLogistica()) {
+        loadProblemasProducao();
+      }
     }
   }, []);
 
@@ -171,6 +178,127 @@ export default function ProgramacaoPedidos() {
     loadData();
   };
 
+  // Processar arquivo com IA
+  const handleArquivoIA = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    const isPDF = file.name.endsWith('.pdf');
+
+    if (!isExcel && !isPDF) {
+      alert('Por favor, selecione um arquivo Excel (.xlsx, .xls) ou PDF (.pdf)');
+      return;
+    }
+
+    setProcessandoIA(true);
+    setArquivoProcessando(file);
+    setShowAIModal(true);
+
+    try {
+      // Criar backend de IA
+      const aiBackend = openAIKey 
+        ? criarAIBackend('openai', openAIKey)
+        : criarAIBackend('local');
+
+      // Processar arquivo
+      let dadosExtraidos: DadosExtraidosIA[];
+      
+      if (isExcel) {
+        dadosExtraidos = await processarExcel(file, aiBackend);
+      } else {
+        dadosExtraidos = await processarPDF(file, aiBackend);
+      }
+
+      setDadosExtraidosIA(dadosExtraidos);
+    } catch (error: any) {
+      alert(`Erro ao processar arquivo: ${error.message}`);
+      setShowAIModal(false);
+    } finally {
+      setProcessandoIA(false);
+      e.target.value = '';
+    }
+  };
+
+  // Confirmar e criar programações após revisão
+  const handleConfirmarIA = () => {
+    if (dadosExtraidosIA.length === 0) {
+      alert('Nenhum dado para confirmar');
+      return;
+    }
+
+    const programacoesCriadas: ProgramacaoPedido[] = [];
+
+    dadosExtraidosIA.forEach((dados, index) => {
+      if (!dados.codigoProduto || !dados.setor || !dados.linha) {
+        return; // Pular dados incompletos
+      }
+
+      const programacao: ProgramacaoPedido = {
+        id: `${Date.now()}_${index}_${dados.codigoProduto}`,
+        codigoProduto: dados.codigoProduto,
+        setor: dados.setor,
+        linha: dados.linha,
+        quantidadeProgramada: dados.quantidade || 0,
+        dataProgramacao: new Date().toISOString(),
+        atencao: dados.observacoes,
+        importadoDe: 'ia',
+        arquivoOrigem: arquivoProcessando?.name || 'Arquivo IA',
+        estadoPedido: dados.estadoPedido || 'normal',
+        revisado: true,
+        dadosExtraidosIA: dados,
+        criadoPor: usuario?.nome || 'Logística',
+        dataCriacao: new Date().toISOString(),
+      };
+
+      programacoesPedidosStorage.add(programacao);
+      programacoesCriadas.push(programacao);
+    });
+
+    // Criar registros no Controle de Produção automaticamente
+    programacoesCriadas.forEach(programacao => {
+      const controleProducao: ControleProducao = {
+        id: `prod_${programacao.id}`,
+        codigoTubo: programacao.codigoProduto,
+        setor: programacao.setor,
+        linha: programacao.linha,
+        data: format(new Date(), 'yyyy-MM-dd'),
+        hora: format(new Date(), 'HH:mm'),
+        turno: determinarTurno() as '1' | '2' | '3' | 'central',
+        quantidade30min: 0,
+        quantidadeHora: 0,
+        tempoMontagem: 0,
+        maoObra: 0,
+        maoObraPorLinha: 0,
+        processo: 'Programado',
+        quantidadeTotalLogistica: programacao.quantidadeProgramada,
+        observacoes: `Importado automaticamente da programação de pedidos (Estado: ${programacao.estadoPedido || 'normal'})`,
+      };
+
+      producaoStorage.add(controleProducao);
+    });
+
+    alert(`${programacoesCriadas.length} programação(ões) criada(s) e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produção!`);
+    
+    setDadosExtraidosIA([]);
+    setArquivoProcessando(null);
+    setShowAIModal(false);
+    loadData();
+  };
+
+  // Editar dados extraídos pela IA
+  const handleEditarDadosIA = (index: number, campo: keyof DadosExtraidosIA, valor: any) => {
+    const novosDados = [...dadosExtraidosIA];
+    novosDados[index] = { ...novosDados[index], [campo]: valor };
+    setDadosExtraidosIA(novosDados);
+  };
+
+  // Remover item dos dados extraídos
+  const handleRemoverDadosIA = (index: number) => {
+    setDadosExtraidosIA(dadosExtraidosIA.filter((_, i) => i !== index));
+  };
+
   const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -232,18 +360,32 @@ export default function ProgramacaoPedidos() {
     }
   };
 
-  const filteredProgramacoes = programacoes.filter(p =>
-    p.codigoProduto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.setor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.linha.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar programações: preparadores veem apenas do seu setor
+  const filteredProgramacoes = programacoes.filter(p => {
+    // Se for preparador, filtrar apenas do seu setor
+    if (isPreparador() && usuario?.setor) {
+      const setorUsuario = usuario.setor.toLowerCase().trim();
+      const setorProgramacao = p.setor.toLowerCase().trim();
+      // Comparar setores (pode ser nome completo ou parcial)
+      if (!setorProgramacao.includes(setorUsuario) && !setorUsuario.includes(setorProgramacao)) {
+        return false;
+      }
+    }
+    
+    // Aplicar filtro de busca
+    return (
+      p.codigoProduto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.setor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.linha.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
-  if (!isLogistica()) {
+  if (!isLogistica() && !isPreparador()) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
         <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
-        <p className="text-gray-600">Apenas o setor de Logística pode acessar esta página.</p>
+        <p className="text-gray-600">Apenas o setor de Logística e Preparadores podem acessar esta página.</p>
       </div>
     );
   }
@@ -316,27 +458,55 @@ export default function ProgramacaoPedidos() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <button
-            onClick={() => setShowEmailModal(true)}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            <Mail className="w-5 h-5 mr-2" />
-            Programar por Email
-          </button>
-          <button
-            onClick={() => setShowExcelModal(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            Importar Excel
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Nova Programação
-          </button>
+          {isPreparador() && (
+            <div className="flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+              <span className="text-sm font-medium">Setor: {usuario?.setor || 'Não definido'}</span>
+            </div>
+          )}
+          {isLogistica() && (
+            <>
+              <label className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 cursor-pointer">
+                <Sparkles className="w-5 h-5 mr-2" />
+                {processandoIA ? 'Processando...' : 'Processar com IA'}
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.pdf"
+                  onChange={handleArquivoIA}
+                  className="hidden"
+                  disabled={processandoIA}
+                />
+              </label>
+              <button
+                onClick={() => setShowConfigAI(true)}
+                className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                title="Configurar API de IA (OpenAI)"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Config IA
+              </button>
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Mail className="w-5 h-5 mr-2" />
+                Programar por Email
+              </button>
+              <button
+                onClick={() => setShowExcelModal(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Upload className="w-5 h-5 mr-2" />
+                Importar Excel
+              </button>
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Nova Programação
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -418,7 +588,7 @@ export default function ProgramacaoPedidos() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProgramacoes.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                     Nenhuma programação encontrada
                   </td>
                 </tr>
@@ -444,11 +614,28 @@ export default function ProgramacaoPedidos() {
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         programacao.importadoDe === 'excel' ? 'bg-blue-100 text-blue-800' :
                         programacao.importadoDe === 'email' ? 'bg-green-100 text-green-800' :
+                        programacao.importadoDe === 'ia' ? 'bg-purple-100 text-purple-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {programacao.importadoDe === 'excel' ? 'Excel' :
-                         programacao.importadoDe === 'email' ? 'Email' : 'Manual'}
+                         programacao.importadoDe === 'email' ? 'Email' :
+                         programacao.importadoDe === 'ia' ? 'IA' : 'Manual'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {programacao.estadoPedido && (
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          programacao.estadoPedido === 'critico' ? 'bg-red-100 text-red-800' :
+                          programacao.estadoPedido === 'alerta' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {programacao.estadoPedido === 'critico' ? 'Crítico' :
+                           programacao.estadoPedido === 'alerta' ? 'Alerta' : 'Normal'}
+                        </span>
+                      )}
+                      {!programacao.estadoPedido && (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {programacao.atencao || '-'}
@@ -461,20 +648,24 @@ export default function ProgramacaoPedidos() {
                       >
                         <Eye className="w-5 h-5" />
                       </button>
-                      <button
-                        onClick={() => handleEdit(programacao)}
-                        className="text-primary-600 hover:text-primary-900 mr-4"
-                        title="Editar"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(programacao.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      {isLogistica() && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(programacao)}
+                            className="text-primary-600 hover:text-primary-900 mr-4"
+                            title="Editar"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(programacao.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -900,6 +1091,245 @@ export default function ProgramacaoPedidos() {
               >
                 Fechar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Revisão de Dados Extraídos pela IA */}
+      {showAIModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Sparkles className="w-6 h-6 mr-2 text-purple-600" />
+                Revisar Dados Extraídos pela IA
+              </h2>
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setDadosExtraidosIA([]);
+                  setArquivoProcessando(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {processandoIA ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="w-12 h-12 text-purple-600 animate-spin mb-4" />
+                <p className="text-gray-600">Processando arquivo com IA...</p>
+                <p className="text-sm text-gray-500 mt-2">Isso pode levar alguns segundos</p>
+              </div>
+            ) : dadosExtraidosIA.length === 0 ? (
+              <div className="text-center py-12">
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                <p className="text-gray-600">Nenhum dado foi extraído do arquivo.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Arquivo:</strong> {arquivoProcessando?.name}
+                  </p>
+                  <p className="text-sm text-blue-800 mt-1">
+                    <strong>Itens encontrados:</strong> {dadosExtraidosIA.length}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-2">
+                    Revise os dados abaixo e corrija se necessário antes de confirmar.
+                  </p>
+                </div>
+
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                  {dadosExtraidosIA.map((dados, index) => (
+                    <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-semibold text-gray-900">Item {index + 1}</h3>
+                        <div className="flex items-center space-x-2">
+                          {dados.confianca && (
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              dados.confianca >= 80 ? 'bg-green-100 text-green-800' :
+                              dados.confianca >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              Confiança: {dados.confianca}%
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handleRemoverDadosIA(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Código do Produto *</label>
+                          <input
+                            type="text"
+                            value={dados.codigoProduto || ''}
+                            onChange={(e) => handleEditarDadosIA(index, 'codigoProduto', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Quantidade *</label>
+                          <input
+                            type="number"
+                            value={dados.quantidade || ''}
+                            onChange={(e) => handleEditarDadosIA(index, 'quantidade', parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Setor *</label>
+                          <select
+                            value={dados.setor || ''}
+                            onChange={(e) => handleEditarDadosIA(index, 'setor', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            required
+                          >
+                            <option value="">Selecione...</option>
+                            {setores.map(setor => (
+                              <option key={setor.id} value={setor.nome}>{setor.nome}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Linha *</label>
+                          <input
+                            type="text"
+                            value={dados.linha || ''}
+                            onChange={(e) => handleEditarDadosIA(index, 'linha', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            required
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs text-gray-600 mb-1">Estado do Pedido</label>
+                          <select
+                            value={dados.estadoPedido || 'normal'}
+                            onChange={(e) => handleEditarDadosIA(index, 'estadoPedido', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                          >
+                            <option value="normal">Normal</option>
+                            <option value="alerta">Alerta</option>
+                            <option value="critico">Crítico</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs text-gray-600 mb-1">Observações</label>
+                          <textarea
+                            value={dados.observacoes || ''}
+                            onChange={(e) => handleEditarDadosIA(index, 'observacoes', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAIModal(false);
+                      setDadosExtraidosIA([]);
+                      setArquivoProcessando(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleConfirmarIA}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Confirmar e Criar Programações
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Configuração de IA */}
+      {showConfigAI && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Sparkles className="w-6 h-6 mr-2 text-purple-600" />
+                Configuração de IA
+              </h2>
+              <button
+                onClick={() => setShowConfigAI(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OpenAI API Key (Opcional)
+                </label>
+                <input
+                  type="password"
+                  value={openAIKey}
+                  onChange={(e) => setOpenAIKey(e.target.value)}
+                  placeholder="sk-..."
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Deixe em branco para usar processamento local (menos preciso)
+                </p>
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-xs text-blue-800">
+                  <strong>Como obter a API Key:</strong>
+                </p>
+                <ol className="text-xs text-blue-700 mt-1 list-decimal list-inside space-y-1">
+                  <li>Acesse <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com/api-keys</a></li>
+                  <li>Crie uma conta ou faça login</li>
+                  <li>Gere uma nova API key</li>
+                  <li>Cole a chave aqui</li>
+                </ol>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <button
+                  onClick={() => setShowConfigAI(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    if (openAIKey) {
+                      salvarOpenAIKey(openAIKey);
+                    } else {
+                      localStorage.removeItem('openai_api_key');
+                    }
+                    setShowConfigAI(false);
+                    alert('Configuração salva!');
+                  }}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                  Salvar
+                </button>
+              </div>
             </div>
           </div>
         </div>

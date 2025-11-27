@@ -25,62 +25,63 @@ export default function Equipe() {
   };
 
   // Normalizar cargo para agrupamento consistente
-  const normalizarCargoParaGrupo = (cargo: string | undefined, setor: string | undefined): string => {
+  // O setor é apenas informativo (para localizar linhas), o agrupamento é baseado no CARGO
+  const normalizarCargoParaGrupo = (cargo: string | undefined, _setor?: string | undefined): string => {
     if (!cargo) return 'Outros';
     
     const cargoLower = cargo.toLowerCase();
-    const setorLower = setor?.toLowerCase() || '';
     
-    // Engenharia
-    if (cargoLower.includes('engen') || setorLower.includes('engenharia')) {
+    // Engenharia - baseado apenas no cargo
+    if (cargoLower.includes('engen')) {
       return 'Engenharia';
     }
     
-    // Logística
-    if (cargoLower.includes('logist') || setorLower.includes('logistica') || setorLower.includes('logística')) {
+    // Logística - baseado apenas no cargo
+    if (cargoLower.includes('logist')) {
       return 'Logística';
     }
     
-    // Central de Mecânica
-    if (cargoLower.includes('mecan') || cargoLower.includes('eletr') || cargoLower.includes('ferrament') || 
-        setorLower.includes('mecanica') || setorLower.includes('eletrica') || setorLower.includes('ferramentaria')) {
+    // Central de Mecânica - baseado apenas no cargo
+    if (cargoLower.includes('mecan') || cargoLower.includes('eletr') || cargoLower.includes('ferrament')) {
       return 'Central de Mecânica';
     }
     
-    // TI
+    // TI - baseado apenas no cargo
     if (cargoLower.includes('ti') || cargoLower.includes('tecnologia') || cargoLower.includes('informática') || 
-        cargoLower.includes('informatica') || setorLower.includes('ti')) {
+        cargoLower.includes('informatica') || cargoLower.includes('t.i') || cargoLower.includes('t.i.')) {
       return 'TI';
     }
     
-    // Segurança do Trabalho
-    if (cargoLower.includes('seguranca') || cargoLower.includes('segurança') || setorLower.includes('seguranca')) {
+    // RH - baseado apenas no cargo
+    if (cargoLower.includes('rh') || cargoLower.includes('recursos humanos') || cargoLower.includes('r.h') ||
+        cargoLower.includes('r.h.')) {
+      return 'RH';
+    }
+    
+    // Segurança do Trabalho - baseado apenas no cargo
+    if (cargoLower.includes('seguranca') || cargoLower.includes('segurança')) {
       return 'Segurança do Trabalho';
     }
     
-    // Produção
+    // Produção - baseado apenas no cargo
     if (cargoLower.includes('preparador') || cargoLower.includes('operador') || cargoLower.includes('produção') || 
         cargoLower.includes('producao') || cargoLower.includes('montador')) {
       return 'Produção';
     }
     
-    // Gestão
+    // Gestão - baseado apenas no cargo
     if (cargoLower.includes('lider') || cargoLower.includes('líder') || cargoLower.includes('coordenador') || 
         cargoLower.includes('gerente') || cargoLower.includes('supervisor') || cargoLower.includes('diretor')) {
       return 'Gestão';
     }
     
-    // Qualidade
+    // Qualidade - baseado apenas no cargo
     if (cargoLower.includes('qualidade') || cargoLower.includes('qc') || cargoLower.includes('qa')) {
       return 'Qualidade';
     }
     
-    // Usar o setor se disponível, senão usar o cargo como está
-    if (setor) {
-      return setor;
-    }
-    
     // Se não se encaixar em nenhum grupo padrão, usar o cargo como grupo
+    // O setor não é usado para agrupamento, apenas como informação adicional
     return cargo;
   };
 
@@ -108,7 +109,7 @@ export default function Equipe() {
   const gruposUsuarios = agruparPorCargo();
   
   // Ordenar grupos: primeiro os principais, depois alfabeticamente
-  const gruposPrincipais = ['Engenharia', 'Logística', 'Produção', 'Central de Mecânica', 'TI', 'Segurança do Trabalho', 'Qualidade', 'Gestão'];
+  const gruposPrincipais = ['Engenharia', 'Logística', 'Produção', 'Central de Mecânica', 'TI', 'RH', 'Segurança do Trabalho', 'Qualidade', 'Gestão'];
   const gruposOrdenados = [
     ...gruposPrincipais.filter(g => gruposUsuarios[g]),
     ...Object.keys(gruposUsuarios)
@@ -116,16 +117,59 @@ export default function Equipe() {
       .sort()
   ];
 
+  // Filtrar grupos baseado na busca
+  // A busca por cargo funciona igual a setor, mas o agrupamento é sempre por CARGO
+  const filtrarGrupos = () => {
+    if (!searchTerm) return gruposOrdenados;
+    
+    const termoLower = searchTerm.toLowerCase();
+    
+    // Verificar se o termo corresponde a um grupo (cargo)
+    const gruposFiltrados = gruposOrdenados.filter(grupo => {
+      const grupoLower = grupo.toLowerCase();
+      
+      // Se o termo corresponde ao nome do grupo (cargo), mostrar todos os usuários desse grupo
+      if (grupoLower.includes(termoLower) || termoLower.includes(grupoLower)) {
+        return true;
+      }
+      
+      // Verificar se algum usuário do grupo corresponde ao termo
+      // O setor pode ser usado na busca, mas não no agrupamento
+      const usuariosGrupo = gruposUsuarios[grupo];
+      return usuariosGrupo.some(u =>
+        u.nome.toLowerCase().includes(termoLower) ||
+        u.cargo?.toLowerCase().includes(termoLower) ||
+        u.matricula?.toLowerCase().includes(termoLower) ||
+        u.setor?.toLowerCase().includes(termoLower) || // Setor pode ser usado na busca
+        u.email?.toLowerCase().includes(termoLower)
+      );
+    });
+    
+    return gruposFiltrados;
+  };
+
   // Filtrar usuários dentro de cada grupo baseado na busca
+  // O agrupamento é sempre por CARGO, mas a busca pode incluir setor
   const filtrarUsuariosPorGrupo = (usuariosGrupo: Usuario[]) => {
     if (!searchTerm) return usuariosGrupo;
     
+    const termoLower = searchTerm.toLowerCase();
+    const grupoNome = normalizarCargoParaGrupo(usuariosGrupo[0]?.cargo, usuariosGrupo[0]?.setor);
+    const grupoLower = grupoNome.toLowerCase();
+    
+    // Se o termo corresponde ao nome do grupo (cargo), mostrar todos os usuários
+    if (grupoLower.includes(termoLower) || termoLower.includes(grupoLower)) {
+      return usuariosGrupo;
+    }
+    
+    // Caso contrário, filtrar usuários individualmente
+    // O setor pode ser usado na busca, mas não afeta o agrupamento
     return usuariosGrupo.filter(u =>
-      u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.cargo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.matricula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.setor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      u.nome.toLowerCase().includes(termoLower) ||
+      u.cargo?.toLowerCase().includes(termoLower) ||
+      u.matricula?.toLowerCase().includes(termoLower) ||
+      u.setor?.toLowerCase().includes(termoLower) || // Setor pode ser usado na busca
+      u.email?.toLowerCase().includes(termoLower)
     );
   };
 
@@ -220,7 +264,7 @@ export default function Equipe() {
 
       {/* Grupos por Cargo */}
       <div className="space-y-6">
-        {gruposOrdenados.map((grupo) => {
+        {filtrarGrupos().map((grupo) => {
           const usuariosGrupo = gruposUsuarios[grupo];
           const usuariosFiltradosGrupo = filtrarUsuariosPorGrupo(usuariosGrupo);
 
