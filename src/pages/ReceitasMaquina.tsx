@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, History, Image, X, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, History, Image, X, Eye, FileText } from 'lucide-react';
 import { receitasStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { ReceitaMaquina, HistoricoVersao, Setor } from '../types';
+import type { ReceitaMaquina, HistoricoVersao, Setor, AnexoPDF } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import HistoricoModal from '../components/HistoricoModal';
@@ -49,6 +49,7 @@ export default function ReceitasMaquina() {
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
   const [viewingReceita, setViewingReceita] = useState<ReceitaMaquina | null>(null);
+  const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
 
   useEffect(() => {
     loadReceitas();
@@ -103,6 +104,43 @@ export default function ReceitasMaquina() {
     setShowFotoModal(true);
   };
 
+  const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type === 'application/pdf') {
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`O arquivo ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const novoAnexo: AnexoPDF = {
+            nome: file.name,
+            conteudo: base64String,
+            dataUpload: new Date().toISOString(),
+            tamanho: file.size,
+          };
+          setAnexosPDF((prev) => [...prev, novoAnexo]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar o PDF. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos PDF.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removePDF = (index: number) => {
+    setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +170,7 @@ export default function ReceitasMaquina() {
       fotos: fotos.length > 0 ? fotos : undefined,
       fotosLadoA: fotosLadoA.length > 0 ? fotosLadoA : undefined,
       fotosLadoB: fotosLadoB.length > 0 ? fotosLadoB : undefined,
+      anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
       dataCriacao: editingReceita?.dataCriacao || new Date().toISOString(),
       dataAtualizacao: new Date().toISOString(),
       criadoPor: formData.nomeResponsavel || 'Usuário',
@@ -185,6 +224,7 @@ export default function ReceitasMaquina() {
     setFotos(receita.fotos || []);
     setFotosLadoA(receita.fotosLadoA || []);
     setFotosLadoB(receita.fotosLadoB || []);
+    setAnexosPDF(receita.anexosPDF || []);
     setShowModal(true);
   };
 
@@ -223,6 +263,7 @@ export default function ReceitasMaquina() {
     setFotos([]);
     setFotosLadoA([]);
     setFotosLadoB([]);
+    setAnexosPDF([]);
     setEditingReceita(null);
     setShowModal(false);
   };
@@ -887,6 +928,51 @@ export default function ReceitasMaquina() {
                 )}
               </div>
 
+              {/* Seção de Anexos PDF */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Anexos PDF</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Adicionar Arquivo PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    multiple
+                    onChange={handlePDFUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
+                </div>
+                {anexosPDF.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Anexos adicionados ({anexosPDF.length}):</p>
+                    <div className="space-y-2">
+                      {anexosPDF.map((anexo, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                              {anexo.tamanho && (
+                                <p className="text-xs text-gray-500">
+                                  {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePDF(index)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {editingReceita && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1213,6 +1299,38 @@ export default function ReceitasMaquina() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Anexos PDF */}
+              {viewingReceita.anexosPDF && viewingReceita.anexosPDF.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingReceita.anexosPDF.length})</h3>
+                  <div className="space-y-2">
+                    {viewingReceita.anexosPDF.map((anexo, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-6 h-6 text-red-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                            {anexo.tamanho && (
+                              <p className="text-xs text-gray-500">
+                                {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                {anexo.dataUpload && ` - ${format(new Date(anexo.dataUpload), 'dd/MM/yyyy', { locale: ptBR })}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={anexo.conteudo}
+                          download={anexo.nome}
+                          className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
