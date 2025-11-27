@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Image as ImageIcon, Video, Mic, Search, X, Pause, FileText } from 'lucide-react';
+import { Send, Image as ImageIcon, Video, Mic, Search, X, Pause, FileText, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { mensagensStorage, conversasStorage, usuariosStorage, notificacoesStorage } from '../utils/storage';
 import type { Mensagem, Conversa, Usuario, Notificacao } from '../types';
@@ -22,13 +22,14 @@ export default function Chat() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const mensagensEndRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const mensagensContainerRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const intervaloAudioRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
+  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
     if (usuario) {
@@ -50,7 +51,10 @@ export default function Chat() {
   }, [usuario, conversaSelecionada]);
 
   useEffect(() => {
-    scrollToBottom();
+    // Só fazer scroll automático se o usuário já estava no final
+    if (shouldAutoScrollRef.current) {
+      scrollToBottom();
+    }
   }, [mensagens]);
 
   const loadConversas = () => {
@@ -104,6 +108,9 @@ export default function Chat() {
   const loadMensagens = (conversaId: string) => {
     const msgs = mensagensStorage.getByConversa(conversaId);
     
+    // Verificar se há novas mensagens antes de atualizar
+    const quantidadeAnterior = mensagens.length;
+    
     // Enriquecer com dados dos usuários
     const msgsEnriquecidas = msgs.map(msg => ({
       ...msg,
@@ -113,7 +120,23 @@ export default function Chat() {
       new Date(a.dataEnvio).getTime() - new Date(b.dataEnvio).getTime()
     );
 
+    // Verificar se há novas mensagens recebidas
+    const temNovasMensagens = msgsEnriquecidas.length > quantidadeAnterior;
+    const ultimaMensagem = msgsEnriquecidas[msgsEnriquecidas.length - 1];
+    const isNovaMensagemRecebida = temNovasMensagens && ultimaMensagem?.destinatarioId === usuario?.id;
+
     setMensagens(msgsEnriquecidas);
+
+    // Se recebeu uma nova mensagem e está no final, permitir scroll automático
+    if (isNovaMensagemRecebida) {
+      setTimeout(() => {
+        if (mensagensContainerRef.current) {
+          const container = mensagensContainerRef.current;
+          const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+          shouldAutoScrollRef.current = isNearBottom;
+        }
+      }, 100);
+    }
 
     // Marcar mensagens como lidas
     msgsEnriquecidas.forEach(msg => {
@@ -121,6 +144,33 @@ export default function Chat() {
         mensagensStorage.marcarComoLida(msg.id);
       }
     });
+  };
+
+  const deletarMensagem = (mensagemId: string) => {
+    if (!usuario || !conversaSelecionada) return;
+    
+    const mensagem = mensagensStorage.getAll().find(m => m.id === mensagemId);
+    if (!mensagem) return;
+    
+    // Verificar se o usuário é o remetente da mensagem
+    if (mensagem.remetenteId !== usuario.id) {
+      alert('Você só pode deletar suas próprias mensagens.');
+      return;
+    }
+    
+    // Confirmar antes de deletar
+    if (!window.confirm('Tem certeza que deseja deletar esta mensagem?')) {
+      return;
+    }
+    
+    // Deletar a mensagem
+    mensagensStorage.delete(mensagemId);
+    
+    // Atualizar a lista de mensagens
+    loadMensagens(conversaSelecionada.id);
+    
+    // Atualizar a lista de conversas para refletir a última mensagem
+    loadConversas();
   };
 
   const loadNotificacoes = () => {
@@ -151,7 +201,22 @@ export default function Chat() {
   }, []);
 
   const scrollToBottom = () => {
-    mensagensEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Usar setTimeout para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      if (mensagensContainerRef.current) {
+        mensagensContainerRef.current.scrollTop = mensagensContainerRef.current.scrollHeight;
+      }
+    }, 0);
+  };
+
+  const handleScroll = () => {
+    if (!mensagensContainerRef.current) return;
+    
+    const container = mensagensContainerRef.current;
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    
+    // Se o usuário está próximo do final, permitir scroll automático
+    shouldAutoScrollRef.current = isNearBottom;
   };
 
   const iniciarConversa = (outroUsuario: Usuario) => {
@@ -159,6 +224,7 @@ export default function Chat() {
     
     const conversa = conversasStorage.criarOuObter(usuario.id, outroUsuario.id);
     setConversaSelecionada(conversa);
+    shouldAutoScrollRef.current = true; // Permitir scroll ao abrir conversa
     loadMensagens(conversa.id);
     setMostrarUsuarios(false);
   };
@@ -236,6 +302,7 @@ export default function Chat() {
     setAudioGravado(null);
     setNomeArquivoPDF('');
     setDuracaoAudio(0);
+    shouldAutoScrollRef.current = true; // Permitir scroll ao enviar mensagem
     loadMensagens(conversaSelecionada.id);
     loadConversas();
   };
@@ -408,6 +475,7 @@ export default function Chat() {
                   key={conv.id}
                   onClick={() => {
                     setConversaSelecionada(conv);
+                    shouldAutoScrollRef.current = true; // Permitir scroll ao selecionar conversa
                     loadMensagens(conv.id);
                   }}
                   className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
@@ -502,26 +570,39 @@ export default function Chat() {
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div 
+              ref={mensagensContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+            >
               {mensagens.map(msg => {
                 const isRemetente = msg.remetenteId === usuario.id;
                 
                 return (
                   <div
                     key={msg.id}
-                    className={`flex ${isRemetente ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isRemetente ? 'justify-end' : 'justify-start'} group`}
                   >
-                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    <div className={`relative max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                       isRemetente
                         ? 'bg-primary-600 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}>
+                      {isRemetente && (
+                        <button
+                          onClick={() => deletarMensagem(msg.id)}
+                          className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg z-10"
+                          title="Deletar mensagem"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      
                       {msg.tipo === 'texto' && <p className="text-sm">{msg.conteudo}</p>}
                       
                       {msg.tipo === 'audio' && msg.audioUrl && (
                         <div className="flex items-center space-x-2">
                           <audio
-                            ref={audioRef}
                             src={msg.audioUrl}
                             controls
                             className="w-full"
@@ -535,7 +616,9 @@ export default function Chat() {
                       )}
                       
                       {msg.tipo === 'foto' && msg.fotoUrl && (
-                        <img src={msg.fotoUrl} alt="Foto enviada" className="max-w-full rounded-lg" />
+                        <div className="relative">
+                          <img src={msg.fotoUrl} alt="Foto enviada" className="max-w-full rounded-lg" />
+                        </div>
                       )}
                       
                       {msg.tipo === 'video' && msg.videoUrl && (
@@ -558,9 +641,11 @@ export default function Chat() {
                         </div>
                       )}
                       
-                      <p className={`text-xs mt-1 ${isRemetente ? 'text-white opacity-75' : 'text-gray-500'}`}>
-                        {format(new Date(msg.dataEnvio), 'HH:mm', { locale: ptBR })}
-                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className={`text-xs ${isRemetente ? 'text-white opacity-75' : 'text-gray-500'}`}>
+                          {format(new Date(msg.dataEnvio), 'HH:mm', { locale: ptBR })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
