@@ -226,6 +226,7 @@ export interface ControleFuncionarios {
 
 export interface ProblemaTecnico {
   id: string;
+  numeroChamado?: string; // ID único do chamado (ex: CHAM-001, CHAM-002)
   tipo: 'mecanico' | 'eletrico' | 'sistema';
   maquina: string;
   descricao: string;

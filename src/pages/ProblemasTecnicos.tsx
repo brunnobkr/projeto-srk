@@ -67,6 +67,24 @@ export default function ProblemasTecnicos() {
     setProblemas(problemasStorage.getAll());
   };
 
+  // Gerar número único de chamado
+  const gerarNumeroChamado = (): string => {
+    const todosProblemas = problemasStorage.getAll();
+    // Encontrar o maior número de chamado existente
+    let maiorNumero = 0;
+    todosProblemas.forEach(p => {
+      if (p.numeroChamado) {
+        const numero = parseInt(p.numeroChamado.replace('CHAM-', ''));
+        if (!isNaN(numero) && numero > maiorNumero) {
+          maiorNumero = numero;
+        }
+      }
+    });
+    // Gerar próximo número
+    const proximoNumero = maiorNumero + 1;
+    return `CHAM-${proximoNumero.toString().padStart(4, '0')}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Determinar turno se não foi definido
@@ -74,6 +92,7 @@ export default function ProblemasTecnicos() {
     
     const problema: ProblemaTecnico = {
       id: editingProblema?.id || Date.now().toString(),
+      numeroChamado: editingProblema?.numeroChamado || gerarNumeroChamado(),
       tipo: formData.tipo,
       maquina: formData.maquina,
       setor: formData.setor,
@@ -108,7 +127,17 @@ export default function ProblemasTecnicos() {
   };
 
   const handleEdit = (problema: ProblemaTecnico) => {
-    setEditingProblema(problema);
+    // Se o problema não tiver número de chamado, gerar um
+    if (!problema.numeroChamado) {
+      const problemaComNumero = {
+        ...problema,
+        numeroChamado: gerarNumeroChamado(),
+      };
+      problemasStorage.update(problema.id, problemaComNumero);
+      setEditingProblema(problemaComNumero);
+    } else {
+      setEditingProblema(problema);
+    }
     setFormData({
       tipo: problema.tipo,
       maquina: problema.maquina,
@@ -190,7 +219,8 @@ export default function ProblemasTecnicos() {
 
   const filteredProblemas = problemas.filter(p =>
     p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -216,7 +246,7 @@ export default function ProblemasTecnicos() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por máquina ou descrição..."
+            placeholder="Buscar por ID do chamado, máquina ou descrição..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -229,6 +259,7 @@ export default function ProblemasTecnicos() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Chamado</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Máquina</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
@@ -243,13 +274,24 @@ export default function ProblemasTecnicos() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProblemas.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
                     Nenhum problema encontrado
                   </td>
                 </tr>
               ) : (
                 filteredProblemas.map((problema) => (
                   <tr key={problema.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {problema.numeroChamado ? (
+                        <span className="px-3 py-1 text-xs font-bold rounded-full bg-primary-600 text-white">
+                          {problema.numeroChamado}
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 text-xs rounded-full bg-gray-300 text-gray-700">
+                          Sem ID
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         problema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
@@ -339,6 +381,16 @@ export default function ProblemasTecnicos() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">{editingProblema ? 'Editar' : 'Novo'} Problema</h2>
+            {editingProblema?.numeroChamado && (
+              <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">ID do Chamado:</span>
+                  <span className="px-3 py-1 text-sm font-bold rounded-full bg-primary-600 text-white">
+                    {editingProblema.numeroChamado}
+                  </span>
+                </div>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -454,7 +506,16 @@ export default function ProblemasTecnicos() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setViewingProblema(null)}
                 className="text-gray-400 hover:text-gray-600"
