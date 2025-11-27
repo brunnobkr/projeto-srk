@@ -215,13 +215,19 @@ export default function GerenciarUsuarios() {
   };
 
   const togglePermissao = (permissao: keyof Permissoes) => {
-    setFormData({
-      ...formData,
-      permissoes: {
-        ...formData.permissoes,
-        [permissao]: !formData.permissoes[permissao],
-      },
-    });
+    const valorAtual = formData.permissoes[permissao];
+    
+    // Verificar se é uma permissão boolean (dashboardAdmin, gerenciarUsuarios, programarPedidos)
+    if (typeof valorAtual === 'boolean') {
+      setFormData({
+        ...formData,
+        permissoes: {
+          ...formData.permissoes,
+          [permissao]: !valorAtual,
+        },
+      });
+    }
+    // Se for PermissoesModulo, não fazer nada (usar togglePermissaoModulo)
   };
 
   const togglePermissaoModulo = (modulo: keyof Permissoes, acao: keyof PermissoesModulo) => {
