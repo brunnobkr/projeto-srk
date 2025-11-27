@@ -30,23 +30,59 @@ export default function Chat() {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const shouldAutoScrollRef = useRef(true);
+  const conversaSelecionadaRef = useRef<Conversa | null>(null);
 
+  // Atualizar ref quando conversaSelecionada mudar
+  useEffect(() => {
+    conversaSelecionadaRef.current = conversaSelecionada;
+  }, [conversaSelecionada]);
+
+  // Carregar conversas e usuários quando o usuário mudar
   useEffect(() => {
     if (usuario) {
       loadConversas();
       loadUsuarios();
       loadNotificacoes();
-      
-      // Atualizar a cada 2 segundos para simular tempo real
-      const interval = setInterval(() => {
-        loadConversas();
-        if (conversaSelecionada) {
-          loadMensagens(conversaSelecionada.id);
-        }
-        loadNotificacoes();
-      }, 2000);
+    }
+  }, [usuario]);
 
-      return () => clearInterval(interval);
+  // Atualizar a cada 2 segundos para simular tempo real
+  useEffect(() => {
+    if (!usuario) return;
+
+    const interval = setInterval(() => {
+      loadConversas();
+      if (conversaSelecionadaRef.current) {
+        loadMensagens(conversaSelecionadaRef.current.id);
+      }
+      loadNotificacoes();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [usuario]);
+
+  // Carregar mensagens quando a conversa selecionada mudar
+  useEffect(() => {
+    if (conversaSelecionada && usuario) {
+      loadMensagens(conversaSelecionada.id);
+      shouldAutoScrollRef.current = true;
+    }
+  }, [conversaSelecionada?.id, usuario]);
+
+  // Verificar localStorage para abrir conversa automaticamente (vindo da página Equipe)
+  useEffect(() => {
+    if (usuario && !conversaSelecionada) {
+      const usuarioIdSelecionado = localStorage.getItem('srk_chat_conversa_selecionada');
+      if (usuarioIdSelecionado) {
+        const outroUsuario = usuariosStorage.getById(usuarioIdSelecionado);
+        if (outroUsuario && outroUsuario.id !== usuario.id) {
+          const conversa = conversasStorage.criarOuObter(usuario.id, outroUsuario.id);
+          setConversaSelecionada(conversa);
+          shouldAutoScrollRef.current = true;
+          // Limpar o localStorage após usar
+          localStorage.removeItem('srk_chat_conversa_selecionada');
+        }
+      }
     }
   }, [usuario, conversaSelecionada]);
 
