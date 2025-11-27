@@ -279,6 +279,7 @@ export interface InstrucaoTrabalho {
   passos: PassoInstrucao[];
   preparador: boolean;
   funcionario: boolean;
+  fotos?: string[]; // Fotos gerais da instrução (armazenadas em base64)
   anexosPDF?: AnexoPDF[];
   dataCriacao: string;
   dataAtualizacao: string;

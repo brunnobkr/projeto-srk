@@ -1514,13 +1514,28 @@ export default function ReceitasMaquina() {
                             )}
                           </div>
                         </div>
-                        <a
-                          href={anexo.conteudo}
-                          download={anexo.nome}
-                          className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
-                        >
-                          Download
-                        </a>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              const newWindow = window.open();
+                              if (newWindow) {
+                                newWindow.document.write(`
+                                  <iframe src="${anexo.conteudo}" style="width:100%;height:100vh;border:none;"></iframe>
+                                `);
+                              }
+                            }}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          >
+                            Visualizar
+                          </button>
+                          <a
+                            href={anexo.conteudo}
+                            download={anexo.nome}
+                            className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                          >
+                            Download
+                          </a>
+                        </div>
                       </div>
                     ))}
                   </div>

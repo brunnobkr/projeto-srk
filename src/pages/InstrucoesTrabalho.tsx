@@ -40,6 +40,7 @@ export default function InstrucoesTrabalho() {
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
   const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
+  const [fotosGerais, setFotosGerais] = useState<string[]>([]);
 
   useEffect(() => {
     loadInstrucoes();
@@ -100,6 +101,38 @@ export default function InstrucoesTrabalho() {
     setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleFotoGeralUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith('image/')) {
+        // Verificar tamanho (máximo 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`A foto ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          setFotosGerais((prev) => [...prev, base64String]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar a foto. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos de imagem.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removeFotoGeral = (index: number) => {
+    setFotosGerais((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const instrucao: InstrucaoTrabalho = {
@@ -112,6 +145,7 @@ export default function InstrucoesTrabalho() {
       passos: formData.passos,
       preparador: formData.preparador,
       funcionario: formData.funcionario,
+      fotos: fotosGerais.length > 0 ? fotosGerais : undefined,
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
       dataCriacao: editingInstrucao?.dataCriacao || new Date().toISOString(),
       dataAtualizacao: new Date().toISOString(),
@@ -149,6 +183,7 @@ export default function InstrucoesTrabalho() {
       passos: passosMigrados,
     });
     setAnexosPDF(instrucao.anexosPDF || []);
+    setFotosGerais(instrucao.fotos || []);
     setShowModal(true);
   };
 
@@ -665,6 +700,52 @@ export default function InstrucoesTrabalho() {
                 </div>
               </div>
 
+              {/* Seção de Fotos Gerais */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4">Fotos Gerais</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Adicionar Fotos</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFotoGeralUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por foto</p>
+                </div>
+                {fotosGerais.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Fotos adicionadas ({fotosGerais.length}):</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {fotosGerais.map((foto, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={foto}
+                            alt={`Foto ${index + 1}`}
+                            className="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => {
+                              setFotoSelecionada(foto);
+                              setFotosModalAtual(fotosGerais);
+                              setShowFotoModal(true);
+                            }}
+                          />
+                          {podeCriarEditar && (
+                            <button
+                              type="button"
+                              onClick={() => removeFotoGeral(index)}
+                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Seção de Anexos PDF */}
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-lg font-semibold mb-4">Anexos PDF</h3>
@@ -837,6 +918,29 @@ export default function InstrucoesTrabalho() {
                 </div>
               </div>
 
+              {/* Fotos Gerais */}
+              {viewingInstrucao.fotos && viewingInstrucao.fotos.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Fotos Gerais ({viewingInstrucao.fotos.length})</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {viewingInstrucao.fotos.map((foto, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={foto}
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-32 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => {
+                            setFotoSelecionada(foto);
+                            setFotosModalAtual(viewingInstrucao.fotos || []);
+                            setShowFotoModal(true);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Anexos PDF */}
               {viewingInstrucao.anexosPDF && viewingInstrucao.anexosPDF.length > 0 && (
                 <div>
@@ -856,13 +960,28 @@ export default function InstrucoesTrabalho() {
                             )}
                           </div>
                         </div>
-                        <a
-                          href={anexo.conteudo}
-                          download={anexo.nome}
-                          className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
-                        >
-                          Download
-                        </a>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              const newWindow = window.open();
+                              if (newWindow) {
+                                newWindow.document.write(`
+                                  <iframe src="${anexo.conteudo}" style="width:100%;height:100vh;border:none;"></iframe>
+                                `);
+                              }
+                            }}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          >
+                            Visualizar
+                          </button>
+                          <a
+                            href={anexo.conteudo}
+                            download={anexo.nome}
+                            className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                          >
+                            Download
+                          </a>
+                        </div>
                       </div>
                     ))}
                   </div>
