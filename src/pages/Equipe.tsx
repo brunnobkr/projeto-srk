@@ -117,6 +117,13 @@ export default function Equipe() {
       .sort()
   ];
 
+  // Obter lista única de cargos para o datalist
+  const cargosUnicos = Array.from(new Set(
+    usuarios
+      .map(u => u.cargo)
+      .filter((cargo): cargo is string => !!cargo)
+  )).sort();
+
   // Filtrar grupos baseado na busca
   // A busca por cargo funciona igual a setor, mas o agrupamento é sempre por CARGO
   const filtrarGrupos = () => {
@@ -249,11 +256,20 @@ export default function Equipe() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
+            list="cargos-list"
             placeholder="Buscar por nome, cargo, matrícula, setor ou email... (deixe em branco para ver todos)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
+          <datalist id="cargos-list">
+            {cargosUnicos.map(cargo => (
+              <option key={cargo} value={cargo} />
+            ))}
+            {gruposPrincipais.map(grupo => (
+              <option key={grupo} value={grupo} />
+            ))}
+          </datalist>
         </div>
         {searchTerm && (
           <p className="text-sm text-gray-500 mt-2">

@@ -346,6 +346,9 @@ export default function ComponentesProduto() {
     setShowModal(false);
   };
 
+  // Obter lista única de códigos para o datalist
+  const codigosUnicos = Array.from(new Set(componentes.map(c => c.codigo))).sort();
+
   const filteredComponentes = componentes.filter(c =>
     c.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -375,11 +378,17 @@ export default function ComponentesProduto() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
+            list="codigos-list"
             placeholder="Buscar por código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
+          <datalist id="codigos-list">
+            {codigosUnicos.map(codigo => (
+              <option key={codigo} value={codigo} />
+            ))}
+          </datalist>
         </div>
       </div>
 
