@@ -118,6 +118,11 @@ export default function ProblemasTecnicos() {
 
     if (editingProblema) {
       problemasStorage.update(editingProblema.id, problema);
+      
+      // Se foi marcado para chamar engenharia e antes não estava marcado, criar notificações
+      if (formData.engenhariaChamada && !editingProblema.engenhariaChamada) {
+        criarNotificacoesEngenharia(problema);
+      }
     } else {
       problemasStorage.add(problema);
       
