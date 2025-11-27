@@ -714,131 +714,235 @@ export default function ComponentesProduto() {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Detalhes do Componente</h2>
-              <button
-                onClick={() => setViewingComponente(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {podeCriarEditar && (
+                  <button
+                    onClick={() => {
+                      handleEdit(viewingComponente);
+                      setViewingComponente(null);
+                    }}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                  >
+                    Editar
+                  </button>
+                )}
+                <button
+                  onClick={() => setViewingComponente(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Código: {viewingComponente.codigo}</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {viewingComponente.tubos && viewingComponente.tubos.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Tubos:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.tubos.map((tubo, idx) => (
-                          <li key={idx} className="text-gray-900">{tubo.nome} - Qtd: {tubo.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.conectores && viewingComponente.conectores.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Conectores:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.conectores.map((con, idx) => (
-                          <li key={idx} className="text-gray-900">{con.nome} - Qtd: {con.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.presilhas && viewingComponente.presilhas.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Presilhas:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.presilhas.map((pres, idx) => (
-                          <li key={idx} className="text-gray-900">{pres.tipo} - Qtd: {pres.quantidade}{pres.descricao ? ` - ${pres.descricao}` : ''}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.fitas && viewingComponente.fitas.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Fitas:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.fitas.map((fita, idx) => (
-                          <li key={idx} className="text-gray-900">{fita.nome} - Qtd: {fita.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.guianas && viewingComponente.guianas.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Guiãs:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.guianas.map((guia, idx) => (
-                          <li key={idx} className="text-gray-900">{guia.nome} - Qtd: {guia.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.aneis && viewingComponente.aneis.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Anéis:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.aneis.map((anel, idx) => (
-                          <li key={idx} className="text-gray-900">{anel.nome} - Qtd: {anel.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.marcacoes && viewingComponente.marcacoes.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Marcações:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.marcacoes.map((marc, idx) => (
-                          <li key={idx} className="text-gray-900">{marc.tipo} - {marc.descricao}{marc.localizacao ? ` - Localização: ${marc.localizacao}` : ''}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.recalques && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Recalques:</span>
-                      <p className="text-gray-900">{viewingComponente.recalques}</p>
-                    </div>
-                  )}
-                  {viewingComponente.cores && viewingComponente.cores.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Cores:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.cores.map((cor, idx) => (
-                          <li key={idx} className="text-gray-900">{cor.componente} - Cor: {cor.cor}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.valvulas && viewingComponente.valvulas.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Válvulas:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.valvulas.map((val, idx) => (
-                          <li key={idx} className="text-gray-900">{val.nome} - Qtd: {val.quantidade} - Tipo: {val.tipo || 'N/A'}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.filtros && viewingComponente.filtros.length > 0 && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Filtros:</span>
-                      <ul className="list-disc list-inside mt-1">
-                        {viewingComponente.filtros.map((filtro, idx) => (
-                          <li key={idx} className="text-gray-900">{filtro.nome} - Qtd: {filtro.quantidade}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {viewingComponente.observacoes && (
-                    <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Observações:</span>
-                      <p className="text-gray-900">{viewingComponente.observacoes}</p>
-                    </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Código do Produto Final *</label>
+                <input
+                  type="text"
+                  value={viewingComponente.codigo}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">Código final do produto que será construído</p>
+              </div>
+
+              {/* Tubos */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Tubos</h3>
+                <div className="space-y-2">
+                  {viewingComponente.tubos && viewingComponente.tubos.length > 0 ? (
+                    viewingComponente.tubos.map((t, i) => {
+                      const tWithCodigos = t as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{t.quantidade}x {t.nome}{tWithCodigos.codigos && tWithCodigos.codigos.length > 0 ? ` (Códigos: ${tWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhum tubo cadastrado</p>
                   )}
                 </div>
+              </div>
+
+              {/* Conectores */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Conectores</h3>
+                <div className="space-y-2">
+                  {viewingComponente.conectores && viewingComponente.conectores.length > 0 ? (
+                    viewingComponente.conectores.map((c, i) => {
+                      const cWithCodigos = c as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{c.quantidade}x {c.nome}{cWithCodigos.codigos && cWithCodigos.codigos.length > 0 ? ` (Códigos: ${cWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhum conector cadastrado</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Válvulas */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Válvulas</h3>
+                <div className="space-y-2">
+                  {viewingComponente.valvulas && viewingComponente.valvulas.length > 0 ? (
+                    viewingComponente.valvulas.map((v, i) => {
+                      const vWithCodigos = v as { nome: string; quantidade: number; tipo?: 'A' | 'B' | 'AB'; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{v.quantidade}x {v.nome} {v.tipo === 'A' ? '(A)' : v.tipo === 'B' ? '(B)' : '(A e B)'}{vWithCodigos.codigos && vWithCodigos.codigos.length > 0 ? ` - Códigos: ${vWithCodigos.codigos.join(', ')}` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma válvula cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Fitas */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Fitas</h3>
+                <div className="space-y-2">
+                  {viewingComponente.fitas && viewingComponente.fitas.length > 0 ? (
+                    viewingComponente.fitas.map((f, i) => {
+                      const fWithCodigos = f as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{f.quantidade}x {f.nome}{fWithCodigos.codigos && fWithCodigos.codigos.length > 0 ? ` (Códigos: ${fWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma fita cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Guianas */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Guianas e Borrachas</h3>
+                <div className="space-y-2">
+                  {viewingComponente.guianas && viewingComponente.guianas.length > 0 ? (
+                    viewingComponente.guianas.map((g, i) => {
+                      const gWithCodigos = g as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{g.quantidade}x {g.nome}{gWithCodigos.codigos && gWithCodigos.codigos.length > 0 ? ` (Códigos: ${gWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma guiana cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Anéis */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Anéis</h3>
+                <div className="space-y-2">
+                  {viewingComponente.aneis && viewingComponente.aneis.length > 0 ? (
+                    viewingComponente.aneis.map((a, i) => {
+                      const aWithCodigos = a as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{a.quantidade}x {a.nome}{aWithCodigos.codigos && aWithCodigos.codigos.length > 0 ? ` (Códigos: ${aWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhum anel cadastrado</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Filtros */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Filtros</h3>
+                <div className="space-y-2">
+                  {viewingComponente.filtros && viewingComponente.filtros.length > 0 ? (
+                    viewingComponente.filtros.map((f, i) => {
+                      const fWithCodigos = f as { nome: string; quantidade: number; codigos?: string[] };
+                      return (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <span>{f.quantidade}x {f.nome}{fWithCodigos.codigos && fWithCodigos.codigos.length > 0 ? ` (Códigos: ${fWithCodigos.codigos.join(', ')})` : ''}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhum filtro cadastrado</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Recalques</label>
+                <input
+                  type="text"
+                  value={viewingComponente.recalques || ''}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Presilhas</h3>
+                <div className="space-y-2">
+                  {viewingComponente.presilhas && viewingComponente.presilhas.length > 0 ? (
+                    viewingComponente.presilhas.map((p, i) => (
+                      <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                        <span>{p.quantidade}x {p.tipo} {p.descricao && `- ${p.descricao}`}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma presilha cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Marcações</h3>
+                <div className="space-y-2">
+                  {viewingComponente.marcacoes && viewingComponente.marcacoes.length > 0 ? (
+                    viewingComponente.marcacoes.map((m, i) => (
+                      <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                        <span>{m.tipo}: {m.descricao} {m.localizacao && `(${m.localizacao})`}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma marcação cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Cores</h3>
+                <div className="space-y-2">
+                  {viewingComponente.cores && viewingComponente.cores.length > 0 ? (
+                    viewingComponente.cores.map((c, i) => (
+                      <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                        <span>{c.componente}: {c.cor}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">Nenhuma cor cadastrada</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Observações</label>
+                <textarea
+                  value={viewingComponente.observacoes || ''}
+                  readOnly
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                />
               </div>
             </div>
 
