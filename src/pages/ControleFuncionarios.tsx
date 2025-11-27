@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, UserPlus, AlertTriangle, X, FileWarning } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserPlus, AlertTriangle, X, FileWarning, Image, FileText } from 'lucide-react';
 import { controleFuncionariosStorage, funcionariosStorage, setoresStorage, acidentesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { ControleFuncionarios, Funcionario, Setor, Acidente } from '../types';
+import type { ControleFuncionarios, Funcionario, Setor, Acidente, AnexoPDF } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
@@ -57,6 +57,11 @@ export default function ControleFuncionarios() {
     causas: '',
     medidasPreventivas: '',
   });
+  const [fotosAcidente, setFotosAcidente] = useState<string[]>([]);
+  const [anexosPDFAcidente, setAnexosPDFAcidente] = useState<AnexoPDF[]>([]);
+  const [showFotoModal, setShowFotoModal] = useState(false);
+  const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
+  const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
@@ -234,6 +239,80 @@ export default function ControleFuncionarios() {
     return labels[tipo] || tipo;
   };
 
+  const handleFotoAcidenteUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith('image/')) {
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`A foto ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          setFotosAcidente((prev) => [...prev, base64String]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar a foto. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos de imagem.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removeFotoAcidente = (index: number) => {
+    setFotosAcidente((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePDFAcidenteUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type === 'application/pdf') {
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`O arquivo ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const novoAnexo: AnexoPDF = {
+            nome: file.name,
+            conteudo: base64String,
+            dataUpload: new Date().toISOString(),
+            tamanho: file.size,
+          };
+          setAnexosPDFAcidente((prev) => [...prev, novoAnexo]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar o PDF. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos PDF.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removePDFAcidente = (index: number) => {
+    setAnexosPDFAcidente((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const openFotoModal = (foto: string, fotosArray: string[]) => {
+    setFotoSelecionada(foto);
+    setFotosModalAtual(fotosArray);
+    setShowFotoModal(true);
+  };
+
   const handleAcidenteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const acidente: Acidente = {
@@ -247,6 +326,8 @@ export default function ControleFuncionarios() {
       descricao: acidenteFormData.descricao,
       causas: acidenteFormData.causas || undefined,
       medidasPreventivas: acidenteFormData.medidasPreventivas || undefined,
+      fotos: fotosAcidente.length > 0 ? fotosAcidente : undefined,
+      anexosPDF: anexosPDFAcidente.length > 0 ? anexosPDFAcidente : undefined,
       dataRegistro: new Date().toISOString(),
       registradoPor: usuario?.nome || 'Sistema',
     };
@@ -264,6 +345,8 @@ export default function ControleFuncionarios() {
       causas: '',
       medidasPreventivas: '',
     });
+    setFotosAcidente([]);
+    setAnexosPDFAcidente([]);
     setShowAcidenteModal(false);
   };
 
@@ -700,6 +783,97 @@ export default function ControleFuncionarios() {
                 />
               </div>
 
+              {/* Seção de Fotos do Acidente */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Image className="w-5 h-5 mr-2 text-red-600" />
+                  Fotos do Acidente
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Adicionar Fotos</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFotoAcidenteUpload}
+                    className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por foto</p>
+                </div>
+                {fotosAcidente.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Fotos adicionadas ({fotosAcidente.length}):</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {fotosAcidente.map((foto, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={foto}
+                            alt={`Foto acidente ${index + 1}`}
+                            className="w-full h-24 object-cover rounded border border-red-300 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => openFotoModal(foto, fotosAcidente)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeFotoAcidente(index)}
+                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Seção de Anexos PDF */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-red-600" />
+                  Anexos PDF
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Adicionar Arquivo PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    multiple
+                    onChange={handlePDFAcidenteUpload}
+                    className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
+                </div>
+                {anexosPDFAcidente.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Anexos adicionados ({anexosPDFAcidente.length}):</p>
+                    <div className="space-y-2">
+                      {anexosPDFAcidente.map((anexo, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-red-200">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                              {anexo.tamanho && (
+                                <p className="text-xs text-gray-500">
+                                  {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePDFAcidente(index)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-4 pt-4 border-t">
                 <button
                   type="button"
@@ -717,6 +891,87 @@ export default function ControleFuncionarios() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização de Fotos */}
+      {showFotoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Fotos do Acidente</h2>
+              <button
+                onClick={() => {
+                  setShowFotoModal(false);
+                  setFotoSelecionada(null);
+                  setFotosModalAtual([]);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {fotoSelecionada ? (
+              <div className="relative">
+                <img
+                  src={fotoSelecionada}
+                  alt="Foto ampliada"
+                  className="max-w-full h-auto rounded-lg"
+                />
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex > 0) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex - 1]);
+                      }
+                    }}
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === 0}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    {fotosModalAtual.indexOf(fotoSelecionada) + 1} de {fotosModalAtual.length}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex < fotosModalAtual.length - 1) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex + 1]);
+                      }
+                    }}
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === fotosModalAtual.length - 1}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    Próxima
+                  </button>
+                </div>
+                <button
+                  onClick={() => setFotoSelecionada(null)}
+                  className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-4">
+                {fotosModalAtual.map((foto, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={foto}
+                      alt={`Foto ${index + 1}`}
+                      className="w-full h-32 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => setFotoSelecionada(foto)}
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      Foto {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

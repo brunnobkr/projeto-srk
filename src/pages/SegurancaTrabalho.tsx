@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, PlusCircle, X, Shield, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, PlusCircle, X, Shield, Clock, Image, FileText, Eye } from 'lucide-react';
 import { segurancaStorage, problemasStorage, acidentesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente } from '../types';
@@ -44,6 +44,10 @@ export default function SegurancaTrabalho() {
 
   const [problemasSeguranca, setProblemasSeguranca] = useState<ProblemaTecnico[]>([]);
   const [acidentesRecentes, setAcidentesRecentes] = useState<Acidente[]>([]);
+  const [viewingAcidente, setViewingAcidente] = useState<Acidente | null>(null);
+  const [showFotoModal, setShowFotoModal] = useState(false);
+  const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
+  const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
 
   useEffect(() => {
     loadSegurancas();
@@ -246,6 +250,47 @@ export default function SegurancaTrabalho() {
                             {format(new Date(acidente.data), 'dd/MM/yyyy', { locale: ptBR })} às {acidente.hora}
                           </span>
                         </div>
+                        {(acidente.fotos && acidente.fotos.length > 0) || (acidente.anexosPDF && acidente.anexosPDF.length > 0) ? (
+                          <div className="flex items-center space-x-2 mt-3">
+                            {acidente.fotos && acidente.fotos.length > 0 && (
+                              <button
+                                onClick={() => {
+                                  setFotoSelecionada(acidente.fotos![0]);
+                                  setFotosModalAtual(acidente.fotos || []);
+                                  setShowFotoModal(true);
+                                }}
+                                className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                              >
+                                <Image className="w-4 h-4" />
+                                <span>Ver {acidente.fotos.length} {acidente.fotos.length === 1 ? 'Foto' : 'Fotos'}</span>
+                              </button>
+                            )}
+                            {acidente.anexosPDF && acidente.anexosPDF.length > 0 && (
+                              <button
+                                onClick={() => setViewingAcidente(acidente)}
+                                className="flex items-center space-x-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                              >
+                                <FileText className="w-4 h-4" />
+                                <span>Ver {acidente.anexosPDF.length} {acidente.anexosPDF.length === 1 ? 'PDF' : 'PDFs'}</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setViewingAcidente(acidente)}
+                              className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                            >
+                              <Eye className="w-4 h-4" />
+                              <span>Ver Detalhes</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setViewingAcidente(acidente)}
+                            className="mt-3 flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Ver Detalhes</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -506,6 +551,249 @@ export default function SegurancaTrabalho() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingSeguranca ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada do Acidente */}
+      {viewingAcidente && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Acidente</h2>
+              <button
+                onClick={() => setViewingAcidente(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Informações Básicas */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações do Acidente</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Funcionário:</span>
+                    <p className="text-gray-900">{viewingAcidente.funcionarioId || 'Não identificado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Gravidade:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingAcidente.tipo === 'grave' ? 'bg-red-600 text-white' :
+                        viewingAcidente.tipo === 'moderado' ? 'bg-orange-500 text-white' :
+                        'bg-yellow-500 text-white'
+                      }`}>
+                        {viewingAcidente.tipo === 'grave' ? 'Grave' :
+                         viewingAcidente.tipo === 'moderado' ? 'Moderado' : 'Leve'}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Setor:</span>
+                    <p className="text-gray-900">{viewingAcidente.setor}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Localização:</span>
+                    <p className="text-gray-900">{viewingAcidente.localizacao}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">
+                      {format(new Date(viewingAcidente.data), 'dd/MM/yyyy', { locale: ptBR })} às {viewingAcidente.hora}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Registrado por:</span>
+                    <p className="text-gray-900">{viewingAcidente.registradoPor}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Descrição</h3>
+                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{viewingAcidente.descricao}</p>
+              </div>
+
+              {/* Causas */}
+              {viewingAcidente.causas && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Possíveis Causas</h3>
+                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{viewingAcidente.causas}</p>
+                </div>
+              )}
+
+              {/* Medidas Preventivas */}
+              {viewingAcidente.medidasPreventivas && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Medidas Preventivas Sugeridas</h3>
+                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{viewingAcidente.medidasPreventivas}</p>
+                </div>
+              )}
+
+              {/* Fotos do Acidente */}
+              {viewingAcidente.fotos && viewingAcidente.fotos.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Fotos do Acidente ({viewingAcidente.fotos.length})</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {viewingAcidente.fotos.map((foto, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={foto}
+                          alt={`Foto acidente ${index + 1}`}
+                          className="w-full h-32 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => {
+                            setFotoSelecionada(foto);
+                            setFotosModalAtual(viewingAcidente.fotos || []);
+                            setShowFotoModal(true);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Anexos PDF */}
+              {viewingAcidente.anexosPDF && viewingAcidente.anexosPDF.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingAcidente.anexosPDF.length})</h3>
+                  <div className="space-y-2">
+                    {viewingAcidente.anexosPDF.map((anexo, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-6 h-6 text-red-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                            {anexo.tamanho && (
+                              <p className="text-xs text-gray-500">
+                                {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                {anexo.dataUpload && ` - ${format(new Date(anexo.dataUpload), 'dd/MM/yyyy', { locale: ptBR })}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              const newWindow = window.open();
+                              if (newWindow) {
+                                newWindow.document.write(`
+                                  <iframe src="${anexo.conteudo}" style="width:100%;height:100vh;border:none;"></iframe>
+                                `);
+                              }
+                            }}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          >
+                            Visualizar
+                          </button>
+                          <a
+                            href={anexo.conteudo}
+                            download={anexo.nome}
+                            className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                          >
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingAcidente(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização de Fotos */}
+      {showFotoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Fotos do Acidente</h2>
+              <button
+                onClick={() => {
+                  setShowFotoModal(false);
+                  setFotoSelecionada(null);
+                  setFotosModalAtual([]);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {fotoSelecionada ? (
+              <div className="relative">
+                <img
+                  src={fotoSelecionada}
+                  alt="Foto ampliada"
+                  className="max-w-full h-auto rounded-lg"
+                />
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex > 0) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex - 1]);
+                      }
+                    }}
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === 0}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    {fotosModalAtual.indexOf(fotoSelecionada) + 1} de {fotosModalAtual.length}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex < fotosModalAtual.length - 1) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex + 1]);
+                      }
+                    }}
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === fotosModalAtual.length - 1}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    Próxima
+                  </button>
+                </div>
+                <button
+                  onClick={() => setFotoSelecionada(null)}
+                  className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-4">
+                {fotosModalAtual.map((foto, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={foto}
+                      alt={`Foto ${index + 1}`}
+                      className="w-full h-32 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => setFotoSelecionada(foto)}
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      Foto {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

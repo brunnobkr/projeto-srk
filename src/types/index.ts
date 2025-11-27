@@ -123,6 +123,8 @@ export interface Acidente {
   localizacao: string;
   causas?: string;
   medidasPreventivas?: string;
+  fotos?: string[]; // Fotos do acidente (armazenadas em base64)
+  anexosPDF?: AnexoPDF[]; // PDFs relacionados ao acidente
   dataRegistro: string;
   registradoPor: string;
 }
