@@ -3,24 +3,27 @@ import { Edit, Trash2, Search, X, Save, Eye, EyeOff, UserPlus, CheckCircle, XCir
 // Plus removido - não usado
 import { usuariosStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { Usuario, Permissoes, Setor } from '../types';
+import type { Usuario, Permissoes, PermissoesModulo, Setor } from '../types';
 
-const permissoesPadrao: Permissoes = {
-  receitasMaquina: false,
-  controleProducao: false,
-  controleFuncionarios: false,
-  problemasTecnicos: false,
-  mudancasMelhorias: false,
-  instrucoesTrabalho: false,
-  componentesProduto: false,
-  segurancaTrabalho: false,
-  dashboardAdmin: false,
-  gerenciarUsuarios: false,
-  programarPedidos: false,
+const permissoesModuloPadrao: PermissoesModulo = {
+  visualizar: false,
   criar: false,
   editar: false,
   excluir: false,
-  visualizar: false,
+};
+
+const permissoesPadrao: Permissoes = {
+  receitasMaquina: { ...permissoesModuloPadrao },
+  controleProducao: { ...permissoesModuloPadrao },
+  controleFuncionarios: { ...permissoesModuloPadrao },
+  problemasTecnicos: { ...permissoesModuloPadrao },
+  mudancasMelhorias: { ...permissoesModuloPadrao },
+  instrucoesTrabalho: { ...permissoesModuloPadrao },
+  componentesProduto: { ...permissoesModuloPadrao },
+  segurancaTrabalho: { ...permissoesModuloPadrao },
+  dashboardAdmin: false,
+  gerenciarUsuarios: false,
+  programarPedidos: false,
 };
 
 export default function GerenciarUsuarios() {
@@ -110,6 +113,27 @@ export default function GerenciarUsuarios() {
 
   const handleEdit = (usuario: Usuario) => {
     setEditingUsuario(usuario);
+    
+    // Migrar permissões antigas para nova estrutura se necessário
+    const permissoesMigradas: Permissoes = { ...usuario.permissoes };
+    
+    // Se as permissões ainda estão na estrutura antiga, migrar
+    if (typeof permissoesMigradas.receitasMaquina === 'boolean') {
+      const visualizar = permissoesMigradas.visualizar || false;
+      const criar = permissoesMigradas.criar || false;
+      const editar = permissoesMigradas.editar || false;
+      const excluir = permissoesMigradas.excluir || false;
+      
+      permissoesMigradas.receitasMaquina = { visualizar, criar, editar, excluir };
+      permissoesMigradas.controleProducao = { visualizar, criar, editar, excluir };
+      permissoesMigradas.controleFuncionarios = { visualizar, criar, editar, excluir };
+      permissoesMigradas.problemasTecnicos = { visualizar, criar, editar, excluir };
+      permissoesMigradas.mudancasMelhorias = { visualizar, criar, editar, excluir };
+      permissoesMigradas.instrucoesTrabalho = { visualizar, criar, editar, excluir };
+      permissoesMigradas.componentesProduto = { visualizar, criar, editar, excluir };
+      permissoesMigradas.segurancaTrabalho = { visualizar, criar, editar, excluir };
+    }
+    
     setFormData({
       username: usuario.username,
       senha: '',
@@ -122,7 +146,7 @@ export default function GerenciarUsuarios() {
       emailCorporativo: usuario.emailCorporativo || '',
       isAdmin: usuario.isAdmin,
       isAtivo: usuario.isAtivo,
-      permissoes: { ...usuario.permissoes },
+      permissoes: permissoesMigradas,
       statusAprovacao: usuario.statusAprovacao || 'aprovado',
       motivoRejeicao: usuario.motivoRejeicao || '',
     });
@@ -198,6 +222,40 @@ export default function GerenciarUsuarios() {
         [permissao]: !formData.permissoes[permissao],
       },
     });
+  };
+
+  const togglePermissaoModulo = (modulo: keyof Permissoes, acao: keyof PermissoesModulo) => {
+    const moduloPermissao = formData.permissoes[modulo];
+    if (typeof moduloPermissao === 'object' && 'visualizar' in moduloPermissao) {
+      const novoValor = !moduloPermissao[acao];
+      
+      // Se desabilitar visualizar, desabilitar todas as outras permissões também
+      if (acao === 'visualizar' && !novoValor) {
+        setFormData({
+          ...formData,
+          permissoes: {
+            ...formData.permissoes,
+            [modulo]: {
+              visualizar: false,
+              criar: false,
+              editar: false,
+              excluir: false,
+            },
+          },
+        });
+      } else {
+        setFormData({
+          ...formData,
+          permissoes: {
+            ...formData.permissoes,
+            [modulo]: {
+              ...moduloPermissao,
+              [acao]: novoValor,
+            },
+          },
+        });
+      }
+    }
   };
 
   const filteredUsuarios = usuarios.filter(u =>
@@ -542,55 +600,190 @@ export default function GerenciarUsuarios() {
 
               {!formData.isAdmin && (
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-4">Permissões</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div>
-                      <h4 className="font-medium text-sm mb-2 text-gray-700">Módulos</h4>
-                      <div className="space-y-2">
-                        {[
-                          { key: 'receitasMaquina', label: 'Receitas de Máquina' },
-                          { key: 'controleProducao', label: 'Controle de Produção' },
-                          { key: 'controleFuncionarios', label: 'Controle de Funcionários' },
-                          { key: 'problemasTecnicos', label: 'Problemas Técnicos' },
-                          { key: 'mudancasMelhorias', label: 'Mudanças e Melhorias' },
-                          { key: 'instrucoesTrabalho', label: 'Instruções de Trabalho' },
-                          { key: 'componentesProduto', label: 'Componentes por Código' },
-                          { key: 'segurancaTrabalho', label: 'Segurança do Trabalho' },
-                          { key: 'dashboardAdmin', label: 'Dashboard Admin' },
-                          { key: 'gerenciarUsuarios', label: 'Gerenciar Usuários' },
-                        ].map(({ key, label }) => (
-                          <label key={key} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={formData.permissoes[key as keyof Permissoes]}
-                              onChange={() => togglePermissao(key as keyof Permissoes)}
-                              className="mr-2"
-                            />
-                            <span className="text-sm">{label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm mb-2 text-gray-700">Ações</h4>
-                      <div className="space-y-2">
-                        {[
-                          { key: 'visualizar', label: 'Visualizar' },
-                          { key: 'criar', label: 'Criar' },
-                          { key: 'editar', label: 'Editar' },
-                          { key: 'excluir', label: 'Excluir' },
-                        ].map(({ key, label }) => (
-                          <label key={key} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={formData.permissoes[key as keyof Permissoes]}
-                              onChange={() => togglePermissao(key as keyof Permissoes)}
-                              className="mr-2"
-                            />
-                            <span className="text-sm">{label}</span>
-                          </label>
-                        ))}
-                      </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+                      <span className="mr-2">ℹ️</span>
+                      Permissões Granulares por Módulo
+                    </h3>
+                    <p className="text-sm text-blue-800 mb-2">
+                      <strong>Importante:</strong> Você pode configurar permissões independentes para cada módulo:
+                    </p>
+                    <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
+                      <li><strong>Visualizar:</strong> Permite apenas ver as informações (sem editar, criar ou excluir)</li>
+                      <li><strong>Criar:</strong> Permite adicionar novos registros (requer permissão de visualizar)</li>
+                      <li><strong>Editar:</strong> Permite modificar registros existentes (requer permissão de visualizar)</li>
+                      <li><strong>Excluir:</strong> Permite remover registros (requer permissão de visualizar)</li>
+                    </ul>
+                    <p className="text-sm text-blue-800 mt-2">
+                      <strong>Exemplo:</strong> Um operador pode ter permissão para <strong>visualizar</strong> o Controle de Produção, mas <strong>não pode editar</strong> os registros.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {[
+                      { key: 'receitasMaquina', label: 'Receitas de Máquina' },
+                      { key: 'controleProducao', label: 'Controle de Produção' },
+                      { key: 'controleFuncionarios', label: 'Controle de Funcionários' },
+                      { key: 'problemasTecnicos', label: 'Problemas Técnicos' },
+                      { key: 'mudancasMelhorias', label: 'Mudanças e Melhorias' },
+                      { key: 'instrucoesTrabalho', label: 'Instruções de Trabalho' },
+                      { key: 'componentesProduto', label: 'Componentes por Código' },
+                      { key: 'segurancaTrabalho', label: 'Segurança do Trabalho' },
+                    ].map(({ key, label }) => {
+                      const moduloPermissao = formData.permissoes[key as keyof Permissoes];
+                      const permissoesModulo = typeof moduloPermissao === 'object' && 'visualizar' in moduloPermissao 
+                        ? moduloPermissao as PermissoesModulo 
+                        : permissoesModuloPadrao;
+                      
+                      const todasPermissoes = permissoesModulo.visualizar && permissoesModulo.criar && permissoesModulo.editar && permissoesModulo.excluir;
+                      const apenasVisualizar = permissoesModulo.visualizar && !permissoesModulo.criar && !permissoesModulo.editar && !permissoesModulo.excluir;
+                      
+                      return (
+                        <div key={key} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-semibold text-sm text-gray-900">{label}</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    permissoes: {
+                                      ...formData.permissoes,
+                                      [key]: { visualizar: true, criar: false, editar: false, excluir: false },
+                                    },
+                                  });
+                                }}
+                                className={`text-xs px-2 py-1 rounded ${apenasVisualizar ? 'bg-blue-100 text-blue-700 border border-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                title="Apenas visualizar"
+                              >
+                                Apenas Ver
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    permissoes: {
+                                      ...formData.permissoes,
+                                      [key]: { visualizar: true, criar: true, editar: true, excluir: true },
+                                    },
+                                  });
+                                }}
+                                className={`text-xs px-2 py-1 rounded ${todasPermissoes ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                title="Todas as permissões"
+                              >
+                                Todas
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    permissoes: {
+                                      ...formData.permissoes,
+                                      [key]: { visualizar: false, criar: false, editar: false, excluir: false },
+                                    },
+                                  });
+                                }}
+                                className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                title="Nenhuma permissão"
+                              >
+                                Nenhuma
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={permissoesModulo.visualizar}
+                                onChange={() => togglePermissaoModulo(key as keyof Permissoes, 'visualizar')}
+                                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">Visualizar</span>
+                                <span className="text-xs text-gray-500">Ver informações</span>
+                              </div>
+                            </label>
+                            <label className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={permissoesModulo.criar}
+                                onChange={() => togglePermissaoModulo(key as keyof Permissoes, 'criar')}
+                                disabled={!permissoesModulo.visualizar}
+                                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">Criar</span>
+                                <span className="text-xs text-gray-500">Adicionar novos</span>
+                              </div>
+                            </label>
+                            <label className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={permissoesModulo.editar}
+                                onChange={() => togglePermissaoModulo(key as keyof Permissoes, 'editar')}
+                                disabled={!permissoesModulo.visualizar}
+                                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">Editar</span>
+                                <span className="text-xs text-gray-500">Modificar existentes</span>
+                              </div>
+                            </label>
+                            <label className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={permissoesModulo.excluir}
+                                onChange={() => togglePermissaoModulo(key as keyof Permissoes, 'excluir')}
+                                disabled={!permissoesModulo.visualizar}
+                                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">Excluir</span>
+                                <span className="text-xs text-gray-500">Remover registros</span>
+                              </div>
+                            </label>
+                          </div>
+                          {!permissoesModulo.visualizar && (
+                            <p className="text-xs text-amber-600 mt-2 flex items-center">
+                              <span className="mr-1">⚠️</span>
+                              Sem permissão de visualização. O usuário não poderá acessar este módulo.
+                            </p>
+                          )}
+                          {permissoesModulo.visualizar && !permissoesModulo.editar && (
+                            <p className="text-xs text-blue-600 mt-2 flex items-center">
+                              <span className="mr-1">ℹ️</span>
+                              Usuário pode apenas visualizar este módulo, sem editar.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-medium text-sm mb-3 text-gray-700">Permissões Especiais</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.permissoes.dashboardAdmin}
+                          onChange={() => togglePermissao('dashboardAdmin')}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Dashboard Admin</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.permissoes.programarPedidos}
+                          onChange={() => togglePermissao('programarPedidos')}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Programar Pedidos (Logística)</span>
+                      </label>
                     </div>
                   </div>
                 </div>

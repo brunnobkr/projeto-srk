@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function Equipe() {
-  const { usuario: usuarioLogado, isAdmin, isEngenharia, isLogistica, isSegurancaTrabalho, isCentralMecanica, isTI } = useAuth();
+  const { usuario: usuarioLogado } = useAuth();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
@@ -20,106 +20,76 @@ export default function Equipe() {
 
   const loadUsuarios = () => {
     const todosUsuarios = usuariosStorage.getAll();
+    // Mostrar todos os usuários ativos, independente de permissões
     setUsuarios(todosUsuarios.filter(u => u.isAtivo));
   };
 
-  // Filtrar usuários baseado no cargo do usuário logado
-  const getUsuariosFiltrados = () => {
-    if (isAdmin()) {
-      // Admin vê todos
-      return usuarios;
+  // Normalizar cargo para agrupamento consistente
+  const normalizarCargoParaGrupo = (cargo: string | undefined, setor: string | undefined): string => {
+    if (!cargo) return 'Outros';
+    
+    const cargoLower = cargo.toLowerCase();
+    const setorLower = setor?.toLowerCase() || '';
+    
+    // Engenharia
+    if (cargoLower.includes('engen') || setorLower.includes('engenharia')) {
+      return 'Engenharia';
     }
-
-    if (isEngenharia()) {
-      // Engenharia vê outros da engenharia
-      return usuarios.filter(u => 
-        u.cargo.toLowerCase().includes('engen') || 
-        u.setor?.toLowerCase().includes('engenharia')
-      );
+    
+    // Logística
+    if (cargoLower.includes('logist') || setorLower.includes('logistica') || setorLower.includes('logística')) {
+      return 'Logística';
     }
-
-    if (isCentralMecanica()) {
-      // Central de Mecânica vê mecânicos, elétricos e ferramentaria
-      return usuarios.filter(u => {
-        const cargoLower = u.cargo.toLowerCase();
-        const setorLower = u.setor?.toLowerCase() || '';
-        return (
-          cargoLower.includes('mecan') ||
-          cargoLower.includes('eletr') ||
-          cargoLower.includes('ferrament') ||
-          setorLower.includes('mecanica') ||
-          setorLower.includes('eletrica') ||
-          setorLower.includes('ferramentaria')
-        );
-      });
+    
+    // Central de Mecânica
+    if (cargoLower.includes('mecan') || cargoLower.includes('eletr') || cargoLower.includes('ferrament') || 
+        setorLower.includes('mecanica') || setorLower.includes('eletrica') || setorLower.includes('ferramentaria')) {
+      return 'Central de Mecânica';
     }
-
-    if (isLogistica()) {
-      // Logística vê outros da logística
-      return usuarios.filter(u => 
-        u.cargo.toLowerCase().includes('logist') || 
-        u.setor?.toLowerCase().includes('logistica')
-      );
+    
+    // TI
+    if (cargoLower.includes('ti') || cargoLower.includes('tecnologia') || cargoLower.includes('informática') || 
+        cargoLower.includes('informatica') || setorLower.includes('ti')) {
+      return 'TI';
     }
-
-    if (isTI()) {
-      // TI vê outros de TI
-      return usuarios.filter(u => 
-        u.cargo.toLowerCase().includes('ti') || 
-        u.cargo.toLowerCase().includes('tecnologia') ||
-        u.setor?.toLowerCase().includes('ti')
-      );
+    
+    // Segurança do Trabalho
+    if (cargoLower.includes('seguranca') || cargoLower.includes('segurança') || setorLower.includes('seguranca')) {
+      return 'Segurança do Trabalho';
     }
-
-    if (isSegurancaTrabalho()) {
-      // Segurança do Trabalho vê outros de segurança
-      return usuarios.filter(u => 
-        u.cargo.toLowerCase().includes('seguranca') || 
-        u.setor?.toLowerCase().includes('seguranca')
-      );
+    
+    // Produção
+    if (cargoLower.includes('preparador') || cargoLower.includes('operador') || cargoLower.includes('produção') || 
+        cargoLower.includes('producao') || cargoLower.includes('montador')) {
+      return 'Produção';
     }
-
-    // Outros usuários veem apenas seu próprio setor
-    return usuarios.filter(u => u.setor === usuarioLogado?.setor);
+    
+    // Gestão
+    if (cargoLower.includes('lider') || cargoLower.includes('líder') || cargoLower.includes('coordenador') || 
+        cargoLower.includes('gerente') || cargoLower.includes('supervisor') || cargoLower.includes('diretor')) {
+      return 'Gestão';
+    }
+    
+    // Qualidade
+    if (cargoLower.includes('qualidade') || cargoLower.includes('qc') || cargoLower.includes('qa')) {
+      return 'Qualidade';
+    }
+    
+    // Usar o setor se disponível, senão usar o cargo como está
+    if (setor) {
+      return setor;
+    }
+    
+    // Se não se encaixar em nenhum grupo padrão, usar o cargo como grupo
+    return cargo;
   };
 
-  const usuariosFiltrados = getUsuariosFiltrados();
-
-  const filteredUsuarios = usuariosFiltrados.filter(u =>
-    u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.matricula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.setor?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Agrupar usuários por cargo/setor
+  // Agrupar todos os usuários por cargo normalizado
   const agruparPorCargo = () => {
     const grupos: Record<string, Usuario[]> = {};
     
-    filteredUsuarios.forEach(usuario => {
-      // Determinar o grupo baseado no cargo
-      let grupo = 'Outros';
-      const cargoLower = usuario.cargo?.toLowerCase() || '';
-      const setorLower = usuario.setor?.toLowerCase() || '';
-      
-      if (cargoLower.includes('engen') || setorLower.includes('engenharia')) {
-        grupo = 'Engenharia';
-      } else if (cargoLower.includes('logist') || setorLower.includes('logistica')) {
-        grupo = 'Logística';
-      } else if (cargoLower.includes('mecan') || cargoLower.includes('eletr') || cargoLower.includes('ferrament') || 
-                 setorLower.includes('mecanica') || setorLower.includes('eletrica') || setorLower.includes('ferramentaria')) {
-        grupo = 'Central de Mecânica';
-      } else if (cargoLower.includes('ti') || cargoLower.includes('tecnologia') || setorLower.includes('ti')) {
-        grupo = 'TI';
-      } else if (cargoLower.includes('seguranca') || cargoLower.includes('segurança') || setorLower.includes('seguranca')) {
-        grupo = 'Segurança do Trabalho';
-      } else if (cargoLower.includes('preparador') || cargoLower.includes('operador') || cargoLower.includes('produção')) {
-        grupo = 'Produção';
-      } else if (cargoLower.includes('lider') || cargoLower.includes('líder') || cargoLower.includes('coordenador') || cargoLower.includes('gerente')) {
-        grupo = 'Gestão';
-      } else if (usuario.setor) {
-        grupo = usuario.setor;
-      }
+    usuarios.forEach(usuario => {
+      const grupo = normalizarCargoParaGrupo(usuario.cargo, usuario.setor);
       
       if (!grupos[grupo]) {
         grupos[grupo] = [];
@@ -127,11 +97,37 @@ export default function Equipe() {
       grupos[grupo].push(usuario);
     });
     
+    // Ordenar usuários dentro de cada grupo por nome
+    Object.keys(grupos).forEach(grupo => {
+      grupos[grupo].sort((a, b) => a.nome.localeCompare(b.nome));
+    });
+    
     return grupos;
   };
 
   const gruposUsuarios = agruparPorCargo();
-  const gruposOrdenados = Object.keys(gruposUsuarios).sort();
+  
+  // Ordenar grupos: primeiro os principais, depois alfabeticamente
+  const gruposPrincipais = ['Engenharia', 'Logística', 'Produção', 'Central de Mecânica', 'TI', 'Segurança do Trabalho', 'Qualidade', 'Gestão'];
+  const gruposOrdenados = [
+    ...gruposPrincipais.filter(g => gruposUsuarios[g]),
+    ...Object.keys(gruposUsuarios)
+      .filter(g => !gruposPrincipais.includes(g))
+      .sort()
+  ];
+
+  // Filtrar usuários dentro de cada grupo baseado na busca
+  const filtrarUsuariosPorGrupo = (usuariosGrupo: Usuario[]) => {
+    if (!searchTerm) return usuariosGrupo;
+    
+    return usuariosGrupo.filter(u =>
+      u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.cargo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.matricula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.setor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
 
   const handleEnviarMensagem = (usuario: Usuario) => {
     // Salvar no localStorage para o Chat abrir automaticamente
@@ -192,23 +188,14 @@ export default function Equipe() {
     alert(`Mensagem enviada para ${enviadas} pessoa(s) de ${grupo}!`);
   };
 
-  const getTituloSecao = () => {
-    if (isAdmin()) return 'Equipe Completa';
-    if (isEngenharia()) return 'Equipe da Engenharia';
-    if (isCentralMecanica()) return 'Equipe da Central de Mecânica';
-    if (isLogistica()) return 'Equipe da Logística';
-    if (isTI()) return 'Equipe de TI';
-    if (isSegurancaTrabalho()) return 'Equipe de Segurança do Trabalho';
-    return 'Equipe do Setor';
-  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{getTituloSecao()}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Equipe</h1>
           <p className="text-gray-600 mt-1">
-            {filteredUsuarios.length} {filteredUsuarios.length === 1 ? 'pessoa encontrada' : 'pessoas encontradas'}
+            Encontre pessoas por cargo ou setor. {usuarios.length} {usuarios.length === 1 ? 'pessoa cadastrada' : 'pessoas cadastradas'} no total
           </p>
         </div>
       </div>
@@ -218,26 +205,29 @@ export default function Equipe() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por nome, cargo, matrícula ou setor..."
+            placeholder="Buscar por nome, cargo, matrícula, setor ou email... (deixe em branco para ver todos)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
         </div>
+        {searchTerm && (
+          <p className="text-sm text-gray-500 mt-2">
+            Mostrando resultados para: <strong>"{searchTerm}"</strong>
+          </p>
+        )}
       </div>
 
       {/* Grupos por Cargo */}
       <div className="space-y-6">
         {gruposOrdenados.map((grupo) => {
           const usuariosGrupo = gruposUsuarios[grupo];
-          const usuariosFiltradosGrupo = usuariosGrupo.filter(u =>
-            u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            u.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            u.matricula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            u.setor?.toLowerCase().includes(searchTerm.toLowerCase())
-          );
+          const usuariosFiltradosGrupo = filtrarUsuariosPorGrupo(usuariosGrupo);
 
           if (usuariosFiltradosGrupo.length === 0) return null;
+          
+          const totalNoGrupo = usuariosGrupo.length;
+          const mostrando = usuariosFiltradosGrupo.length;
 
           return (
             <div key={grupo} className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -248,7 +238,10 @@ export default function Equipe() {
                   <div>
                     <h2 className="text-xl font-bold text-white">{grupo}</h2>
                     <p className="text-sm text-primary-100">
-                      {usuariosFiltradosGrupo.length} {usuariosFiltradosGrupo.length === 1 ? 'pessoa' : 'pessoas'}
+                      {mostrando === totalNoGrupo 
+                        ? `${totalNoGrupo} ${totalNoGrupo === 1 ? 'pessoa' : 'pessoas'}`
+                        : `Mostrando ${mostrando} de ${totalNoGrupo} ${totalNoGrupo === 1 ? 'pessoa' : 'pessoas'}`
+                      }
                     </p>
                   </div>
                 </div>
@@ -331,7 +324,19 @@ export default function Equipe() {
           <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Nenhuma pessoa encontrada</p>
           <p className="text-gray-400 text-sm mt-2">
-            {searchTerm ? 'Tente buscar com outros termos' : 'Não há pessoas cadastradas nesta área'}
+            {searchTerm 
+              ? `Nenhum resultado encontrado para "${searchTerm}". Tente buscar com outros termos ou deixe em branco para ver todos os usuários.`
+              : 'Não há pessoas cadastradas no sistema'
+            }
+          </p>
+        </div>
+      )}
+      
+      {!searchTerm && gruposOrdenados.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-800">
+            <strong>💡 Dica:</strong> Não sabe o nome da pessoa? Navegue pelos grupos acima para encontrar pessoas por cargo ou setor. 
+            Use a busca para filtrar por nome, matrícula ou qualquer outro termo.
           </p>
         </div>
       )}

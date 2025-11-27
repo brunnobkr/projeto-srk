@@ -46,25 +46,32 @@ export interface MapeamentoFuncao {
   criadoPor: string;
 }
 
+export interface PermissoesModulo {
+  visualizar: boolean;
+  criar: boolean;
+  editar: boolean;
+  excluir: boolean;
+}
+
 export interface Permissoes {
-  // Módulos principais
-  receitasMaquina: boolean;
-  controleProducao: boolean;
-  controleFuncionarios: boolean;
-  problemasTecnicos: boolean;
-  mudancasMelhorias: boolean;
-  instrucoesTrabalho: boolean;
-  componentesProduto: boolean;
-  segurancaTrabalho: boolean;
-  dashboardAdmin: boolean;
-  gerenciarUsuarios: boolean;
+  // Módulos principais com permissões granulares
+  receitasMaquina: PermissoesModulo;
+  controleProducao: PermissoesModulo;
+  controleFuncionarios: PermissoesModulo;
+  problemasTecnicos: PermissoesModulo;
+  mudancasMelhorias: PermissoesModulo;
+  instrucoesTrabalho: PermissoesModulo;
+  componentesProduto: PermissoesModulo;
+  segurancaTrabalho: PermissoesModulo;
+  dashboardAdmin: boolean; // Acesso ao dashboard admin
+  gerenciarUsuarios: boolean; // Gerenciar usuários
   programarPedidos: boolean; // Logística pode programar pedidos
   
-  // Ações específicas
-  criar: boolean; // Pode criar novos registros
-  editar: boolean; // Pode editar registros
-  excluir: boolean; // Pode excluir registros
-  visualizar: boolean; // Pode visualizar registros
+  // Compatibilidade com versão antiga (deprecated - manter por enquanto)
+  criar?: boolean;
+  editar?: boolean;
+  excluir?: boolean;
+  visualizar?: boolean;
 }
 
 export interface ProgramacaoPedido {

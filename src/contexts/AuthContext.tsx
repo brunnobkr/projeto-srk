@@ -9,8 +9,10 @@ interface AuthContextType {
   hasPermission: (permission: keyof Permissoes) => boolean;
   hasAnyPermission: (permissions: (keyof Permissoes)[]) => boolean;
   isAdmin: () => boolean;
+  canView: (modulo: string) => boolean;
   canEdit: (modulo: string) => boolean;
   canCreate: (modulo: string) => boolean;
+  canDelete: (modulo: string) => boolean;
   isLogistica: () => boolean;
   isEngenharia: () => boolean;
   isSegurancaTrabalho: () => boolean;
@@ -41,22 +43,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Criar usuário admin inicial se não existir nenhum
     const todosUsuarios = usuariosStorage.getAll();
     if (todosUsuarios.length === 0) {
-      const permissoesPadrao: Permissoes = {
-        receitasMaquina: false,
-        controleProducao: false,
-        controleFuncionarios: false,
-        problemasTecnicos: false,
-        mudancasMelhorias: false,
-        instrucoesTrabalho: false,
-        componentesProduto: false,
-        segurancaTrabalho: false,
-        dashboardAdmin: false,
-        gerenciarUsuarios: false,
-        programarPedidos: false,
+      const permissoesModuloPadrao = {
+        visualizar: false,
         criar: false,
         editar: false,
         excluir: false,
-        visualizar: false,
+      };
+
+      const permissoesPadrao: Permissoes = {
+        receitasMaquina: { ...permissoesModuloPadrao },
+        controleProducao: { ...permissoesModuloPadrao },
+        controleFuncionarios: { ...permissoesModuloPadrao },
+        problemasTecnicos: { ...permissoesModuloPadrao },
+        mudancasMelhorias: { ...permissoesModuloPadrao },
+        instrucoesTrabalho: { ...permissoesModuloPadrao },
+        componentesProduto: { ...permissoesModuloPadrao },
+        segurancaTrabalho: { ...permissoesModuloPadrao },
+        dashboardAdmin: false,
+        gerenciarUsuarios: false,
+        programarPedidos: false,
       };
 
       const adminInicial: Usuario = {
@@ -137,10 +142,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return usuario?.isAdmin || false;
   };
 
+  const canView = (modulo: string): boolean => {
+    if (!usuario) return false;
+    if (usuario.id === 'admin_inicial') return true;
+    if (usuario.isAdmin) return true;
+    
+    const moduloPermissao = usuario.permissoes[modulo as keyof Permissoes];
+    
+    // Nova estrutura: permissões por módulo
+    if (typeof moduloPermissao === 'object' && 'visualizar' in moduloPermissao) {
+      return moduloPermissao.visualizar;
+    }
+    
+    // Estrutura antiga (compatibilidade)
+    if (usuario.permissoes.visualizar) return true;
+    
+    // Verificar se o módulo está habilitado (estrutura antiga)
+    if (typeof moduloPermissao === 'boolean') {
+      return moduloPermissao;
+    }
+    
+    return false;
+  };
+
+  const canCreate = (modulo: string): boolean => {
+    if (!usuario) return false;
+    if (usuario.id === 'admin_inicial') return true;
+    if (usuario.isAdmin) return true;
+    
+    const moduloPermissao = usuario.permissoes[modulo as keyof Permissoes];
+    
+    // Nova estrutura: permissões por módulo
+    if (typeof moduloPermissao === 'object' && 'criar' in moduloPermissao) {
+      return moduloPermissao.criar;
+    }
+    
+    // Estrutura antiga (compatibilidade)
+    const cargo = usuario.cargo?.toLowerCase() || '';
+    const setor = usuario.setor?.toLowerCase() || '';
+    
+    // Engenharia pode criar receitas, componentes, instruções e segurança
+    if (cargo.includes('engenharia') || setor.includes('engenharia')) {
+      if (['receitasMaquina', 'componentesProduto', 'instrucoesTrabalho', 'segurancaTrabalho'].includes(modulo)) {
+        return usuario.permissoes.criar || true;
+      }
+    }
+    
+    return usuario.permissoes.criar || false;
+  };
+
   const canEdit = (modulo: string): boolean => {
     if (!usuario) return false;
     if (usuario.id === 'admin_inicial') return true;
+    if (usuario.isAdmin) return true;
     
+    const moduloPermissao = usuario.permissoes[modulo as keyof Permissoes];
+    
+    // Nova estrutura: permissões por módulo
+    if (typeof moduloPermissao === 'object' && 'editar' in moduloPermissao) {
+      return moduloPermissao.editar;
+    }
+    
+    // Estrutura antiga (compatibilidade)
     const cargo = usuario.cargo?.toLowerCase() || '';
     const setor = usuario.setor?.toLowerCase() || '';
     
@@ -154,21 +217,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return usuario.permissoes.editar || false;
   };
 
-  const canCreate = (modulo: string): boolean => {
+  const canDelete = (modulo: string): boolean => {
     if (!usuario) return false;
     if (usuario.id === 'admin_inicial') return true;
+    if (usuario.isAdmin) return true;
     
-    const cargo = usuario.cargo?.toLowerCase() || '';
-    const setor = usuario.setor?.toLowerCase() || '';
+    const moduloPermissao = usuario.permissoes[modulo as keyof Permissoes];
     
-    // Engenharia pode criar receitas, componentes, instruções e segurança
-    if (cargo.includes('engenharia') || setor.includes('engenharia')) {
-      if (['receitasMaquina', 'componentesProduto', 'instrucoesTrabalho', 'segurancaTrabalho'].includes(modulo)) {
-        return usuario.permissoes.criar || true;
-      }
+    // Nova estrutura: permissões por módulo
+    if (typeof moduloPermissao === 'object' && 'excluir' in moduloPermissao) {
+      return moduloPermissao.excluir;
     }
     
-    return usuario.permissoes.criar || false;
+    // Estrutura antiga (compatibilidade)
+    return usuario.permissoes.excluir || false;
   };
 
   const isLogistica = (): boolean => {
@@ -232,8 +294,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hasPermission, 
       hasAnyPermission, 
       isAdmin,
+      canView,
       canEdit,
       canCreate,
+      canDelete,
       isLogistica,
       isEngenharia,
       isSegurancaTrabalho,
@@ -252,4 +316,5 @@ export function useAuth() {
   }
   return context;
 }
+
 
