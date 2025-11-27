@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, UserPlus, AlertTriangle, X, FileWarning, Image, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserPlus, AlertTriangle, X, FileWarning, Image, FileText, ChevronDown, ChevronRight } from 'lucide-react';
 import { controleFuncionariosStorage, funcionariosStorage, setoresStorage, acidentesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { ControleFuncionarios, Funcionario, Setor, Acidente, AnexoPDF } from '../types';
@@ -13,6 +13,9 @@ export default function ControleFuncionarios() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
+  const [filtroData, setFiltroData] = useState<string>('');
+  const [turnoAtual, setTurnoAtual] = useState<'1' | '2' | '3' | 'central'>(determinarTurno());
   const [showModal, setShowModal] = useState(false);
   const [showFuncModal, setShowFuncModal] = useState(false);
   const [editingControle, setEditingControle] = useState<ControleFuncionarios | null>(null);
@@ -62,11 +65,12 @@ export default function ControleFuncionarios() {
   const [showFotoModal, setShowFotoModal] = useState(false);
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
+  const [tiposExpandidos, setTiposExpandidos] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadData();
     determinarTurnoAtual();
-    // Atualizar turno a cada minuto
+    // Atualizar turno a cada minuto para detectar mudanças
     const interval = setInterval(() => {
       determinarTurnoAtual();
     }, 60000);
@@ -76,6 +80,19 @@ export default function ControleFuncionarios() {
   // Função para determinar o turno atual baseado no horário
   const determinarTurnoAtual = () => {
     const turno = determinarTurno();
+    
+    // Verificar se o turno mudou antes de atualizar
+    setTurnoAtual(prevTurno => {
+      // Se o turno mudou, recarregar os dados para atualizar a visualização
+      if (prevTurno !== turno) {
+        // Usar setTimeout para evitar problemas de estado
+        setTimeout(() => {
+          loadData();
+        }, 100);
+      }
+      return turno;
+    });
+    
     // Atualizar o turno no formulário se não estiver editando
     if (!editingControle) {
       setFormData(prev => ({ ...prev, turno }));
@@ -371,11 +388,61 @@ export default function ControleFuncionarios() {
 
   const filteredControles = controles.filter(c => {
     const func = c.funcionario;
-    return (
+    const matchesSearch = 
       func?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      func?.matricula.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      func?.matricula.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Se houver busca por nome/matrícula, mostrar TODOS os registros daquele funcionário
+    // (ignorar filtros de data e turno para facilitar visualização completa)
+    if (searchTerm.trim() !== '' && matchesSearch) {
+      return true; // Mostrar todos os registros do funcionário encontrado
+    }
+    
+    // Se não houver busca, aplicar filtros normalmente
+    if (searchTerm.trim() === '') {
+      const matchesTurno = filtroTurno === 'todos' || c.turno === filtroTurno;
+      const matchesData = filtroData === '' || (() => {
+        try {
+          const dataControle = new Date(c.data);
+          const dataFiltro = new Date(filtroData);
+          if (isNaN(dataControle.getTime()) || isNaN(dataFiltro.getTime())) return true;
+          // Comparar apenas dia, mês e ano
+          return dataControle.getDate() === dataFiltro.getDate() &&
+                 dataControle.getMonth() === dataFiltro.getMonth() &&
+                 dataControle.getFullYear() === dataFiltro.getFullYear();
+        } catch {
+          return true;
+        }
+      })();
+      return matchesTurno && matchesData;
+    }
+    
+    return false;
   });
+
+  // Agrupar controles por tipo
+  const controlesPorTipo = filteredControles.reduce((acc, controle) => {
+    const tipo = controle.tipo;
+    if (!acc[tipo]) {
+      acc[tipo] = [];
+    }
+    acc[tipo].push(controle);
+    return acc;
+  }, {} as Record<string, typeof filteredControles>);
+
+  // Ordenar tipos por ordem de importância
+  const tiposOrdenados = [
+    'falta',
+    'ausente',
+    'chegada-atrasado',
+    'chegada-tarde',
+    'saida-cedo',
+    'tempo-ocioso',
+    'transferencia',
+    'atestado',
+    'afastado',
+    'presente',
+  ].filter(tipo => controlesPorTipo[tipo] && controlesPorTipo[tipo].length > 0);
 
   return (
     <div className="space-y-6">
@@ -425,103 +492,238 @@ export default function ControleFuncionarios() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar por nome ou matrícula..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por nome ou matrícula..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+            {searchTerm.trim() !== '' && (
+              <p className="mt-1 text-xs text-blue-600">
+                ℹ️ Mostrando todos os registros do funcionário encontrado
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Filtrar por Data</label>
+            <input
+              type="date"
+              value={filtroData}
+              onChange={(e) => setFiltroData(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              disabled={searchTerm.trim() !== ''}
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Filtrar por Turno</label>
+            <select
+              value={filtroTurno}
+              onChange={(e) => setFiltroTurno(e.target.value as any)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              disabled={searchTerm.trim() !== ''}
+            >
+              <option value="todos">Todos os Turnos</option>
+              <option value="1">1º Turno (06:30-16:18)</option>
+              <option value="2">2º Turno (16:18-01:30)</option>
+              <option value="3">3º Turno (01:30-06:30)</option>
+              <option value="central">Central</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600">Turno Atual:</span>
+            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
+              turnoAtual === '1' ? 'bg-blue-100 text-blue-800' :
+              turnoAtual === '2' ? 'bg-green-100 text-green-800' :
+              turnoAtual === '3' ? 'bg-purple-100 text-purple-800' :
+              'bg-orange-100 text-orange-800'
+            }`}>
+              {turnoAtual === '1' ? '1º Turno' :
+               turnoAtual === '2' ? '2º Turno' :
+               turnoAtual === '3' ? '3º Turno' : 'Central'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-4">
+            {filtroData && (
+              <button
+                onClick={() => setFiltroData('')}
+                className="text-xs text-gray-600 hover:text-gray-900 underline"
+              >
+                Limpar filtro de data
+              </button>
+            )}
+            <p className="text-xs text-gray-500">
+              💾 Todos os registros são salvos permanentemente para consulta do RH
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Funcionário</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Matrícula</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hora Registro</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Período</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Ocioso</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Atraso</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transferência</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredControles.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
-                    Nenhum registro encontrado
-                  </td>
-                </tr>
-              ) : (
-                filteredControles.map((controle) => (
-                  <tr key={controle.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium">{controle.funcionario?.nome || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{controle.funcionario?.matricula || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{format(new Date(controle.data), 'dd/MM/yyyy', { locale: ptBR })}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{controle.horaRegistro || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        controle.tipo === 'falta' ? 'bg-red-100 text-red-800' :
-                        controle.tipo === 'ausente' ? 'bg-yellow-100 text-yellow-800' :
-                        controle.tipo === 'tempo-ocioso' ? 'bg-orange-100 text-orange-800' :
-                        controle.tipo === 'chegada-atrasado' ? 'bg-pink-100 text-pink-800' :
-                        controle.tipo === 'presente' ? 'bg-green-100 text-green-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {getTipoLabel(controle.tipo)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {controle.tipo === 'chegada-atrasado' && controle.horaChegada 
-                        ? `Chegada: ${controle.horaChegada}`
-                        : controle.tipo === 'chegada-tarde' && controle.horaChegada
-                        ? `Chegada: ${controle.horaChegada}`
-                        : controle.tipo === 'saida-cedo' && controle.horaSaida
-                        ? `Saída: ${controle.horaSaida}`
-                        : controle.tipo === 'atestado' && controle.dataInicioAtestado && controle.dataFimAtestado
-                        ? `${format(new Date(controle.dataInicioAtestado), 'dd/MM', { locale: ptBR })} - ${format(new Date(controle.dataFimAtestado), 'dd/MM', { locale: ptBR })}`
-                        : controle.tipo === 'afastado' && controle.dataInicioAfastamento
-                        ? `Desde: ${format(new Date(controle.dataInicioAfastamento), 'dd/MM/yyyy', { locale: ptBR })}`
-                        : controle.inicio && controle.fim 
-                        ? `${controle.inicio} - ${controle.fim}` 
-                        : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {controle.tempoOcioso ? `${controle.tempoOcioso} min` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {controle.tempoAtraso ? `${controle.tempoAtraso} min` : 
-                       controle.tempoAntecipacao ? `${controle.tempoAntecipacao} min` :
-                       controle.tipo === 'atestado' && controle.diasAtestado ? `${controle.diasAtestado} dias` :
-                       '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {controle.setorOrigem && controle.setorDestino ? `${controle.setorOrigem} → ${controle.setorDestino}` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button onClick={() => handleEdit(controle)} className="text-primary-600 hover:text-primary-900 mr-4">
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button onClick={() => handleDelete(controle.id)} className="text-red-600 hover:text-red-900">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Registros Agrupados por Tipo */}
+      {filteredControles.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <p className="text-gray-500">Nenhum registro encontrado</p>
         </div>
-      </div>
+      ) : (
+        <div className="space-y-4">
+          {tiposOrdenados.map((tipo) => {
+            const controlesDoTipo = controlesPorTipo[tipo];
+            const isExpanded = tiposExpandidos[tipo] !== false; // Por padrão expandido
+            const getTipoColor = (t: string) => {
+              switch (t) {
+                case 'falta': return 'bg-red-50 border-red-200';
+                case 'ausente': return 'bg-yellow-50 border-yellow-200';
+                case 'tempo-ocioso': return 'bg-orange-50 border-orange-200';
+                case 'chegada-atrasado': return 'bg-pink-50 border-pink-200';
+                case 'chegada-tarde': return 'bg-pink-50 border-pink-200';
+                case 'saida-cedo': return 'bg-purple-50 border-purple-200';
+                case 'transferencia': return 'bg-blue-50 border-blue-200';
+                case 'atestado': return 'bg-indigo-50 border-indigo-200';
+                case 'afastado': return 'bg-gray-50 border-gray-200';
+                case 'presente': return 'bg-green-50 border-green-200';
+                default: return 'bg-gray-50 border-gray-200';
+              }
+            };
+            const getBadgeColor = (t: string) => {
+              switch (t) {
+                case 'falta': return 'bg-red-100 text-red-800';
+                case 'ausente': return 'bg-yellow-100 text-yellow-800';
+                case 'tempo-ocioso': return 'bg-orange-100 text-orange-800';
+                case 'chegada-atrasado': return 'bg-pink-100 text-pink-800';
+                case 'chegada-tarde': return 'bg-pink-100 text-pink-800';
+                case 'saida-cedo': return 'bg-purple-100 text-purple-800';
+                case 'transferencia': return 'bg-blue-100 text-blue-800';
+                case 'atestado': return 'bg-indigo-100 text-indigo-800';
+                case 'afastado': return 'bg-gray-100 text-gray-800';
+                case 'presente': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+              }
+            };
+
+            return (
+              <div key={tipo} className={`bg-white rounded-lg shadow-sm border-2 ${getTipoColor(tipo)}`}>
+                <button
+                  onClick={() => setTiposExpandidos(prev => ({ ...prev, [tipo]: !isExpanded }))}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-opacity-80 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    )}
+                    <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getBadgeColor(tipo)}`}>
+                      {getTipoLabel(tipo)}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      ({controlesDoTipo.length} {controlesDoTipo.length === 1 ? 'registro' : 'registros'})
+                    </span>
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t border-gray-200">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Funcionário</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Matrícula</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hora Registro</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Período</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Ocioso</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Atraso</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transferência</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {controlesDoTipo.map((controle) => (
+                            <tr key={controle.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap font-medium">{controle.funcionario?.nome || 'N/A'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">{controle.funcionario?.matricula || 'N/A'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {(() => {
+                                  try {
+                                    const data = new Date(controle.data);
+                                    if (isNaN(data.getTime())) return controle.data || '-';
+                                    return format(data, 'dd/MM/yyyy', { locale: ptBR });
+                                  } catch {
+                                    return controle.data || '-';
+                                  }
+                                })()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">{controle.horaRegistro || '-'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                {controle.tipo === 'chegada-atrasado' && controle.horaChegada 
+                                  ? `Chegada: ${controle.horaChegada}`
+                                  : controle.tipo === 'chegada-tarde' && controle.horaChegada
+                                  ? `Chegada: ${controle.horaChegada}`
+                                  : controle.tipo === 'saida-cedo' && controle.horaSaida
+                                  ? `Saída: ${controle.horaSaida}`
+                                  : controle.tipo === 'atestado' && controle.dataInicioAtestado && controle.dataFimAtestado
+                                  ? (() => {
+                                      try {
+                                        const inicio = new Date(controle.dataInicioAtestado);
+                                        const fim = new Date(controle.dataFimAtestado);
+                                        if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime())) {
+                                          return `${format(inicio, 'dd/MM', { locale: ptBR })} - ${format(fim, 'dd/MM', { locale: ptBR })}`;
+                                        }
+                                      } catch {}
+                                      return '-';
+                                    })()
+                                  : controle.tipo === 'afastado' && controle.dataInicioAfastamento
+                                  ? (() => {
+                                      try {
+                                        const data = new Date(controle.dataInicioAfastamento);
+                                        if (!isNaN(data.getTime())) {
+                                          return `Desde: ${format(data, 'dd/MM/yyyy', { locale: ptBR })}`;
+                                        }
+                                      } catch {}
+                                      return '-';
+                                    })()
+                                  : controle.inicio && controle.fim 
+                                  ? `${controle.inicio} - ${controle.fim}` 
+                                  : '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {controle.tempoOcioso ? `${controle.tempoOcioso} min` : '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {controle.tempoAtraso ? `${controle.tempoAtraso} min` : 
+                                 controle.tempoAntecipacao ? `${controle.tempoAntecipacao} min` :
+                                 controle.tipo === 'atestado' && controle.diasAtestado ? `${controle.diasAtestado} dias` :
+                                 '-'}
+                              </td>
+                              <td className="px-6 py-4 text-sm">
+                                {controle.setorOrigem && controle.setorDestino ? `${controle.setorOrigem} → ${controle.setorDestino}` : '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <button onClick={() => handleEdit(controle)} className="text-primary-600 hover:text-primary-900 mr-4">
+                                  <Edit className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => handleDelete(controle.id)} className="text-red-600 hover:text-red-900">
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Modal Controle */}
       {showModal && (

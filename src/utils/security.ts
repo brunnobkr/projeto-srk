@@ -1,5 +1,9 @@
 // Sistema de Segurança e Proteção do Código
 
+// ⚠️ CONFIGURAÇÃO: Para DESABILITAR todas as proteções, altere para true
+// Quando desabilitado, o sistema não pedirá senha e não aplicará proteções
+const DISABLE_SECURITY = false; // Altere para true para remover todas as proteções
+
 // Senha de desenvolvimento/segurança
 const DEV_PASSWORD = 'SRK2024DEV@SECURE';
 
@@ -155,6 +159,7 @@ export const protectConsole = () => {
 
 // Sistema de senha de segurança
 export const checkSecurityPassword = (): boolean => {
+  if (DISABLE_SECURITY) return true; // Se segurança desabilitada, sempre permitir
   if (isDevMode()) return true;
 
   const savedPassword = sessionStorage.getItem('srk_dev_password');
@@ -185,6 +190,12 @@ export const deobfuscate = (str: string): string => {
 
 // Inicializar todas as proteções
 export const initSecurity = () => {
+  // Se a segurança estiver desabilitada, não aplicar nenhuma proteção
+  if (DISABLE_SECURITY) {
+    console.log('🔓 Proteções de segurança desabilitadas pela configuração');
+    return;
+  }
+
   if (isDevMode()) {
     console.log('🔓 Modo de desenvolvimento ativo - Proteções desabilitadas');
     return;

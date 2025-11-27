@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Cloud, CheckCircle, XCircle, AlertCircle, Save, RefreshCw } from 'lucide-react';
+import { Cloud, CheckCircle, XCircle, AlertCircle, Save, RefreshCw, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { initializeFirebase, isFirebaseInitialized, clearFirebase, type FirebaseConfig } from '../config/firebase';
 import { cloudStorage } from '../utils/cloudStorage';
 import { STORAGE_KEYS } from '../utils/storage';
 
 const FIREBASE_CONFIG_KEY = 'srk_firebase_config';
+const SECURITY_PASSWORD = 'SRK2024DEV@SECURE';
+const PASSWORD_STORAGE_KEY = 'srk_cloud_config_password';
 
 export default function ConfiguracaoCloud() {
-  const { isAdmin } = useAuth();
+  const { usuario } = useAuth();
+  const [passwordVerified, setPasswordVerified] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
   const [config, setConfig] = useState<FirebaseConfig>({
     apiKey: '',
     authDomain: '',
@@ -23,25 +28,46 @@ export default function ConfiguracaoCloud() {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
-    // Carregar configuração salva
-    const savedConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
-    if (savedConfig) {
-      try {
-        const parsed = JSON.parse(savedConfig);
-        setConfig(parsed);
-        // Tentar inicializar se já houver configuração
-        if (parsed.apiKey && parsed.projectId) {
-          const success = initializeFirebase(parsed);
-          setIsConnected(success);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar configuração:', error);
-      }
+    // Verificar se a senha já foi verificada nesta sessão
+    const savedPassword = sessionStorage.getItem(PASSWORD_STORAGE_KEY);
+    if (savedPassword === SECURITY_PASSWORD) {
+      setPasswordVerified(true);
     }
 
-    // Verificar status atual
-    setIsConnected(isFirebaseInitialized());
-  }, []);
+    // Carregar configuração salva apenas se a senha foi verificada
+    if (passwordVerified) {
+      const savedConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+      if (savedConfig) {
+        try {
+          const parsed = JSON.parse(savedConfig);
+          setConfig(parsed);
+          // Tentar inicializar se já houver configuração
+          if (parsed.apiKey && parsed.projectId) {
+            const success = initializeFirebase(parsed);
+            setIsConnected(success);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar configuração:', error);
+        }
+      }
+
+      // Verificar status atual
+      setIsConnected(isFirebaseInitialized());
+    }
+  }, [passwordVerified]);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === SECURITY_PASSWORD) {
+      setPasswordVerified(true);
+      setPasswordError(false);
+      sessionStorage.setItem(PASSWORD_STORAGE_KEY, SECURITY_PASSWORD);
+      setPasswordInput('');
+    } else {
+      setPasswordError(true);
+      setPasswordInput('');
+    }
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -126,13 +152,68 @@ export default function ConfiguracaoCloud() {
     }
   };
 
-  if (!isAdmin()) {
+  // Verificar se é admin padrão
+  if (usuario?.id !== 'admin_inicial') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
-          <p className="text-gray-600">Apenas administradores podem acessar esta página.</p>
+          <p className="text-gray-600">Apenas o administrador padrão pode acessar esta página.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Tela de senha se ainda não foi verificada
+  if (!passwordVerified) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+          <div className="text-center mb-6">
+            <div className="bg-primary-100 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <Lock className="w-10 h-10 text-primary-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Acesso Restrito</h2>
+            <p className="text-gray-600">Digite a senha de segurança para acessar a configuração do Cloud</p>
+          </div>
+          
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Senha de Segurança
+              </label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => {
+                  setPasswordInput(e.target.value);
+                  setPasswordError(false);
+                }}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                  passwordError ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Digite a senha..."
+                autoFocus
+              />
+              {passwordError && (
+                <p className="mt-2 text-sm text-red-600">Senha incorreta. Tente novamente.</p>
+              )}
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors"
+            >
+              Acessar Configuração
+            </button>
+          </form>
+          
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-xs text-gray-500 text-center">
+              Esta página contém configurações sensíveis do sistema
+            </p>
+          </div>
         </div>
       </div>
     );

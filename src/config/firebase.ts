@@ -62,3 +62,4 @@ export const clearFirebase = (): void => {
   isInitialized = false;
 };
 
+
