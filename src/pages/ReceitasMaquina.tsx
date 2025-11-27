@@ -8,7 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import HistoricoModal from '../components/HistoricoModal';
 
 export default function ReceitasMaquina() {
-  const { canCreate, canEdit, isEngenharia } = useAuth();
+  const { canCreate, canEdit, isEngenharia, usuario } = useAuth();
   const [receitas, setReceitas] = useState<ReceitaMaquina[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -38,8 +38,8 @@ export default function ReceitasMaquina() {
     limiteInsercaoLadoB: '',
     maoObraNecessaria: '',
     tempoMontagem: '',
-    nomeResponsavel: '',
-    matriculaResponsavel: '',
+    nomeResponsavel: usuario?.nome || '',
+    matriculaResponsavel: usuario?.matricula || '',
     motivo: '',
   });
   const [fotos, setFotos] = useState<string[]>([]);
@@ -55,6 +55,17 @@ export default function ReceitasMaquina() {
     loadReceitas();
     loadSetores();
   }, []);
+
+  // Atualizar nome e matrícula quando o usuário mudar
+  useEffect(() => {
+    if (usuario && !editingReceita) {
+      setFormData(prev => ({
+        ...prev,
+        nomeResponsavel: usuario.nome || '',
+        matriculaResponsavel: usuario.matricula || '',
+      }));
+    }
+  }, [usuario, editingReceita]);
 
   const loadSetores = () => {
     const todosSetores = setoresStorage.getAll();
@@ -256,8 +267,8 @@ export default function ReceitasMaquina() {
       limiteInsercaoLadoB: '',
       maoObraNecessaria: '',
       tempoMontagem: '',
-      nomeResponsavel: '',
-      matriculaResponsavel: '',
+      nomeResponsavel: usuario?.nome || '',
+      matriculaResponsavel: usuario?.matricula || '',
       motivo: '',
     });
     setFotos([]);
@@ -289,7 +300,15 @@ export default function ReceitasMaquina() {
         </div>
         {podeCriarEditar && (
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              // Preencher automaticamente com dados do usuário logado
+              setFormData(prev => ({
+                ...prev,
+                nomeResponsavel: usuario?.nome || '',
+                matriculaResponsavel: usuario?.matricula || '',
+              }));
+              setShowModal(true);
+            }}
             className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -500,10 +519,11 @@ export default function ReceitasMaquina() {
                       type="text"
                       required
                       value={formData.nomeResponsavel}
-                      onChange={(e) => setFormData({ ...formData, nomeResponsavel: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      placeholder="Digite o nome completo"
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                      placeholder="Preenchido automaticamente"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Preenchido automaticamente com base no login</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -513,10 +533,11 @@ export default function ReceitasMaquina() {
                       type="text"
                       required
                       value={formData.matriculaResponsavel}
-                      onChange={(e) => setFormData({ ...formData, matriculaResponsavel: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      placeholder="Digite a matrícula"
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                      placeholder="Preenchido automaticamente"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Preenchido automaticamente com base no login</p>
                   </div>
                 </div>
               </div>
