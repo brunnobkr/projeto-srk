@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, X } from 'lucide-react';
 import { producaoStorage, setoresStorage, receitasStorage } from '../utils/storage';
 import type { ControleProducao, Setor } from '../types';
 import { format } from 'date-fns';
@@ -12,6 +12,7 @@ export default function ControleProducao() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingControle, setEditingControle] = useState<ControleProducao | null>(null);
+  const [viewingControle, setViewingControle] = useState<ControleProducao | null>(null);
   const [formData, setFormData] = useState({
     codigoTubo: '',
     setor: '',
@@ -264,6 +265,9 @@ export default function ControleProducao() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <button onClick={() => setViewingControle(controle)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
+                        <Eye className="w-5 h-5" />
+                      </button>
                       <button onClick={() => handleEdit(controle)} className="text-primary-600 hover:text-primary-900 mr-4">
                         <Edit className="w-5 h-5" />
                       </button>
@@ -477,6 +481,128 @@ export default function ControleProducao() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingControle ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingControle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Controle de Produção</h2>
+              <button
+                onClick={() => setViewingControle(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Código do Produto:</span>
+                    <p className="text-gray-900">{viewingControle.codigoTubo}</p>
+                  </div>
+                  {viewingControle.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingControle.setor}</p>
+                    </div>
+                  )}
+                  {viewingControle.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingControle.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingControle.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingControle.hora}</p>
+                  </div>
+                  {viewingControle.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${getTurnoBadgeColor(viewingControle.turno)}`}>
+                          {getTurnoLabel(viewingControle.turno)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Quantidade 30min:</span>
+                    <p className="text-gray-900">{viewingControle.quantidade30min}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Quantidade Hora:</span>
+                    <p className="text-gray-900">{viewingControle.quantidadeHora}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Tempo de Montagem:</span>
+                    <p className="text-gray-900">{viewingControle.tempoMontagem} min</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Mão de Obra:</span>
+                    <p className="text-gray-900">{viewingControle.maoObra}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Mão de Obra por Linha:</span>
+                    <p className="text-gray-900">{viewingControle.maoObraPorLinha || (viewingControle as any).pessoasPorMaquina || '-'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Processo:</span>
+                    <p className="text-gray-900">{viewingControle.processo}</p>
+                  </div>
+                  {viewingControle.quantidadeTotalLogistica && (
+                    <div>
+                      <span className="font-medium text-gray-700">Quantidade Total Logística:</span>
+                      <p className="text-gray-900">{viewingControle.quantidadeTotalLogistica}</p>
+                    </div>
+                  )}
+                  {viewingControle.preparador && (
+                    <div>
+                      <span className="font-medium text-gray-700">Preparador:</span>
+                      <p className="text-gray-900">{viewingControle.preparador}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Atualização Hora:</span>
+                    <p className="text-gray-900">
+                      {viewingControle.atualizacaoHora ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingControle.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingControle.observacoes}</p>
+                    </div>
+                  )}
+                  {viewingControle.justificativaFaltaFuncionario && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Justificativa Falta de Funcionário:</span>
+                      <p className="text-gray-900">{viewingControle.justificativaFaltaFuncionario}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingControle(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

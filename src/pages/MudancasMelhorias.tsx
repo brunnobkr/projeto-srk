@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, X } from 'lucide-react';
 import { mudancasStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { MudancaMelhoria } from '../types';
@@ -13,6 +13,7 @@ export default function MudancasMelhorias() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingMudanca, setEditingMudanca] = useState<MudancaMelhoria | null>(null);
+  const [viewingMudanca, setViewingMudanca] = useState<MudancaMelhoria | null>(null);
   const [formData, setFormData] = useState({
     tipo: 'atualizacao' as 'atualizacao' | 'ajuste-receita' | 'correcao-problema',
     titulo: '',
@@ -209,6 +210,9 @@ export default function MudancasMelhorias() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <button onClick={() => setViewingMudanca(mudanca)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
+                        <Eye className="w-5 h-5" />
+                      </button>
                       <button onClick={() => handleEdit(mudanca)} className="text-primary-600 hover:text-primary-900 mr-4">
                         <Edit className="w-5 h-5" />
                       </button>
@@ -309,6 +313,98 @@ export default function MudancasMelhorias() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingMudanca ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingMudanca && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes da Mudança/Melhoria</h2>
+              <button
+                onClick={() => setViewingMudanca(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        {getTipoLabel(viewingMudanca.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Título:</span>
+                    <p className="text-gray-900">{viewingMudanca.titulo}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Engenheiro:</span>
+                    <p className="text-gray-900">{viewingMudanca.engenheiro}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingMudanca.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingMudanca.hora}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Interrompeu Produção:</span>
+                    <p className="text-gray-900">
+                      {viewingMudanca.interrompeuProducao ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingMudanca.status === 'planejado' ? 'bg-gray-100 text-gray-800' :
+                        viewingMudanca.status === 'em-execucao' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingMudanca.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingMudanca.dataConclusao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Conclusão:</span>
+                      <p className="text-gray-900">{format(new Date(viewingMudanca.dataConclusao), 'dd/MM/yyyy', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingMudanca.descricao}</p>
+                  </div>
+                  {viewingMudanca.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingMudanca.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingMudanca(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

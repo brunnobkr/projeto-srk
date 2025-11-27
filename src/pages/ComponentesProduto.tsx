@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, PlusCircle, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, PlusCircle, X, Eye } from 'lucide-react';
 import { componentesStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { ComponenteProduto, Presilha, Marcacao, CorComponente } from '../types';
@@ -10,6 +10,7 @@ export default function ComponentesProduto() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingComponente, setEditingComponente] = useState<ComponenteProduto | null>(null);
+  const [viewingComponente, setViewingComponente] = useState<ComponenteProduto | null>(null);
   
   const podeCriarEditar = canCreate('componentesProduto') || canEdit('componentesProduto') || isEngenharia();
   const [formData, setFormData] = useState({
@@ -394,16 +395,21 @@ export default function ComponentesProduto() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Código: {componente.codigo}</h3>
                 </div>
-                {podeCriarEditar && (
-                  <div className="flex space-x-2">
-                    <button onClick={() => handleEdit(componente)} className="text-primary-600 hover:text-primary-900">
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleDelete(componente.id)} className="text-red-600 hover:text-red-900">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex space-x-2">
+                  <button onClick={() => setViewingComponente(componente)} className="text-blue-600 hover:text-blue-900" title="Ver detalhes">
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  {podeCriarEditar && (
+                    <>
+                      <button onClick={() => handleEdit(componente)} className="text-primary-600 hover:text-primary-900">
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => handleDelete(componente.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="space-y-2 text-sm">
                 <div><strong>Tubos:</strong> {
@@ -698,6 +704,152 @@ export default function ComponentesProduto() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingComponente ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingComponente && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Componente</h2>
+              <button
+                onClick={() => setViewingComponente(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Código: {viewingComponente.codigo}</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {viewingComponente.tubos && viewingComponente.tubos.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Tubos:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.tubos.map((tubo, idx) => (
+                          <li key={idx} className="text-gray-900">{tubo.nome} - Qtd: {tubo.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.conectores && viewingComponente.conectores.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Conectores:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.conectores.map((con, idx) => (
+                          <li key={idx} className="text-gray-900">{con.nome} - Qtd: {con.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.presilhas && viewingComponente.presilhas.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Presilhas:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.presilhas.map((pres, idx) => (
+                          <li key={idx} className="text-gray-900">{pres.tipo} - Qtd: {pres.quantidade}{pres.descricao ? ` - ${pres.descricao}` : ''}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.fitas && viewingComponente.fitas.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Fitas:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.fitas.map((fita, idx) => (
+                          <li key={idx} className="text-gray-900">{fita.nome} - Qtd: {fita.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.guianas && viewingComponente.guianas.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Guiãs:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.guianas.map((guia, idx) => (
+                          <li key={idx} className="text-gray-900">{guia.nome} - Qtd: {guia.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.aneis && viewingComponente.aneis.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Anéis:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.aneis.map((anel, idx) => (
+                          <li key={idx} className="text-gray-900">{anel.nome} - Qtd: {anel.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.marcacoes && viewingComponente.marcacoes.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Marcações:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.marcacoes.map((marc, idx) => (
+                          <li key={idx} className="text-gray-900">{marc.tipo} - {marc.descricao}{marc.localizacao ? ` - Localização: ${marc.localizacao}` : ''}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.recalques && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Recalques:</span>
+                      <p className="text-gray-900">{viewingComponente.recalques}</p>
+                    </div>
+                  )}
+                  {viewingComponente.cores && viewingComponente.cores.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Cores:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.cores.map((cor, idx) => (
+                          <li key={idx} className="text-gray-900">{cor.componente} - Cor: {cor.cor}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.valvulas && viewingComponente.valvulas.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Válvulas:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.valvulas.map((val, idx) => (
+                          <li key={idx} className="text-gray-900">{val.nome} - Qtd: {val.quantidade} - Tipo: {val.tipo || 'N/A'}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.filtros && viewingComponente.filtros.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Filtros:</span>
+                      <ul className="list-disc list-inside mt-1">
+                        {viewingComponente.filtros.map((filtro, idx) => (
+                          <li key={idx} className="text-gray-900">{filtro.nome} - Qtd: {filtro.quantidade}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {viewingComponente.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingComponente.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingComponente(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

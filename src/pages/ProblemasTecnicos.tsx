@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, CheckCircle, Eye, X } from 'lucide-react';
 import { problemasStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { ProblemaTecnico, Setor } from '../types';
@@ -13,6 +13,7 @@ export default function ProblemasTecnicos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
+  const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -307,6 +308,9 @@ export default function ProblemasTecnicos() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">{problema.resolvidoPor || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <button onClick={() => setViewingProblema(problema)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
+                        <Eye className="w-5 h-5" />
+                      </button>
                       {problema.status !== 'resolvido' && (
                         <button
                           onClick={() => handleResolve(problema.id)}
@@ -441,6 +445,158 @@ export default function ProblemasTecnicos() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingProblema ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingProblema && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">{viewingProblema.resolvidoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

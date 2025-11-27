@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Upload, Mail, Save, X, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Upload, Mail, Save, X, AlertCircle, CheckCircle, Clock, Eye } from 'lucide-react';
 import { programacoesPedidosStorage, componentesStorage, setoresStorage, problemasStorage } from '../utils/storage';
 // producaoStorage removido - não usado
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,7 @@ export default function ProgramacaoPedidos() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [editingProgramacao, setEditingProgramacao] = useState<ProgramacaoPedido | null>(null);
+  const [viewingProgramacao, setViewingProgramacao] = useState<ProgramacaoPedido | null>(null);
   const [formData, setFormData] = useState({
     codigoProduto: '',
     setor: '',
@@ -397,6 +398,13 @@ export default function ProgramacaoPedidos() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
+                        onClick={() => setViewingProgramacao(programacao)}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                        title="Ver detalhes"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleEdit(programacao)}
                         className="text-primary-600 hover:text-primary-900 mr-4"
                         title="Editar"
@@ -658,6 +666,78 @@ export default function ProgramacaoPedidos() {
                   Fechar
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingProgramacao && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes da Programação de Pedido</h2>
+              <button
+                onClick={() => setViewingProgramacao(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Código do Produto:</span>
+                    <p className="text-gray-900">{viewingProgramacao.codigoProduto}</p>
+                  </div>
+                  {viewingProgramacao.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProgramacao.setor}</p>
+                    </div>
+                  )}
+                  {viewingProgramacao.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProgramacao.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Quantidade Programada:</span>
+                    <p className="text-gray-900">{viewingProgramacao.quantidadeProgramada}</p>
+                  </div>
+                  {viewingProgramacao.atencao && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Atenção:</span>
+                      <p className="text-gray-900">{viewingProgramacao.atencao}</p>
+                    </div>
+                  )}
+                  {viewingProgramacao.dataCriacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Criado em:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProgramacao.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProgramacao.dataProgramacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Programação:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProgramacao.dataProgramacao), 'dd/MM/yyyy', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProgramacao(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
             </div>
           </div>
         </div>
