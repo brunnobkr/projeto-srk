@@ -21,6 +21,7 @@ import CentralMecanica from './pages/CentralMecanica';
 import ChamadosTI from './pages/ChamadosTI';
 import Registro from './pages/Registro';
 import Chat from './pages/Chat';
+import Equipe from './pages/Equipe';
 import AcompanhamentoProducao from './pages/AcompanhamentoProducao';
 
 function AppRoutes() {
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path="/central-mecanica" element={<ProtectedRoute><CentralMecanica /></ProtectedRoute>} />
         <Route path="/chamados-ti" element={<ProtectedRoute><ChamadosTI /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/equipe" element={<ProtectedRoute><Equipe /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );
