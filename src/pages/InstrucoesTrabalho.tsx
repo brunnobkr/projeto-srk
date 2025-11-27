@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, PlusCircle, X, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, PlusCircle, X, Image, Eye } from 'lucide-react';
 import { instrucoesStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { InstrucaoTrabalho, PassoInstrucao, Setor } from '../types';
@@ -7,13 +7,14 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
-  const { canCreate, canEdit, isEngenharia } = useAuth();
+  const { canCreate, canEdit, isEngenharia, isSegurancaTrabalho } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingInstrucao, setEditingInstrucao] = useState<InstrucaoTrabalho | null>(null);
+  const [viewingInstrucao, setViewingInstrucao] = useState<InstrucaoTrabalho | null>(null);
   
-  const podeCriarEditar = canCreate('instrucoesTrabalho') || canEdit('instrucoesTrabalho') || isEngenharia();
+  const podeCriarEditar = (canCreate('instrucoesTrabalho') || canEdit('instrucoesTrabalho') || isEngenharia() || isSegurancaTrabalho());
   const [setores, setSetores] = useState<Setor[]>([]);
   const [formData, setFormData] = useState({
     codigoProduto: '',
@@ -306,12 +307,32 @@ export default function InstrucoesTrabalho() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por código ou título..."
+            placeholder="Buscar por código ou título... (pressione Enter para ver detalhes)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchTerm.trim()) {
+                // Buscar instrução pelo código exato
+                const instrucaoEncontrada = instrucoes.find(i => 
+                  i.codigoProduto.toLowerCase() === searchTerm.toLowerCase().trim()
+                );
+                if (instrucaoEncontrada) {
+                  setViewingInstrucao(instrucaoEncontrada);
+                } else if (filteredInstrucoes.length === 1) {
+                  // Se encontrar apenas uma instrução, mostrar ela
+                  setViewingInstrucao(filteredInstrucoes[0]);
+                }
+              }
+            }}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
         </div>
+        {searchTerm.trim() && filteredInstrucoes.length > 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            {filteredInstrucoes.length} {filteredInstrucoes.length === 1 ? 'instrução encontrada' : 'instruções encontradas'}. 
+            {filteredInstrucoes.length === 1 && ' Pressione Enter para ver detalhes.'}
+          </p>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -353,12 +374,23 @@ export default function InstrucoesTrabalho() {
                         )}
                       </div>
                       <div className="flex space-x-2 ml-2">
-                        <button onClick={() => handleEdit(instrucao)} className="text-primary-600 hover:text-primary-900" title="Editar">
-                          <Edit className="w-4 h-4" />
+                        <button 
+                          onClick={() => setViewingInstrucao(instrucao)} 
+                          className="text-blue-600 hover:text-blue-900" 
+                          title="Ver Detalhes"
+                        >
+                          <Eye className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(instrucao.id)} className="text-red-600 hover:text-red-900" title="Excluir">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {podeCriarEditar && (
+                          <>
+                            <button onClick={() => handleEdit(instrucao)} className="text-primary-600 hover:text-primary-900" title="Editar">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDelete(instrucao.id)} className="text-red-600 hover:text-red-900" title="Excluir">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -596,6 +628,137 @@ export default function InstrucoesTrabalho() {
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingInstrucao ? 'Atualizar' : 'Criar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização Detalhada */}
+      {viewingInstrucao && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes da Instrução</h2>
+              <button
+                onClick={() => setViewingInstrucao(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Informações Básicas */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Código do Produto:</span>
+                    <p className="text-gray-900">{viewingInstrucao.codigoProduto}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo de Instrução:</span>
+                    <p className="text-gray-900">{getTipoInstrucaoLabel(viewingInstrucao.tipoInstrucao || 'insercao')}</p>
+                  </div>
+                  {viewingInstrucao.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingInstrucao.setor}</p>
+                    </div>
+                  )}
+                  {viewingInstrucao.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingInstrucao.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Título:</span>
+                    <p className="text-gray-900">{viewingInstrucao.titulo}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Destinatários:</span>
+                    <div className="flex space-x-2 mt-1">
+                      {viewingInstrucao.preparador && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Preparador</span>
+                      )}
+                      {viewingInstrucao.funcionario && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Funcionário</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Criado em:</span>
+                    <p className="text-gray-900">{format(new Date(viewingInstrucao.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Atualizado em:</span>
+                    <p className="text-gray-900">{format(new Date(viewingInstrucao.dataAtualizacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                  </div>
+                  {viewingInstrucao.criadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Criado por:</span>
+                      <p className="text-gray-900">{viewingInstrucao.criadoPor}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Passos da Instrução */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Passos da Instrução ({viewingInstrucao.passos.length})</h3>
+                <div className="space-y-4">
+                  {viewingInstrucao.passos
+                    .sort((a, b) => {
+                      const letraA = a.letra || String.fromCharCode(64 + ((a as any).ordem || 1));
+                      const letraB = b.letra || String.fromCharCode(64 + ((b as any).ordem || 1));
+                      return letraA.localeCompare(letraB);
+                    })
+                    .map((passo, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="font-semibold text-gray-900 text-lg">Passo {passo.letra || String.fromCharCode(64 + ((passo as any).ordem || index + 1))}:</span>
+                          <span className="px-2 py-1 text-xs rounded-full bg-primary-100 text-primary-800">
+                            {getTipoLabel(passo.tipo)}
+                          </span>
+                          {passo.criadoPor && (
+                            <span className="text-xs text-gray-500">por {passo.criadoPor}</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 mb-2">{passo.descricao}</p>
+                        {passo.detalhes && (
+                          <p className="text-xs text-gray-600 mb-3">{passo.detalhes}</p>
+                        )}
+                        {passo.fotos && passo.fotos.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs font-medium text-gray-600 mb-2">Fotos do Passo ({passo.fotos.length}):</p>
+                            <div className="grid grid-cols-4 gap-2">
+                              {passo.fotos.map((foto, fotoIndex) => (
+                                <div key={fotoIndex} className="relative">
+                                  <img
+                                    src={foto}
+                                    alt={`Foto passo ${passo.letra} - ${fotoIndex + 1}`}
+                                    className="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={() => openFotoModalPasso(foto, passo.fotos || [])}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingInstrucao(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
