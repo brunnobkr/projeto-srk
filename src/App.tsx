@@ -24,6 +24,7 @@ import Chat from './pages/Chat';
 import Equipe from './pages/Equipe';
 import AcompanhamentoProducao from './pages/AcompanhamentoProducao';
 import ConfiguracaoCloud from './pages/ConfiguracaoCloud';
+import ChamadosEngenharia from './pages/ChamadosEngenharia';
 
 function AppRoutes() {
   const { usuario } = useAuth();
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/equipe" element={<ProtectedRoute><Equipe /></ProtectedRoute>} />
         <Route path="/configuracao-cloud" element={<ProtectedRoute requireAdminPadrao><ConfiguracaoCloud /></ProtectedRoute>} />
+        <Route path="/chamados-engenharia" element={<ProtectedRoute><ChamadosEngenharia /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );

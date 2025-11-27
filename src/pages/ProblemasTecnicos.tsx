@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, CheckCircle, Eye, X } from 'lucide-react';
-import { problemasStorage, setoresStorage } from '../utils/storage';
+import { problemasStorage, setoresStorage, notificacoesStorage, usuariosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { ProblemaTecnico, Setor } from '../types';
+import type { ProblemaTecnico, Setor, Notificacao } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
@@ -120,10 +120,42 @@ export default function ProblemasTecnicos() {
       problemasStorage.update(editingProblema.id, problema);
     } else {
       problemasStorage.add(problema);
+      
+      // Se foi marcado para chamar engenharia, criar notificações
+      if (formData.engenhariaChamada) {
+        criarNotificacoesEngenharia(problema);
+      }
     }
 
     resetForm();
     loadProblemas();
+  };
+
+  // Criar notificações para usuários da engenharia
+  const criarNotificacoesEngenharia = (problema: ProblemaTecnico) => {
+    const todosUsuarios = usuariosStorage.getAll();
+    const usuariosEngenharia = todosUsuarios.filter(u => {
+      const cargo = u.cargo?.toLowerCase() || '';
+      const setor = u.setor?.toLowerCase() || '';
+      return (cargo.includes('engenharia') || setor.includes('engenharia')) && u.isAtivo;
+    });
+
+    usuariosEngenharia.forEach(usuario => {
+      const notificacao: Notificacao = {
+        id: `notif_${Date.now()}_${usuario.id}_${problema.id}`,
+        usuarioId: usuario.id,
+        tipo: 'chamado_engenharia',
+        titulo: `Novo Chamado: ${problema.maquina}`,
+        mensagem: `Chamado ${problema.numeroChamado || problema.id} - ${problema.descricao.substring(0, 100)}${problema.descricao.length > 100 ? '...' : ''}`,
+        lida: false,
+        dataCriacao: new Date().toISOString(),
+        dadosRelacionados: {
+          chamadoId: problema.id,
+          tipoChamado: problema.tipo,
+        },
+      };
+      notificacoesStorage.add(notificacao);
+    });
   };
 
   const handleEdit = (problema: ProblemaTecnico) => {

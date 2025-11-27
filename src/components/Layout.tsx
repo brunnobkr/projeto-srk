@@ -261,20 +261,46 @@ export default function Layout({ children }: LayoutProps) {
                 <>
                   {/* Engenharia - sempre disponível para admin */}
                   {(isEngenharia() || usuario?.id === 'admin_inicial') && (
-                    <li>
-                      <Link
-                        to="/gerenciar-setores-linhas"
-                        onClick={() => setSetoresExpandidos({ ...setoresExpandidos, setores: false })}
-                        className={`flex items-center px-4 py-3 pl-12 rounded-lg transition-colors ${
-                          location.pathname === '/gerenciar-setores-linhas'
-                            ? 'bg-primary-50 text-primary-700 font-semibold'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        <Settings className="w-5 h-5 mr-3" />
-                        <span>Engenharia</span>
-                      </Link>
-                    </li>
+                    <>
+                      <li>
+                        <Link
+                          to="/gerenciar-setores-linhas"
+                          onClick={() => setSetoresExpandidos({ ...setoresExpandidos, setores: false })}
+                          className={`flex items-center px-4 py-3 pl-12 rounded-lg transition-colors ${
+                            location.pathname === '/gerenciar-setores-linhas'
+                              ? 'bg-primary-50 text-primary-700 font-semibold'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <Settings className="w-5 h-5 mr-3" />
+                          <span>Gerenciar Setores</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/chamados-engenharia"
+                          onClick={() => setSetoresExpandidos({ ...setoresExpandidos, setores: false })}
+                          className={`flex items-center px-4 py-3 pl-12 rounded-lg transition-colors ${
+                            location.pathname === '/chamados-engenharia'
+                              ? 'bg-primary-50 text-primary-700 font-semibold'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <AlertTriangle className="w-5 h-5 mr-3" />
+                          <span>Chamados</span>
+                          {(() => {
+                            if (!usuario) return null;
+                            const notificacoes = notificacoesStorage.getNaoLidas(usuario.id);
+                            const chamadosNaoLidos = notificacoes.filter((n: any) => n.tipo === 'chamado_engenharia').length;
+                            return chamadosNaoLidos > 0 ? (
+                              <span className="ml-auto bg-red-600 text-white text-xs rounded-full px-2 py-1">
+                                {chamadosNaoLidos}
+                              </span>
+                            ) : null;
+                          })()}
+                        </Link>
+                      </li>
+                    </>
                   )}
 
                   {/* Logística - sempre disponível para admin */}

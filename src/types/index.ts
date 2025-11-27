@@ -474,13 +474,18 @@ export interface Conversa {
 export interface Notificacao {
   id: string;
   usuarioId: string;
-  tipo: 'mensagem' | 'chamada' | 'sistema';
+  tipo: 'mensagem' | 'chamada' | 'sistema' | 'chamado_engenharia';
   titulo: string;
   mensagem: string;
   lida: boolean;
   dataCriacao: string;
   link?: string; // Link para onde redirecionar ao clicar
   dadosExtras?: Record<string, any>; // Dados adicionais (ex: conversaId, chamadaId)
+  dadosRelacionados?: {
+    chamadoId?: string;
+    tipoChamado?: string;
+    [key: string]: any;
+  }; // Dados relacionados ao chamado ou outros eventos
 }
 
 export interface Chamada {
