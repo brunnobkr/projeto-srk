@@ -1117,209 +1117,381 @@ export default function ReceitasMaquina() {
       {/* Modal de Visualização Detalhada */}
       {viewingReceita && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Detalhes da Receita</h2>
-              <button
-                onClick={() => setViewingReceita(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {podeCriarEditar && (
+                  <button
+                    onClick={() => {
+                      handleEdit(viewingReceita);
+                      setViewingReceita(null);
+                    }}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                  >
+                    Editar
+                  </button>
+                )}
+                <button
+                  onClick={() => setViewingReceita(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              {/* Informações Básicas */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="space-y-4">
+              {/* Informações do Responsável */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações do Responsável</h3>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="font-medium text-gray-700">Código do Tubo:</span>
-                    <p className="text-gray-900">{viewingReceita.codigoTubo}</p>
-                  </div>
-                  {viewingReceita.setor && (
-                    <div>
-                      <span className="font-medium text-gray-700">Setor:</span>
-                      <p className="text-gray-900">{viewingReceita.setor}</p>
-                    </div>
-                  )}
-                  {viewingReceita.linha && (
-                    <div>
-                      <span className="font-medium text-gray-700">Linha:</span>
-                      <p className="text-gray-900">{viewingReceita.linha}</p>
-                    </div>
-                  )}
-                  <div>
-                    <span className="font-medium text-gray-700">Angulação:</span>
-                    <p className="text-gray-900">{viewingReceita.angulacao}°</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome do Responsável *
+                    </label>
+                    <input
+                      type="text"
+                      value={viewingReceita.nomeResponsavel || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">Velocidade:</span>
-                    <p className="text-gray-900">{viewingReceita.velocidade}</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Matrícula do Responsável *
+                    </label>
+                    <input
+                      type="text"
+                      value={viewingReceita.matriculaResponsavel || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Distância:</span>
-                    <p className="text-gray-900">{viewingReceita.distancia}mm</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Vazão:</span>
-                    <p className="text-gray-900">{viewingReceita.vazaoLado1}/{viewingReceita.vazaoLado2}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Conectores:</span>
-                    <p className="text-gray-900">{viewingReceita.conectores.join(', ')}</p>
-                  </div>
-                  {viewingReceita.maoObraNecessaria && (
-                    <div>
-                      <span className="font-medium text-gray-700">Mão de Obra Necessária:</span>
-                      <p className="text-gray-900">{viewingReceita.maoObraNecessaria}</p>
-                    </div>
-                  )}
-                  {viewingReceita.tempoMontagem && (
-                    <div>
-                      <span className="font-medium text-gray-700">Tempo de Montagem:</span>
-                      <p className="text-gray-900">{viewingReceita.tempoMontagem} min</p>
-                    </div>
-                  )}
-                  {viewingReceita.nomeResponsavel && (
-                    <div>
-                      <span className="font-medium text-gray-700">Responsável:</span>
-                      <p className="text-gray-900">{viewingReceita.nomeResponsavel}</p>
-                    </div>
-                  )}
-                  {viewingReceita.matriculaResponsavel && (
-                    <div>
-                      <span className="font-medium text-gray-700">Matrícula:</span>
-                      <p className="text-gray-900">{viewingReceita.matriculaResponsavel}</p>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* Informações de Inserção */}
-              {(viewingReceita.anguloInsercaoLadoA || viewingReceita.anguloInsercaoLadoB || 
-                viewingReceita.velocidadeLadoA || viewingReceita.velocidadeLadoB) && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-3">Informações de Inserção</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {viewingReceita.anguloInsercaoLadoA && (
-                      <div>
-                        <span className="font-medium text-gray-700">Ângulo Inserção Lado A:</span>
-                        <p className="text-gray-900">{viewingReceita.anguloInsercaoLadoA}°</p>
-                      </div>
-                    )}
-                    {viewingReceita.anguloInsercaoLadoB && (
-                      <div>
-                        <span className="font-medium text-gray-700">Ângulo Inserção Lado B:</span>
-                        <p className="text-gray-900">{viewingReceita.anguloInsercaoLadoB}°</p>
-                      </div>
-                    )}
-                    {viewingReceita.velocidadeLadoA && (
-                      <div>
-                        <span className="font-medium text-gray-700">Velocidade Lado A:</span>
-                        <p className="text-gray-900">{viewingReceita.velocidadeLadoA}</p>
-                      </div>
-                    )}
-                    {viewingReceita.velocidadeLadoB && (
-                      <div>
-                        <span className="font-medium text-gray-700">Velocidade Lado B:</span>
-                        <p className="text-gray-900">{viewingReceita.velocidadeLadoB}</p>
-                      </div>
-                    )}
-                    {viewingReceita.velocidadeMaquinaLadoA && (
-                      <div>
-                        <span className="font-medium text-gray-700">Velocidade Máquina Lado A:</span>
-                        <p className="text-gray-900">{viewingReceita.velocidadeMaquinaLadoA}</p>
-                      </div>
-                    )}
-                    {viewingReceita.velocidadeMaquinaLadoB && (
-                      <div>
-                        <span className="font-medium text-gray-700">Velocidade Máquina Lado B:</span>
-                        <p className="text-gray-900">{viewingReceita.velocidadeMaquinaLadoB}</p>
-                      </div>
-                    )}
-                    {viewingReceita.limiteInsercaoLadoA && (
-                      <div>
-                        <span className="font-medium text-gray-700">Limite Inserção Lado A:</span>
-                        <p className="text-gray-900">{viewingReceita.limiteInsercaoLadoA}</p>
-                      </div>
-                    )}
-                    {viewingReceita.limiteInsercaoLadoB && (
-                      <div>
-                        <span className="font-medium text-gray-700">Limite Inserção Lado B:</span>
-                        <p className="text-gray-900">{viewingReceita.limiteInsercaoLadoB}</p>
-                      </div>
-                    )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Código do Produto *
+                  </label>
+                  <input
+                    type="text"
+                    value={viewingReceita.codigoTubo}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Setor
+                  </label>
+                  <input
+                    type="text"
+                    value={viewingReceita.setor || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Linha
+                  </label>
+                  <input
+                    type="text"
+                    value={viewingReceita.linha || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Angulação (°) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={viewingReceita.angulacao}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Velocidade *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={viewingReceita.velocidade}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Distância (mm) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={viewingReceita.distancia}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vazão Lado 1 *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={viewingReceita.vazaoLado1}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vazão Lado 2 *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={viewingReceita.vazaoLado2}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              {/* Seção: Inserção Lado A */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações Lado A</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ângulo de Inserção Lado A (°) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.anguloInsercaoLadoA || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Velocidade Lado A *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.velocidadeLadoA || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Velocidade Máquina Lado A *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.velocidadeMaquinaLadoA || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Limite Inserção Lado A *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.limiteInsercaoLadoA || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
                   </div>
                 </div>
-              )}
-
-              {/* Fotos */}
-              {((viewingReceita.fotos && viewingReceita.fotos.length > 0) ||
-                (viewingReceita.fotosLadoA && viewingReceita.fotosLadoA.length > 0) ||
-                (viewingReceita.fotosLadoB && viewingReceita.fotosLadoB.length > 0)) && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Fotos</h3>
-                  {viewingReceita.fotos && viewingReceita.fotos.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Fotos Gerais ({viewingReceita.fotos.length}):</p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {viewingReceita.fotos.map((foto, index) => (
+                
+                {/* Fotos Lado A */}
+                {viewingReceita.fotosLadoA && viewingReceita.fotosLadoA.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Fotos da Configuração Lado A ({viewingReceita.fotosLadoA.length})
+                    </label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {viewingReceita.fotosLadoA.map((foto, index) => (
+                        <div key={index} className="relative">
                           <img
-                            key={index}
-                            src={foto}
-                            alt={`Foto ${index + 1}`}
-                            className="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80"
-                            onClick={() => {
-                              setFotoSelecionada(foto);
-                              setFotosModalAtual(viewingReceita.fotos || []);
-                              setShowFotoModal(true);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {viewingReceita.fotosLadoA && viewingReceita.fotosLadoA.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Fotos Lado A ({viewingReceita.fotosLadoA.length}):</p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {viewingReceita.fotosLadoA.map((foto, index) => (
-                          <img
-                            key={index}
                             src={foto}
                             alt={`Foto Lado A ${index + 1}`}
-                            className="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80"
+                            className="w-full h-32 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-80"
                             onClick={() => {
                               setFotoSelecionada(foto);
                               setFotosModalAtual(viewingReceita.fotosLadoA || []);
                               setShowFotoModal(true);
                             }}
                           />
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  {viewingReceita.fotosLadoB && viewingReceita.fotosLadoB.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Fotos Lado B ({viewingReceita.fotosLadoB.length}):</p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {viewingReceita.fotosLadoB.map((foto, index) => (
+                  </div>
+                )}
+              </div>
+
+              {/* Seção: Inserção Lado B */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações Lado B</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ângulo de Inserção Lado B (°) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.anguloInsercaoLadoB || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Velocidade Lado B *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.velocidadeLadoB || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Velocidade Máquina Lado B *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.velocidadeMaquinaLadoB || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Limite Inserção Lado B *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.limiteInsercaoLadoB || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+                
+                {/* Fotos Lado B */}
+                {viewingReceita.fotosLadoB && viewingReceita.fotosLadoB.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Fotos da Configuração Lado B ({viewingReceita.fotosLadoB.length})
+                    </label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {viewingReceita.fotosLadoB.map((foto, index) => (
+                        <div key={index} className="relative">
                           <img
-                            key={index}
                             src={foto}
                             alt={`Foto Lado B ${index + 1}`}
-                            className="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-80"
+                            className="w-full h-32 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-80"
                             onClick={() => {
                               setFotoSelecionada(foto);
                               setFotosModalAtual(viewingReceita.fotosLadoB || []);
                               setShowFotoModal(true);
                             }}
                           />
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
+              </div>
+
+              {/* Seção: Mão de Obra e Tempo */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Mão de Obra e Tempo de Montagem</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Mão de Obra Necessária *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.maoObraNecessaria || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tempo de Montagem (minutos) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={viewingReceita.tempoMontagem || ''}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Conectores (separados por vírgula)
+                </label>
+                <input
+                  type="text"
+                  value={viewingReceita.conectores?.join(', ') || ''}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Fotos Gerais */}
+              {viewingReceita.fotos && viewingReceita.fotos.length > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fotos Gerais ({viewingReceita.fotos.length})
+                  </label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {viewingReceita.fotos.map((foto, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={foto}
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-80"
+                          onClick={() => {
+                            setFotoSelecionada(foto);
+                            setFotosModalAtual(viewingReceita.fotos || []);
+                            setShowFotoModal(true);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
