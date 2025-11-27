@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Eye, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, X, FileText } from 'lucide-react';
 import { mudancasStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { MudancaMelhoria } from '../types';
+import type { MudancaMelhoria, AnexoPDF } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
@@ -14,6 +14,7 @@ export default function MudancasMelhorias() {
   const [showModal, setShowModal] = useState(false);
   const [editingMudanca, setEditingMudanca] = useState<MudancaMelhoria | null>(null);
   const [viewingMudanca, setViewingMudanca] = useState<MudancaMelhoria | null>(null);
+  const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
   const [formData, setFormData] = useState({
     tipo: 'atualizacao' as 'atualizacao' | 'ajuste-receita' | 'correcao-problema',
     titulo: '',
@@ -35,6 +36,43 @@ export default function MudancasMelhorias() {
     setMudancas(mudancasStorage.getAll());
   };
 
+  const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type === 'application/pdf') {
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`O arquivo ${file.name} é muito grande. Tamanho máximo: 10MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const novoAnexo: AnexoPDF = {
+            nome: file.name,
+            conteudo: base64String,
+            dataUpload: new Date().toISOString(),
+            tamanho: file.size,
+          };
+          setAnexosPDF((prev) => [...prev, novoAnexo]);
+        };
+        reader.onerror = () => {
+          alert('Erro ao carregar o PDF. Por favor, tente novamente.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Por favor, selecione apenas arquivos PDF.');
+      }
+    });
+    e.target.value = '';
+  };
+
+  const removePDF = (index: number) => {
+    setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const turno = formData.turno || determinarTurno(formData.hora);
@@ -52,6 +90,7 @@ export default function MudancasMelhorias() {
       status: formData.status,
       dataConclusao: formData.status === 'concluido' ? new Date().toISOString() : undefined,
       observacoes: formData.observacoes || undefined,
+      anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
     };
 
     if (editingMudanca) {
@@ -78,6 +117,7 @@ export default function MudancasMelhorias() {
       status: mudanca.status,
       observacoes: mudanca.observacoes || '',
     });
+    setAnexosPDF(mudanca.anexosPDF || []);
     setShowModal(true);
   };
 
@@ -101,6 +141,7 @@ export default function MudancasMelhorias() {
       status: 'planejado',
       observacoes: '',
     });
+    setAnexosPDF([]);
     setEditingMudanca(null);
     setShowModal(false);
   };
@@ -308,6 +349,52 @@ export default function MudancasMelhorias() {
                 <label className="block text-sm font-medium mb-1">Observações</label>
                 <textarea value={formData.observacoes} onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
               </div>
+              
+              {/* Seção de Anexos PDF */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4">Anexos PDF</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Adicionar Arquivo PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    multiple
+                    onChange={handlePDFUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
+                </div>
+                {anexosPDF.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Anexos adicionados ({anexosPDF.length}):</p>
+                    <div className="space-y-2">
+                      {anexosPDF.map((anexo, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                              {anexo.tamanho && (
+                                <p className="text-xs text-gray-500">
+                                  {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePDF(index)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-4 pt-4">
                 <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>
                 <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">{editingMudanca ? 'Atualizar' : 'Criar'}</button>
@@ -395,6 +482,38 @@ export default function MudancasMelhorias() {
                   )}
                 </div>
               </div>
+
+              {/* Anexos PDF */}
+              {viewingMudanca.anexosPDF && viewingMudanca.anexosPDF.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingMudanca.anexosPDF.length})</h3>
+                  <div className="space-y-2">
+                    {viewingMudanca.anexosPDF.map((anexo, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-6 h-6 text-red-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{anexo.nome}</p>
+                            {anexo.tamanho && (
+                              <p className="text-xs text-gray-500">
+                                {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                                {anexo.dataUpload && ` - ${format(new Date(anexo.dataUpload), 'dd/MM/yyyy', { locale: ptBR })}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={anexo.conteudo}
+                          download={anexo.nome}
+                          className="px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end mt-6 pt-4 border-t">

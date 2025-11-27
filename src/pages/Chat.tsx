@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Image as ImageIcon, Video, Mic, Search, X, Pause } from 'lucide-react';
+import { Send, Image as ImageIcon, Video, Mic, Search, X, Pause, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { mensagensStorage, conversasStorage, usuariosStorage, notificacoesStorage } from '../utils/storage';
 import type { Mensagem, Conversa, Usuario, Notificacao } from '../types';
@@ -13,10 +13,11 @@ export default function Chat() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [novaMensagem, setNovaMensagem] = useState('');
-  const [tipoMensagem, setTipoMensagem] = useState<'texto' | 'audio' | 'foto' | 'video'>('texto');
+  const [tipoMensagem, setTipoMensagem] = useState<'texto' | 'audio' | 'foto' | 'video' | 'pdf'>('texto');
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [audioGravado, setAudioGravado] = useState<string | null>(null);
   const [duracaoAudio, setDuracaoAudio] = useState(0);
+  const [nomeArquivoPDF, setNomeArquivoPDF] = useState<string>('');
   const [mostrarUsuarios, setMostrarUsuarios] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -27,6 +28,7 @@ export default function Chat() {
   const intervaloAudioRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (usuario) {
@@ -172,6 +174,7 @@ export default function Chat() {
     let audioUrl: string | undefined;
     let fotoUrl: string | undefined;
     let videoUrl: string | undefined;
+    let pdfUrl: string | undefined;
 
     if (tipoMensagem === 'audio' && audioGravado) {
       conteudo = 'Áudio';
@@ -182,9 +185,12 @@ export default function Chat() {
     } else if (tipoMensagem === 'video' && audioGravado) {
       conteudo = 'Vídeo';
       videoUrl = audioGravado; // Reutilizando o estado para vídeo
+    } else if (tipoMensagem === 'pdf' && audioGravado) {
+      conteudo = nomeArquivoPDF || 'PDF';
+      pdfUrl = audioGravado;
     }
 
-    if (!conteudo && !audioUrl && !fotoUrl && !videoUrl) return;
+    if (!conteudo && !audioUrl && !fotoUrl && !videoUrl && !pdfUrl) return;
 
     const mensagem: Mensagem = {
       id: Date.now().toString(),
@@ -196,6 +202,8 @@ export default function Chat() {
       audioUrl,
       fotoUrl,
       videoUrl,
+      pdfUrl,
+      nomeArquivoPDF: tipoMensagem === 'pdf' ? nomeArquivoPDF : undefined,
       duracaoAudio: tipoMensagem === 'audio' ? duracaoAudio : undefined,
       lida: false,
       dataEnvio: new Date().toISOString(),
@@ -209,7 +217,7 @@ export default function Chat() {
       usuarioId: outroUsuarioId,
       tipo: 'mensagem',
       titulo: `Nova mensagem de ${usuario.nome}`,
-      mensagem: tipoMensagem === 'texto' ? conteudo : `Enviou um ${tipoMensagem}`,
+      mensagem: tipoMensagem === 'texto' ? conteudo : tipoMensagem === 'pdf' ? `Enviou um PDF: ${nomeArquivoPDF || 'documento.pdf'}` : `Enviou um ${tipoMensagem}`,
       lida: false,
       dataCriacao: new Date().toISOString(),
       link: `/chat?conversa=${conversaSelecionada.id}`,
@@ -226,6 +234,7 @@ export default function Chat() {
     setNovaMensagem('');
     setTipoMensagem('texto');
     setAudioGravado(null);
+    setNomeArquivoPDF('');
     setDuracaoAudio(0);
     loadMensagens(conversaSelecionada.id);
     loadConversas();
@@ -283,11 +292,27 @@ export default function Chat() {
     setAudioGravado(null);
     setDuracaoAudio(0);
     setGravandoAudio(false);
+    setNomeArquivoPDF('');
+    setTipoMensagem('texto');
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, tipo: 'foto' | 'video') => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, tipo: 'foto' | 'video' | 'pdf') => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (tipo === 'pdf') {
+      if (file.type !== 'application/pdf') {
+        alert('Por favor, selecione apenas arquivos PDF.');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('O arquivo PDF é muito grande. Tamanho máximo: 10MB');
+        return;
+      }
+      setNomeArquivoPDF(file.name);
+    } else {
+      setNomeArquivoPDF('');
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -295,12 +320,11 @@ export default function Chat() {
       setAudioGravado(base64); // Reutilizando o estado
       setTipoMensagem(tipo);
     };
+    reader.onerror = () => {
+      alert('Erro ao carregar o arquivo. Por favor, tente novamente.');
+    };
 
-    if (tipo === 'foto') {
-      reader.readAsDataURL(file);
-    } else {
-      reader.readAsDataURL(file);
-    }
+    reader.readAsDataURL(file);
   };
 
 
@@ -420,6 +444,8 @@ export default function Chat() {
                           {conv.ultimaMensagem
                             ? conv.ultimaMensagem.tipo === 'texto'
                               ? conv.ultimaMensagem.conteudo
+                              : conv.ultimaMensagem.tipo === 'pdf'
+                              ? `Enviou um PDF: ${conv.ultimaMensagem.nomeArquivoPDF || 'documento.pdf'}`
                               : `Enviou um ${conv.ultimaMensagem.tipo}`
                             : 'Nenhuma mensagem'}
                         </p>
@@ -516,6 +542,22 @@ export default function Chat() {
                         <video src={msg.videoUrl} controls className="max-w-full rounded-lg" />
                       )}
                       
+                      {msg.tipo === 'pdf' && msg.pdfUrl && (
+                        <div className="flex items-center space-x-2 p-2 bg-white bg-opacity-20 rounded">
+                          <FileText className="w-6 h-6" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{msg.nomeArquivoPDF || 'Documento PDF'}</p>
+                            <a
+                              href={msg.pdfUrl}
+                              download={msg.nomeArquivoPDF || 'documento.pdf'}
+                              className="text-xs underline"
+                            >
+                              Baixar PDF
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      
                       <p className={`text-xs mt-1 ${isRemetente ? 'text-white opacity-75' : 'text-gray-500'}`}>
                         {format(new Date(msg.dataEnvio), 'HH:mm', { locale: ptBR })}
                       </p>
@@ -545,7 +587,7 @@ export default function Chat() {
                 </div>
               )}
               
-              {(audioGravado && (tipoMensagem === 'foto' || tipoMensagem === 'video')) && (
+              {(audioGravado && (tipoMensagem === 'foto' || tipoMensagem === 'video' || tipoMensagem === 'pdf')) && (
                 <div className="mb-2">
                   {tipoMensagem === 'foto' && (
                     <div className="relative">
@@ -566,6 +608,21 @@ export default function Chat() {
                         className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1"
                       >
                         <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  {tipoMensagem === 'pdf' && (
+                    <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                      <FileText className="w-6 h-6 text-red-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{nomeArquivoPDF || 'Documento PDF'}</p>
+                        <p className="text-xs text-gray-500">Pronto para enviar</p>
+                      </div>
+                      <button
+                        onClick={cancelarAudio}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-5 h-5" />
                       </button>
                     </div>
                   )}
@@ -602,6 +659,13 @@ export default function Chat() {
                   onChange={(e) => handleFileSelect(e, 'video')}
                   className="hidden"
                 />
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => handleFileSelect(e, 'pdf')}
+                  className="hidden"
+                />
 
                 <button
                   onClick={() => fileInputRef.current?.click()}
@@ -617,6 +681,14 @@ export default function Chat() {
                   title="Enviar vídeo"
                 >
                   <Video className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={() => pdfInputRef.current?.click()}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  title="Enviar PDF"
+                >
+                  <FileText className="w-5 h-5" />
                 </button>
 
                 {!gravandoAudio && !audioGravado ? (

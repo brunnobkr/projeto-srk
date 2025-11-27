@@ -435,11 +435,13 @@ export interface Mensagem {
   remetente?: Usuario;
   destinatarioId: string;
   destinatario?: Usuario;
-  tipo: 'texto' | 'audio' | 'foto' | 'video';
+  tipo: 'texto' | 'audio' | 'foto' | 'video' | 'pdf';
   conteudo: string; // Texto ou base64 para mídia
   audioUrl?: string; // URL do áudio (base64)
   fotoUrl?: string; // URL da foto (base64)
   videoUrl?: string; // URL do vídeo (base64)
+  pdfUrl?: string; // URL do PDF (base64)
+  nomeArquivoPDF?: string; // Nome do arquivo PDF
   duracaoAudio?: number; // Duração do áudio em segundos
   lida: boolean;
   dataEnvio: string;
