@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, PlusCircle, X, Shield, Clock, Image, FileText, Eye } from 'lucide-react';
 import { segurancaStorage, problemasStorage, acidentesStorage, funcionariosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente, Funcionario } from '../types';
+import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -246,13 +246,15 @@ export default function SegurancaTrabalho() {
                           )}
                           <h4 className="font-semibold text-gray-900">
                             {(() => {
-                              const funcionario = funcionariosStorage.getById(acidente.funcionarioId);
+                              const funcionarios = funcionariosStorage.getAll();
+                              const funcionario = funcionarios.find(f => f.id === acidente.funcionarioId);
                               return funcionario ? funcionario.nome : (acidente.funcionarioId || 'Funcionário não identificado');
                             })()}
                           </h4>
                         </div>
                         {(() => {
-                          const funcionario = funcionariosStorage.getById(acidente.funcionarioId);
+                          const funcionarios = funcionariosStorage.getAll();
+                          const funcionario = funcionarios.find(f => f.id === acidente.funcionarioId);
                           return funcionario ? (
                             <p className="text-xs text-gray-500 mb-1">Matrícula: {funcionario.matricula}</p>
                           ) : null;
@@ -598,7 +600,8 @@ export default function SegurancaTrabalho() {
                     <span className="font-medium text-gray-700">Funcionário:</span>
                     <p className="text-gray-900">
                       {(() => {
-                        const funcionario = funcionariosStorage.getById(viewingAcidente.funcionarioId);
+                        const funcionarios = funcionariosStorage.getAll();
+                        const funcionario = funcionarios.find(f => f.id === viewingAcidente.funcionarioId);
                         return funcionario ? funcionario.nome : (viewingAcidente.funcionarioId || 'Não identificado');
                       })()}
                     </p>
@@ -607,7 +610,8 @@ export default function SegurancaTrabalho() {
                     <span className="font-medium text-gray-700">Matrícula:</span>
                     <p className="text-gray-900">
                       {(() => {
-                        const funcionario = funcionariosStorage.getById(viewingAcidente.funcionarioId);
+                        const funcionarios = funcionariosStorage.getAll();
+                        const funcionario = funcionarios.find(f => f.id === viewingAcidente.funcionarioId);
                         return funcionario ? funcionario.matricula : '-';
                       })()}
                     </p>
