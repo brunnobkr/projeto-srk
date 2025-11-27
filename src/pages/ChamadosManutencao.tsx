@@ -229,11 +229,15 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   };
 
   const filteredChamados = chamados.filter(c => {
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-      c.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.maquina?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.setor.toLowerCase().includes(searchTerm.toLowerCase());
+      c.id.toLowerCase().includes(searchLower) ||
+      c.titulo.toLowerCase().includes(searchLower) ||
+      c.descricao.toLowerCase().includes(searchLower) ||
+      c.maquina?.toLowerCase().includes(searchLower) ||
+      c.setor.toLowerCase().includes(searchLower) ||
+      c.categoria?.toLowerCase().includes(searchLower) ||
+      c.linha?.toLowerCase().includes(searchLower);
     const matchesStatus = statusFilter === 'todos' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -262,13 +266,13 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar chamados..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            />
+              <input
+                type="text"
+                placeholder="Buscar por ID, título, descrição, máquina, setor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              />
           </div>
           <div>
             <select
@@ -302,6 +306,9 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">{chamado.titulo}</h3>
+                    <span className="px-2 py-1 text-xs font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {chamado.id}
+                    </span>
                     <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(chamado.status)}`}>
                       {getStatusLabel(chamado.status)}
                     </span>
@@ -555,7 +562,12 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
 
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{viewingChamado.titulo}</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
                   <div className="flex items-center space-x-2 mb-2">
                     <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
                       {getStatusLabel(viewingChamado.status)}

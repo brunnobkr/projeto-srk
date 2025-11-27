@@ -283,7 +283,15 @@ export default function ProgramacaoPedidos() {
                     <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                       <span className="flex items-center">
                         <Clock className="w-4 h-4 mr-1" />
-                        {format(new Date(problema.data), 'dd/MM/yyyy', { locale: ptBR })} às {problema.hora}
+                        {(() => {
+                          try {
+                            const data = new Date(problema.data);
+                            if (isNaN(data.getTime())) return problema.data || '-';
+                            return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${problema.hora || '-'}`;
+                          } catch {
+                            return problema.data || '-';
+                          }
+                        })()}
                       </span>
                     </div>
                   </div>
@@ -422,7 +430,15 @@ export default function ProgramacaoPedidos() {
                     <td className="px-6 py-4 whitespace-nowrap">{programacao.linha}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{programacao.quantidadeProgramada}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {format(new Date(programacao.dataProgramacao), 'dd/MM/yyyy', { locale: ptBR })}
+                      {(() => {
+                        try {
+                          const data = new Date(programacao.dataProgramacao);
+                          if (isNaN(data.getTime())) return '-';
+                          return format(data, 'dd/MM/yyyy', { locale: ptBR });
+                        } catch {
+                          return '-';
+                        }
+                      })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
@@ -802,27 +818,45 @@ export default function ProgramacaoPedidos() {
                       <p className="text-gray-900">{viewingProgramacao.atencao}</p>
                     </div>
                   )}
-                  {viewingProgramacao.dataCriacao && (
-                    <div>
-                      <span className="font-medium text-gray-700">Criado em:</span>
-                      <p className="text-gray-900">{format(new Date(viewingProgramacao.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
-                    </div>
-                  )}
-                  {viewingProgramacao.dataProgramacao && (
-                    <div>
-                      <span className="font-medium text-gray-700">Data de Programação:</span>
-                      <p className="text-gray-900">{format(new Date(viewingProgramacao.dataProgramacao), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                    </div>
-                  )}
+                  {viewingProgramacao.dataCriacao && (() => {
+                    try {
+                      const data = new Date(viewingProgramacao.dataCriacao);
+                      if (isNaN(data.getTime())) return null;
+                      return (
+                        <div>
+                          <span className="font-medium text-gray-700">Criado em:</span>
+                          <p className="text-gray-900">{format(data, 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                        </div>
+                      );
+                    } catch {
+                      return null;
+                    }
+                  })()}
+                  {viewingProgramacao.dataProgramacao && (() => {
+                    try {
+                      const data = new Date(viewingProgramacao.dataProgramacao);
+                      if (isNaN(data.getTime())) return null;
+                      return (
+                        <div>
+                          <span className="font-medium text-gray-700">Data de Programação:</span>
+                          <p className="text-gray-900">{format(data, 'dd/MM/yyyy', { locale: ptBR })}</p>
+                        </div>
+                      );
+                    } catch {
+                      return null;
+                    }
+                  })()}
                 </div>
               </div>
 
               {/* Anexos PDF */}
-              {viewingProgramacao.anexosPDF && viewingProgramacao.anexosPDF.length > 0 && (
+              {viewingProgramacao.anexosPDF && Array.isArray(viewingProgramacao.anexosPDF) && viewingProgramacao.anexosPDF.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingProgramacao.anexosPDF.length})</h3>
                   <div className="space-y-2">
-                    {viewingProgramacao.anexosPDF.map((anexo, index) => (
+                    {viewingProgramacao.anexosPDF.map((anexo, index) => {
+                      if (!anexo || !anexo.nome || !anexo.conteudo) return null;
+                      return (
                       <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div className="flex items-center space-x-3">
                           <FileText className="w-6 h-6 text-red-600" />
@@ -831,7 +865,15 @@ export default function ProgramacaoPedidos() {
                             {anexo.tamanho && (
                               <p className="text-xs text-gray-500">
                                 {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
-                                {anexo.dataUpload && ` - ${format(new Date(anexo.dataUpload), 'dd/MM/yyyy', { locale: ptBR })}`}
+                                {anexo.dataUpload && (() => {
+                                  try {
+                                    const data = new Date(anexo.dataUpload);
+                                    if (!isNaN(data.getTime())) {
+                                      return ` - ${format(data, 'dd/MM/yyyy', { locale: ptBR })}`;
+                                    }
+                                  } catch {}
+                                  return '';
+                                })()}
                               </p>
                             )}
                           </div>
@@ -844,7 +886,8 @@ export default function ProgramacaoPedidos() {
                           Download
                         </a>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

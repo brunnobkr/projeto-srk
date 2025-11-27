@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, PlusCircle, X, Shield, Clock, Image, FileText, Eye } from 'lucide-react';
-import { segurancaStorage, problemasStorage, acidentesStorage } from '../utils/storage';
+import { segurancaStorage, problemasStorage, acidentesStorage, funcionariosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente } from '../types';
+import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente, Funcionario } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -238,16 +238,40 @@ export default function SegurancaTrabalho() {
                              acidente.tipo === 'moderado' ? 'Moderado' : 'Leve'}
                           </span>
                         </div>
-                        <h4 className="font-semibold text-gray-900">
-                          {acidente.funcionarioId || 'Funcionário não identificado'}
-                        </h4>
+                        <div className="flex items-center space-x-2 mb-1">
+                          {acidente.numeroChamado && (
+                            <span className="px-2 py-1 text-xs font-semibold bg-gray-700 text-white rounded">
+                              {acidente.numeroChamado}
+                            </span>
+                          )}
+                          <h4 className="font-semibold text-gray-900">
+                            {(() => {
+                              const funcionario = funcionariosStorage.getById(acidente.funcionarioId);
+                              return funcionario ? funcionario.nome : (acidente.funcionarioId || 'Funcionário não identificado');
+                            })()}
+                          </h4>
+                        </div>
+                        {(() => {
+                          const funcionario = funcionariosStorage.getById(acidente.funcionarioId);
+                          return funcionario ? (
+                            <p className="text-xs text-gray-500 mb-1">Matrícula: {funcionario.matricula}</p>
+                          ) : null;
+                        })()}
                         <p className="text-sm text-gray-600 mt-1">{acidente.descricao}</p>
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                           <span><strong>Setor:</strong> {acidente.setor}</span>
                           <span><strong>Localização:</strong> {acidente.localizacao}</span>
                           <span className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
-                            {format(new Date(acidente.data), 'dd/MM/yyyy', { locale: ptBR })} às {acidente.hora}
+                            {(() => {
+                              try {
+                                const data = new Date(acidente.data);
+                                if (isNaN(data.getTime())) return acidente.data || '-';
+                                return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${acidente.hora || '-'}`;
+                              } catch {
+                                return acidente.data || '-';
+                              }
+                            })()}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 mt-3 flex-wrap">
@@ -564,9 +588,29 @@ export default function SegurancaTrabalho() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold mb-3">Informações do Acidente</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
+                  {viewingAcidente.numeroChamado && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Código do Chamado:</span>
+                      <p className="text-gray-900 font-semibold text-lg">{viewingAcidente.numeroChamado}</p>
+                    </div>
+                  )}
                   <div>
                     <span className="font-medium text-gray-700">Funcionário:</span>
-                    <p className="text-gray-900">{viewingAcidente.funcionarioId || 'Não identificado'}</p>
+                    <p className="text-gray-900">
+                      {(() => {
+                        const funcionario = funcionariosStorage.getById(viewingAcidente.funcionarioId);
+                        return funcionario ? funcionario.nome : (viewingAcidente.funcionarioId || 'Não identificado');
+                      })()}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Matrícula:</span>
+                    <p className="text-gray-900">
+                      {(() => {
+                        const funcionario = funcionariosStorage.getById(viewingAcidente.funcionarioId);
+                        return funcionario ? funcionario.matricula : '-';
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Gravidade:</span>
@@ -592,7 +636,15 @@ export default function SegurancaTrabalho() {
                   <div>
                     <span className="font-medium text-gray-700">Data/Hora:</span>
                     <p className="text-gray-900">
-                      {format(new Date(viewingAcidente.data), 'dd/MM/yyyy', { locale: ptBR })} às {viewingAcidente.hora}
+                      {(() => {
+                        try {
+                          const data = new Date(viewingAcidente.data);
+                          if (isNaN(data.getTime())) return viewingAcidente.data || '-';
+                          return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${viewingAcidente.hora || '-'}`;
+                        } catch {
+                          return viewingAcidente.data || '-';
+                        }
+                      })()}
                     </p>
                   </div>
                   <div>

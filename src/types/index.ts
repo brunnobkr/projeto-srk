@@ -113,6 +113,7 @@ export interface Setor {
 
 export interface Acidente {
   id: string;
+  numeroChamado?: string; // Código único do chamado (ex: ACID-0001)
   data: string;
   hora: string;
   funcionarioId: string;
@@ -227,7 +228,7 @@ export interface ControleFuncionarios {
 export interface ProblemaTecnico {
   id: string;
   numeroChamado?: string; // ID único do chamado (ex: CHAM-001, CHAM-002)
-  tipo: 'mecanico' | 'eletrico' | 'sistema';
+  tipo: 'mecanico' | 'eletrico' | 'sistema' | 'ferramentaria';
   maquina: string;
   descricao: string;
   data: string; // Data do registro (dia/mês/ano)

@@ -513,7 +513,15 @@ export default function GerenciarSetoresLinhas() {
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                           <span className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
-                            {format(new Date(problema.data), 'dd/MM/yyyy', { locale: ptBR })} às {problema.hora}
+                            {(() => {
+                              try {
+                                const data = new Date(problema.data);
+                                if (isNaN(data.getTime())) return problema.data || '-';
+                                return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${problema.hora || '-'}`;
+                              } catch {
+                                return problema.data || '-';
+                              }
+                            })()}
                           </span>
                         </div>
                       </div>
@@ -572,7 +580,15 @@ export default function GerenciarSetoresLinhas() {
                           {chamado.maquina && <span><strong>Máquina:</strong> {chamado.maquina}</span>}
                           <span className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
-                            {format(new Date(chamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {chamado.horaSolicitacao}
+                            {(() => {
+                              try {
+                                const data = new Date(chamado.dataSolicitacao);
+                                if (isNaN(data.getTime())) return chamado.dataSolicitacao || '-';
+                                return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${chamado.horaSolicitacao || '-'}`;
+                              } catch {
+                                return chamado.dataSolicitacao || '-';
+                              }
+                            })()}
                           </span>
                         </div>
                       </div>

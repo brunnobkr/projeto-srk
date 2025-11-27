@@ -8,7 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
 
 export default function ProblemasTecnicos() {
-  const { usuario } = useAuth();
+  const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
   const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +17,7 @@ export default function ProblemasTecnicos() {
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
   const [formData, setFormData] = useState({
-    tipo: 'mecanico' as 'mecanico' | 'eletrico' | 'sistema',
+    tipo: 'mecanico' as 'mecanico' | 'eletrico' | 'sistema' | 'ferramentaria',
     maquina: '',
     setor: '',
     linha: '',
@@ -194,6 +194,14 @@ export default function ProblemasTecnicos() {
   };
 
   const handleResolve = (id: string) => {
+    // Verificar permissões: precisa ter permissão de editar ou criar na central de mecânica
+    const temPermissao = canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica();
+    
+    if (!temPermissao) {
+      alert('Você não tem permissão para marcar problemas técnicos como resolvidos. Apenas usuários com permissão de editar ou criar na Central de Mecânica podem fazer isso.');
+      return;
+    }
+    
     const problema = problemas.find(p => p.id === id);
     if (problema) {
       const resolvidoPor = prompt('Quem resolveu o problema?');
@@ -241,6 +249,7 @@ export default function ProblemasTecnicos() {
       mecanico: 'Mecânico',
       eletrico: 'Elétrico',
       sistema: 'Sistema',
+      ferramentaria: 'Ferramentaria',
     };
     return labels[tipo] || tipo;
   };
@@ -333,6 +342,7 @@ export default function ProblemasTecnicos() {
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         problema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
                         problema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        problema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
                         'bg-red-100 text-red-800'
                       }`}>
                         {getTipoLabel(problema.tipo)}
@@ -390,7 +400,7 @@ export default function ProblemasTecnicos() {
                       <button onClick={() => setViewingProblema(problema)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
                         <Eye className="w-5 h-5" />
                       </button>
-                      {problema.status !== 'resolvido' && (
+                      {problema.status !== 'resolvido' && (canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica()) && (
                         <button
                           onClick={() => handleResolve(problema.id)}
                           className="text-green-600 hover:text-green-900 mr-4"
@@ -436,6 +446,7 @@ export default function ProblemasTecnicos() {
                     <option value="mecanico">Mecânico</option>
                     <option value="eletrico">Elétrico</option>
                     <option value="sistema">Sistema</option>
+                    <option value="ferramentaria">Ferramentaria</option>
                   </select>
                 </div>
                 <div>
@@ -571,6 +582,7 @@ export default function ProblemasTecnicos() {
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
                         viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
                         'bg-red-100 text-red-800'
                       }`}>
                         {getTipoLabel(viewingProblema.tipo)}

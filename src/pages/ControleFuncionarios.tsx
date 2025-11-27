@@ -313,10 +313,29 @@ export default function ControleFuncionarios() {
     setShowFotoModal(true);
   };
 
+  // Gerar número único de chamado para acidentes
+  const gerarNumeroChamadoAcidente = (): string => {
+    const todosAcidentes = acidentesStorage.getAll();
+    // Encontrar o maior número de chamado existente
+    let maiorNumero = 0;
+    todosAcidentes.forEach(a => {
+      if (a.numeroChamado) {
+        const numero = parseInt(a.numeroChamado.replace('ACID-', ''));
+        if (!isNaN(numero) && numero > maiorNumero) {
+          maiorNumero = numero;
+        }
+      }
+    });
+    // Gerar próximo número
+    const proximoNumero = maiorNumero + 1;
+    return `ACID-${proximoNumero.toString().padStart(4, '0')}`;
+  };
+
   const handleAcidenteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const acidente: Acidente = {
       id: Date.now().toString(),
+      numeroChamado: gerarNumeroChamadoAcidente(),
       data: format(new Date(), 'yyyy-MM-dd'),
       hora: format(new Date(), 'HH:mm'),
       funcionarioId: acidenteFormData.funcionarioId,

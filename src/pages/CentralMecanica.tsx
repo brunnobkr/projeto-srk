@@ -22,15 +22,27 @@ export default function CentralMecanica() {
 
   useEffect(() => {
     loadProblemasTecnicos();
-  }, []);
+  }, [tipoSelecionado]);
 
   const loadProblemasTecnicos = () => {
     const todosProblemas = problemasStorage.getAll();
-    // Filtrar problemas mecânicos e elétricos que estão abertos ou em andamento
+    
+    // Mapear o tipo selecionado para o tipo de problema técnico
+    let tipoProblema: 'mecanico' | 'eletrico' | 'sistema' | 'ferramentaria' | undefined;
+    if (tipoSelecionado === 'mecanica') {
+      tipoProblema = 'mecanico';
+    } else if (tipoSelecionado === 'eletrica') {
+      tipoProblema = 'eletrico';
+    } else if (tipoSelecionado === 'ferramentaria') {
+      tipoProblema = 'ferramentaria';
+    }
+    
+    // Filtrar problemas que correspondem ao tipo selecionado e estão abertos ou em andamento
     const problemasAtivos = todosProblemas.filter(p => 
-      (p.tipo === 'mecanico' || p.tipo === 'eletrico') &&
+      p.tipo === tipoProblema &&
       (p.status === 'aberto' || p.status === 'em-andamento')
     );
+    
     setProblemasTecnicos(problemasAtivos);
   };
 
@@ -51,9 +63,13 @@ export default function CentralMecanica() {
                     <div className="flex items-center space-x-2 mb-2">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         problema.tipo === 'mecanico' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
+                        problema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        problema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-blue-100 text-blue-800'
                       }`}>
-                        {problema.tipo === 'mecanico' ? 'Mecânico' : 'Elétrico'}
+                        {problema.tipo === 'mecanico' ? 'Mecânico' :
+                         problema.tipo === 'eletrico' ? 'Elétrico' :
+                         problema.tipo === 'ferramentaria' ? 'Ferramentaria' : 'Sistema'}
                       </span>
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         problema.status === 'aberto' ? 'bg-red-100 text-red-800' :
