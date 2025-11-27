@@ -250,47 +250,37 @@ export default function SegurancaTrabalho() {
                             {format(new Date(acidente.data), 'dd/MM/yyyy', { locale: ptBR })} às {acidente.hora}
                           </span>
                         </div>
-                        {(acidente.fotos && acidente.fotos.length > 0) || (acidente.anexosPDF && acidente.anexosPDF.length > 0) ? (
-                          <div className="flex items-center space-x-2 mt-3">
-                            {acidente.fotos && acidente.fotos.length > 0 && (
-                              <button
-                                onClick={() => {
-                                  setFotoSelecionada(acidente.fotos![0]);
-                                  setFotosModalAtual(acidente.fotos || []);
-                                  setShowFotoModal(true);
-                                }}
-                                className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                              >
-                                <Image className="w-4 h-4" />
-                                <span>Ver {acidente.fotos.length} {acidente.fotos.length === 1 ? 'Foto' : 'Fotos'}</span>
-                              </button>
-                            )}
-                            {acidente.anexosPDF && acidente.anexosPDF.length > 0 && (
-                              <button
-                                onClick={() => setViewingAcidente(acidente)}
-                                className="flex items-center space-x-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-                              >
-                                <FileText className="w-4 h-4" />
-                                <span>Ver {acidente.anexosPDF.length} {acidente.anexosPDF.length === 1 ? 'PDF' : 'PDFs'}</span>
-                              </button>
-                            )}
+                        <div className="flex items-center space-x-2 mt-3 flex-wrap">
+                          {acidente.fotos && acidente.fotos.length > 0 && (
+                            <button
+                              onClick={() => {
+                                setFotoSelecionada(acidente.fotos![0]);
+                                setFotosModalAtual(acidente.fotos || []);
+                                setShowFotoModal(true);
+                              }}
+                              className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                            >
+                              <Image className="w-4 h-4" />
+                              <span>Ver {acidente.fotos.length} {acidente.fotos.length === 1 ? 'Foto' : 'Fotos'}</span>
+                            </button>
+                          )}
+                          {acidente.anexosPDF && acidente.anexosPDF.length > 0 && (
                             <button
                               onClick={() => setViewingAcidente(acidente)}
-                              className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                              className="flex items-center space-x-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
                             >
-                              <Eye className="w-4 h-4" />
-                              <span>Ver Detalhes</span>
+                              <FileText className="w-4 h-4" />
+                              <span>Ver {acidente.anexosPDF.length} {acidente.anexosPDF.length === 1 ? 'PDF' : 'PDFs'}</span>
                             </button>
-                          </div>
-                        ) : (
+                          )}
                           <button
                             onClick={() => setViewingAcidente(acidente)}
-                            className="mt-3 flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                            className="flex items-center space-x-1 px-3 py-1 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium"
                           >
                             <Eye className="w-4 h-4" />
-                            <span>Ver Detalhes</span>
+                            <span>Ver Detalhes Completos</span>
                           </button>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
