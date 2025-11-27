@@ -872,8 +872,11 @@ export default function InstrucoesTrabalho() {
               </div>
 
               {/* Passos da Instrução */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Passos da Instrução ({viewingInstrucao.passos.length})</h3>
+              <div className="border-t pt-6 mt-6">
+                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-primary-600" />
+                  Passos da Instrução ({viewingInstrucao.passos.length})
+                </h3>
                 <div className="space-y-4">
                   {viewingInstrucao.passos
                     .sort((a, b) => {
@@ -920,8 +923,11 @@ export default function InstrucoesTrabalho() {
 
               {/* Fotos Gerais */}
               {viewingInstrucao.fotos && viewingInstrucao.fotos.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Fotos Gerais ({viewingInstrucao.fotos.length})</h3>
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <Image className="w-5 h-5 mr-2 text-blue-600" />
+                    Fotos Gerais ({viewingInstrucao.fotos.length})
+                  </h3>
                   <div className="grid grid-cols-4 gap-2">
                     {viewingInstrucao.fotos.map((foto, index) => (
                       <div key={index} className="relative">
@@ -943,8 +949,11 @@ export default function InstrucoesTrabalho() {
 
               {/* Anexos PDF */}
               {viewingInstrucao.anexosPDF && viewingInstrucao.anexosPDF.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Anexos PDF ({viewingInstrucao.anexosPDF.length})</h3>
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <FileText className="w-5 h-5 mr-2 text-red-600" />
+                    Anexos PDF ({viewingInstrucao.anexosPDF.length})
+                  </h3>
                   <div className="space-y-2">
                     {viewingInstrucao.anexosPDF.map((anexo, index) => (
                       <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
@@ -1006,7 +1015,7 @@ export default function InstrucoesTrabalho() {
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Fotos do Passo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Visualização de Fotos</h2>
               <button
                 onClick={() => {
                   setShowFotoModal(false);
