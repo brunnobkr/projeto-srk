@@ -2,7 +2,7 @@
 
 // ⚠️ CONFIGURAÇÃO: Para DESABILITAR todas as proteções, altere para true
 // Quando desabilitado, o sistema não pedirá senha e não aplicará proteções
-const DISABLE_SECURITY = false; // Altere para true para remover todas as proteções
+const DISABLE_SECURITY = true; // Altere para true para remover todas as proteções
 
 // Senha de desenvolvimento/segurança
 const DEV_PASSWORD = 'SRK2024DEV@SECURE';

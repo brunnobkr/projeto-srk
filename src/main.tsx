@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
-import { initSecurity } from './utils/security'
+// import { initSecurity } from './utils/security' // Proteção desabilitada
 
 // Garantir que o React está disponível
 if (!React || !ReactDOM) {
@@ -12,7 +12,7 @@ if (!React || !ReactDOM) {
 }
 
 // Inicializar sistema de segurança
-initSecurity();
+// initSecurity(); // Proteção desabilitada
 
 // Registrar Service Worker para PWA
 // Detecta o base path automaticamente para funcionar com GitHub Pages
