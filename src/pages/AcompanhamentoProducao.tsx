@@ -65,6 +65,7 @@ const COLORS_PIE = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4
 export default function AcompanhamentoProducao() {
   const { usuario } = useAuth();
   const [dataSelecionada, setDataSelecionada] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   const [resumoProducao, setResumoProducao] = useState<ProducaoResumo[]>([]);
   const [resumoGeral, setResumoGeral] = useState({
     totalProgramado: 0,
@@ -86,7 +87,7 @@ export default function AcompanhamentoProducao() {
 
   useEffect(() => {
     loadDados();
-  }, [dataSelecionada]);
+  }, [dataSelecionada, filtroTurno]);
 
   // Atualizar automaticamente a cada minuto
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function AcompanhamentoProducao() {
     }, 60000); // 1 minuto
 
     return () => clearInterval(interval);
-  }, [dataSelecionada]);
+  }, [dataSelecionada, filtroTurno]);
 
   // const loadSetores = () => {
   //   const todosSetores = setoresStorage.getAll();
@@ -109,15 +110,32 @@ export default function AcompanhamentoProducao() {
 
     // Carregar programações do dia
     // Compara pela data de criação ou data de programação
+    // Filtrar por turno se não for 'todos'
     const programacoes = programacoesPedidosStorage.getAll().filter(p => {
       const dataProg = p.dataProgramacao ? parseISO(p.dataProgramacao) : parseISO(p.dataCriacao);
-      return dataProg >= dataInicio && dataProg <= dataFim;
+      const dentroDoPeriodo = dataProg >= dataInicio && dataProg <= dataFim;
+      
+      // Filtrar por turno (apenas 1, 2 ou 3, excluindo central)
+      if (filtroTurno !== 'todos') {
+        return dentroDoPeriodo && p.turno === filtroTurno;
+      }
+      
+      // Se for 'todos', mostrar apenas programações com turno definido (1, 2 ou 3)
+      return dentroDoPeriodo && (p.turno === '1' || p.turno === '2' || p.turno === '3');
     });
 
     // Carregar produções realizadas do dia
+    // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
     const producoes = producaoStorage.getAll().filter(p => {
       const dataProd = parseISO(p.data);
-      return dataProd >= dataInicio && dataProd <= dataFim;
+      const dentroDoPeriodo = dataProd >= dataInicio && dataProd <= dataFim;
+      
+      if (filtroTurno !== 'todos') {
+        return dentroDoPeriodo && p.turno === filtroTurno;
+      }
+      
+      // Se for 'todos', mostrar apenas produções com turno definido (1, 2 ou 3)
+      return dentroDoPeriodo && (p.turno === '1' || p.turno === '2' || p.turno === '3');
     });
 
     // Carregar problemas técnicos do dia
@@ -398,6 +416,16 @@ export default function AcompanhamentoProducao() {
             <RefreshCw className="w-4 h-4" />
             <span>Atualizado: {format(ultimaAtualizacao, 'HH:mm:ss', { locale: ptBR })}</span>
           </div>
+          <select
+            value={filtroTurno}
+            onChange={(e) => setFiltroTurno(e.target.value as '1' | '2' | '3' | 'todos')}
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="todos">Todos os Turnos</option>
+            <option value="1">1º Turno (06:30-16:18)</option>
+            <option value="2">2º Turno (16:18-01:30)</option>
+            <option value="3">3º Turno (01:30-06:30)</option>
+          </select>
           <input
             type="date"
             value={dataSelecionada}

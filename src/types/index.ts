@@ -66,6 +66,7 @@ export interface Permissoes {
   dashboardAdmin: boolean; // Acesso ao dashboard admin
   gerenciarUsuarios: boolean; // Gerenciar usuários
   programarPedidos: boolean; // Logística pode programar pedidos
+  atualizarProducaoHora: boolean; // Permissão para atualizar produção hora a hora (preparadores ou autorizados pelo admin)
   
   // Compatibilidade com versão antiga (deprecated - manter por enquanto)
   criar?: boolean;
@@ -81,6 +82,7 @@ export interface ProgramacaoPedido {
   linha: string;
   quantidadeProgramada: number;
   dataProgramacao: string;
+  turno?: '1' | '2' | '3'; // Turno da programação (apenas 1, 2 ou 3, excluindo central)
   atencao?: string; // Observações/atenções
   importadoDe?: 'excel' | 'email' | 'manual' | 'ia';
   arquivoOrigem?: string; // Nome do arquivo Excel ou assunto do email
@@ -97,6 +99,7 @@ export interface DadosExtraidosIA {
   quantidade?: number;
   setor?: string;
   linha?: string;
+  turno?: '1' | '2' | '3'; // Turno extraído pela IA
   estadoPedido?: 'critico' | 'alerta' | 'normal';
   confianca?: number; // Nível de confiança da extração (0-100)
   observacoes?: string;

@@ -24,6 +24,7 @@ const permissoesPadrao: Permissoes = {
   dashboardAdmin: false,
   gerenciarUsuarios: false,
   programarPedidos: false,
+  atualizarProducaoHora: false,
 };
 
 export default function GerenciarUsuarios() {
@@ -789,6 +790,16 @@ export default function GerenciarUsuarios() {
                           className="mr-2"
                         />
                         <span className="text-sm">Programar Pedidos (Logística)</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.permissoes.atualizarProducaoHora}
+                          onChange={() => togglePermissao('atualizarProducaoHora')}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Atualizar Produção Hora a Hora</span>
+                        <span className="ml-2 text-xs text-gray-500">(Preparadores têm permissão automática)</span>
                       </label>
                     </div>
                   </div>

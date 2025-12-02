@@ -8,10 +8,11 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno, getTurnoBadgeColor, getTurnoLabel } from '../utils/turno';
 
 export default function ControleProducao() {
-  const { usuario, isPreparador } = useAuth();
+  const { usuario, isPreparador, podeAtualizarProducao, isAdmin } = useAuth();
   const [controles, setControles] = useState<ControleProducao[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   const [showModal, setShowModal] = useState(false);
   const [editingControle, setEditingControle] = useState<ControleProducao | null>(null);
   const [viewingControle, setViewingControle] = useState<ControleProducao | null>(null);
@@ -47,14 +48,20 @@ export default function ControleProducao() {
     loadControles();
     loadSetores();
     
-    // Atualizar controles a cada minuto para preparadores verem atualizações em tempo real
-    if (isPreparador()) {
+    // Carregar códigos ativos para quem pode atualizar produção
+    if (podeAtualizarProducao()) {
+      loadCodigosAtivosPorLinha();
+    }
+    
+    // Atualizar controles a cada minuto para quem pode atualizar ver atualizações em tempo real
+    if (podeAtualizarProducao()) {
       const interval = setInterval(() => {
         loadControles();
+        loadCodigosAtivosPorLinha();
       }, 60000); // 1 minuto
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [filtroTurno]);
 
   const loadSetores = () => {
     const todosSetores = setoresStorage.getAll();
@@ -65,8 +72,16 @@ export default function ControleProducao() {
   const loadControles = () => {
     let todosControles = producaoStorage.getAll();
     
-    // Se for preparador, filtrar apenas do seu setor
-    if (isPreparador() && usuario?.setor) {
+    // Filtrar por turno (apenas 1, 2 ou 3, excluindo central)
+    if (filtroTurno !== 'todos') {
+      todosControles = todosControles.filter(c => c.turno === filtroTurno);
+    } else {
+      // Se for 'todos', mostrar apenas controles com turno definido (1, 2 ou 3)
+      todosControles = todosControles.filter(c => c.turno === '1' || c.turno === '2' || c.turno === '3');
+    }
+    
+    // Se for quem pode atualizar produção (preparador ou autorizado), filtrar apenas do seu setor
+    if (podeAtualizarProducao() && usuario?.setor) {
       const setorUsuario = usuario.setor.toLowerCase().trim();
       todosControles = todosControles.filter(c => {
         const setorControle = (c.setor || '').toLowerCase().trim();
@@ -93,21 +108,39 @@ export default function ControleProducao() {
     });
     
     setControles(todosControles);
-    
-    // Se for preparador, carregar códigos ativos por linha
-    if (isPreparador()) {
-      loadCodigosAtivosPorLinha();
-    }
   };
 
-  // Carregar códigos ativos por linha (para preparadores)
+    // Carregar códigos ativos por linha (para quem pode atualizar produção)
   const loadCodigosAtivosPorLinha = () => {
-    if (!usuario?.setor) return;
+    if (!usuario?.setor || !podeAtualizarProducao()) return;
 
     const setorUsuario = usuario.setor.toLowerCase().trim();
-    const programacoes = programacoesPedidosStorage.getAll();
-    const controles = producaoStorage.getAll();
+    const dataHoje = format(new Date(), 'yyyy-MM-dd');
     
+    let programacoes = programacoesPedidosStorage.getAll();
+    let controles = producaoStorage.getAll();
+    
+    // Filtrar programações do dia atual (comparar apenas a data, não a hora)
+    programacoes = programacoes.filter(p => {
+      try {
+        const dataProg = p.dataProgramacao ? new Date(p.dataProgramacao) : new Date(p.dataCriacao);
+        const dataProgFormatada = format(dataProg, 'yyyy-MM-dd');
+        return dataProgFormatada === dataHoje;
+      } catch {
+        return false;
+      }
+    });
+    
+    // Filtrar por turno (apenas 1, 2 ou 3, excluindo central)
+    if (filtroTurno !== 'todos') {
+      programacoes = programacoes.filter(p => p.turno === filtroTurno);
+      controles = controles.filter(c => c.turno === filtroTurno);
+    } else {
+      // Se for 'todos', mostrar apenas com turno definido (1, 2 ou 3)
+      programacoes = programacoes.filter(p => p.turno === '1' || p.turno === '2' || p.turno === '3');
+      controles = controles.filter(c => c.turno === '1' || c.turno === '2' || c.turno === '3');
+    }
+
     // Filtrar programações do setor do preparador
     const programacoesSetor = programacoes.filter(p => {
       const setorProgramacao = (p.setor || '').toLowerCase().trim();
@@ -120,13 +153,22 @@ export default function ControleProducao() {
     programacoesSetor.forEach(programacao => {
       const chaveLinha = `${programacao.setor}_${programacao.linha}`;
       
-      // Buscar controle de produção correspondente
-      const controle = controles.find(c => 
-        c.codigoTubo === programacao.codigoProduto &&
-        c.setor === programacao.setor &&
-        c.linha === programacao.linha &&
-        c.data === programacao.dataProgramacao
-      );
+      // Buscar controle de produção correspondente (comparar apenas a data)
+      const controle = controles.find(c => {
+        const dataControle = c.data;
+        let dataProgFormatada: string;
+        try {
+          const dataProg = programacao.dataProgramacao ? new Date(programacao.dataProgramacao) : new Date(programacao.dataCriacao);
+          dataProgFormatada = format(dataProg, 'yyyy-MM-dd');
+        } catch {
+          return false;
+        }
+        
+        return c.codigoTubo === programacao.codigoProduto &&
+          c.setor === programacao.setor &&
+          c.linha === programacao.linha &&
+          dataControle === dataProgFormatada;
+      });
 
       const atualizacoes = controle?.atualizacoesHora || [];
       const quantidadeFinal = atualizacoes.reduce((sum, a) => sum + a.quantidadeRealizada, 0);
@@ -151,7 +193,14 @@ export default function ControleProducao() {
           quantidadeRealizada: quantidadeFinal,
           eficiencia,
           atualizacoesHora: atualizacoes,
-          dataInicio: programacao.dataProgramacao,
+          dataInicio: (() => {
+            try {
+              const dataProg = programacao.dataProgramacao ? new Date(programacao.dataProgramacao) : new Date(programacao.dataCriacao);
+              return format(dataProg, 'yyyy-MM-dd');
+            } catch {
+              return format(new Date(), 'yyyy-MM-dd');
+            }
+          })(),
           status: quantidadeFinal < programacao.quantidadeProgramada ? 'rodando' : 'finalizado',
         };
         
@@ -548,18 +597,23 @@ export default function ControleProducao() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Controle de Produção</h1>
           <p className="mt-2 text-gray-600">
-            {isPreparador() 
+            {podeAtualizarProducao() 
               ? 'Atualize a produção de hora em hora e acompanhe a eficiência do seu setor'
-              : 'Registre e acompanhe a produção por hora e a cada 30 minutos'}
+              : 'Visualize e acompanhe a produção por hora e a cada 30 minutos'}
           </p>
-          {isPreparador() && usuario?.setor && (
+          {podeAtualizarProducao() && usuario?.setor && (
             <p className="mt-1 text-sm text-blue-600 font-medium">
               Setor: {usuario.setor}
             </p>
           )}
+          {!podeAtualizarProducao() && (
+            <p className="mt-1 text-sm text-orange-600 font-medium">
+              ⚠️ Apenas usuários autorizados podem atualizar a produção hora a hora
+            </p>
+          )}
         </div>
         <div className="flex items-center space-x-3">
-          {isPreparador() && (
+          {podeAtualizarProducao() && (
             <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('linhas')}
@@ -583,7 +637,7 @@ export default function ControleProducao() {
               </button>
             </div>
           )}
-          {!isPreparador() && (
+          {!podeAtualizarProducao() && isAdmin() && (
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -595,14 +649,33 @@ export default function ControleProducao() {
         </div>
       </div>
 
-      {isPreparador() && viewMode === 'linhas' ? (
+      {podeAtualizarProducao() && viewMode === 'linhas' ? (
         // VISÃO POR LINHAS (para preparadores)
         <div className="space-y-4">
           {Object.entries(codigosAtivosPorLinha).map(([chaveLinha, codigos]) => {
             const [setor, linha] = chaveLinha.split('_');
-            const programacoes = programacoesPedidosStorage.getAll().filter(p => 
-              p.setor === setor && p.linha === linha && p.dataProgramacao === format(new Date(), 'yyyy-MM-dd')
-            );
+            const dataHoje = format(new Date(), 'yyyy-MM-dd');
+            
+            let programacoes = programacoesPedidosStorage.getAll().filter(p => {
+              // Comparar setor e linha
+              if (p.setor !== setor || p.linha !== linha) return false;
+              
+              // Comparar data (dataProgramacao pode estar em formato ISO)
+              try {
+                const dataProg = p.dataProgramacao ? new Date(p.dataProgramacao) : new Date(p.dataCriacao);
+                const dataProgFormatada = format(dataProg, 'yyyy-MM-dd');
+                return dataProgFormatada === dataHoje;
+              } catch {
+                return false;
+              }
+            });
+            
+            // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
+            if (filtroTurno !== 'todos') {
+              programacoes = programacoes.filter(p => p.turno === filtroTurno);
+            } else {
+              programacoes = programacoes.filter(p => p.turno === '1' || p.turno === '2' || p.turno === '3');
+            }
 
             return (
               <div key={chaveLinha} className="bg-white rounded-lg shadow-sm p-6">
@@ -745,15 +818,31 @@ export default function ControleProducao() {
       ) : (
         <>
           <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Buscar por código do produto, processo ou preparador..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Buscar por código do produto, processo ou preparador..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Turno</label>
+                <select
+                  value={filtroTurno}
+                  onChange={(e) => setFiltroTurno(e.target.value as '1' | '2' | '3' | 'todos')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="todos">Todos os Turnos</option>
+                  <option value="1">1º Turno (06:30-16:18)</option>
+                  <option value="2">2º Turno (16:18-01:30)</option>
+                  <option value="3">3º Turno (01:30-06:30)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Central não é usado para produção</p>
+              </div>
             </div>
           </div>
 
@@ -836,7 +925,7 @@ export default function ControleProducao() {
                       {controle.preparador || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      {isPreparador() && controle.quantidadeTotalLogistica && (
+                      {podeAtualizarProducao() && controle.quantidadeTotalLogistica && (
                         <button 
                           onClick={() => handleAtualizarHora(controle)} 
                           className="text-purple-600 hover:text-purple-900 mr-2" 
@@ -848,7 +937,7 @@ export default function ControleProducao() {
                       <button onClick={() => setViewingControle(controle)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
                         <Eye className="w-5 h-5" />
                       </button>
-                      {!isPreparador() && (
+                      {!podeAtualizarProducao() && isAdmin() && (
                         <>
                           <button onClick={() => handleEdit(controle)} className="text-primary-600 hover:text-primary-900 mr-4">
                             <Edit className="w-5 h-5" />

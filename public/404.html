@@ -8,34 +8,54 @@
       // Redireciona para index.html para permitir que React Router gerencie as rotas
       // Necessário para SPAs no GitHub Pages
       (function() {
-        var path = window.location.pathname;
-        var search = window.location.search;
-        var hash = window.location.hash;
-        
-        // Nome do repositório
-        var repoName = 'projeto-srk';
-        var basePath = '/' + repoName + '/';
-        
-        // Remove o base path do path atual
-        var route = path.replace(basePath, '').replace(/^\/+/, '').replace(/\/+$/, '');
-        
-        // Se não tem rota ou é 404.html, vai para a raiz
-        if (!route || route === '404.html') {
-          route = '';
+        try {
+          var path = window.location.pathname;
+          var search = window.location.search;
+          var hash = window.location.hash;
+          
+          // Detectar base path automaticamente
+          // Se a URL contém /projeto-srk/, o base path é /projeto-srk/
+          // Caso contrário, é /
+          var pathParts = path.split('/').filter(function(p) { return p && p !== 'index.html' && p !== '404.html'; });
+          var basePath = '/';
+          
+          // Se o primeiro segmento não é um arquivo (não tem extensão), pode ser o nome do repositório
+          if (pathParts.length > 0) {
+            var firstPart = pathParts[0];
+            // Verificar se não é um arquivo (sem extensão) e não é uma rota comum
+            if (!firstPart.includes('.') && 
+                firstPart !== 'src' && 
+                firstPart !== 'assets' && 
+                firstPart !== 'public') {
+              basePath = '/' + firstPart + '/';
+              // Remover o primeiro segmento do pathParts para obter a rota
+              pathParts.shift();
+            }
+          }
+          
+          // Construir a rota (tudo que vem depois do base path)
+          var route = pathParts.join('/');
+          
+          // Constrói a URL completa para index.html
+          var indexPath = basePath + 'index.html';
+          
+          // Se temos uma rota, manter no pathname para o React Router processar
+          if (route) {
+            // Usar replaceState para manter a rota no pathname sem recarregar
+            var fullPath = basePath + route;
+            if (fullPath.endsWith('/')) {
+              fullPath = fullPath.slice(0, -1);
+            }
+            window.history.replaceState(null, '', fullPath + search + hash);
+          }
+          
+          // Carrega o index.html
+          window.location.replace(indexPath + search + hash);
+        } catch (error) {
+          console.error('Erro ao redirecionar:', error);
+          // Fallback: redirecionar para a raiz
+          window.location.replace('./index.html');
         }
-        
-        // Constrói a URL completa
-        var indexPath = basePath + 'index.html';
-        
-        // Redireciona para index.html mantendo a rota no pathname
-        // O React Router vai processar a rota corretamente
-        if (route) {
-          // Mantém a rota no pathname para o React Router processar
-          window.history.replaceState(null, '', basePath + route + search + hash);
-        }
-        
-        // Carrega o index.html
-        window.location.replace(indexPath + search + hash);
       })();
     </script>
   </head>
@@ -43,7 +63,7 @@
     <p>Redirecionando...</p>
     <noscript>
       <p>Por favor, habilite JavaScript para acessar o aplicativo.</p>
-      <p><a href="/projeto-srk/">Clique aqui para ir para a página inicial</a></p>
+      <p><a href="./index.html">Clique aqui para ir para a página inicial</a></p>
     </noscript>
   </body>
 </html>

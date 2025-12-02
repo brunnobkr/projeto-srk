@@ -19,6 +19,7 @@ interface AuthContextType {
   isCentralMecanica: () => boolean;
   isTI: () => boolean;
   isPreparador: () => boolean;
+  podeAtualizarProducao: () => boolean; // Verifica se pode atualizar produção hora a hora
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,6 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!usuario) return false;
     if (usuario.id === 'admin_inicial') return true; // Admin padrão tem todas as permissões
     
+    // Controle de Produção: todos os usuários autenticados podem visualizar
+    if (permission === 'controleProducao') {
+      return true; // Todos podem visualizar (atualização é controlada por podeAtualizarProducao)
+    }
+    
     // Verificar permissões baseadas em cargo/setor
     const cargo = usuario.cargo?.toLowerCase() || '';
     const setor = usuario.setor?.toLowerCase() || '';
@@ -153,6 +159,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!usuario) return false;
     if (usuario.id === 'admin_inicial') return true;
     if (usuario.isAdmin) return true;
+    
+    // Controle de Produção: todos podem visualizar (apenas atualização requer permissão)
+    if (modulo === 'controleProducao') {
+      return true; // Todos os usuários autenticados podem visualizar
+    }
     
     const moduloPermissao = usuario.permissoes[modulo as keyof Permissoes];
     
@@ -302,6 +313,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
            setor.includes('preparação') || setor.includes('preparacao');
   };
 
+  // Verifica se o usuário pode atualizar produção hora a hora
+  // Preparadores têm permissão automática, mas admin pode autorizar outros usuários
+  const podeAtualizarProducao = (): boolean => {
+    if (!usuario) return false;
+    if (usuario.id === 'admin_inicial') return true; // Admin padrão tem acesso a tudo
+    if (isAdmin()) return true; // Admins podem atualizar
+    if (isPreparador()) return true; // Preparadores têm permissão automática
+    // Verificar permissão específica concedida pelo admin
+    return usuario.permissoes?.atualizarProducaoHora === true;
+  };
+
   return (
     <AuthContext.Provider value={{ 
       usuario, 
@@ -319,7 +341,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSegurancaTrabalho,
       isCentralMecanica,
       isTI,
-      isPreparador
+      isPreparador,
+      podeAtualizarProducao
     }}>
       {children}
     </AuthContext.Provider>

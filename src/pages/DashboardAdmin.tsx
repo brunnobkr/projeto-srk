@@ -55,6 +55,7 @@ export default function DashboardAdmin() {
   const [faltasPorSetor, setFaltasPorSetor] = useState<Record<string, number>>({});
   const [acidentes, setAcidentes] = useState<Acidente[]>([]);
   const [periodo, setPeriodo] = useState(30); // dias
+  const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   
   // Produção Total da Fábrica
   const [producaoTotal, setProducaoTotal] = useState(0);
@@ -83,7 +84,7 @@ export default function DashboardAdmin() {
       setIsAuthorized(false);
     }
     setLoading(false);
-  }, [periodo]);
+  }, [periodo, filtroTurno]);
 
   // Atualizar dados automaticamente a cada 30 segundos
   useEffect(() => {
@@ -94,7 +95,7 @@ export default function DashboardAdmin() {
     }, 30000); // 30 segundos
 
     return () => clearInterval(interval);
-  }, [isAuthorized, periodo]);
+  }, [isAuthorized, periodo, filtroTurno]);
 
   const loadData = () => {
     const dataInicio = startOfDay(subDays(new Date(), periodo));
@@ -102,10 +103,18 @@ export default function DashboardAdmin() {
 
 
     // Carregar dados de produção
+    // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
     const producoes = producaoStorage.getAll();
-    const producoesFiltradas = producoes.filter(p => {
+    let producoesFiltradas = producoes.filter(p => {
       const dataProd = new Date(p.data);
-      return dataProd >= dataInicio && dataProd <= dataFim;
+      const dentroDoPeriodo = dataProd >= dataInicio && dataProd <= dataFim;
+      
+      if (filtroTurno !== 'todos') {
+        return dentroDoPeriodo && p.turno === filtroTurno;
+      }
+      
+      // Se for 'todos', mostrar apenas produções com turno definido (1, 2 ou 3)
+      return dentroDoPeriodo && (p.turno === '1' || p.turno === '2' || p.turno === '3');
     });
 
     // Produção Total da Fábrica
@@ -114,9 +123,17 @@ export default function DashboardAdmin() {
 
     // ===== DADOS DE PROGRAMAÇÃO VS REALIZAÇÃO =====
     // Carregar programações do período
-    const programacoes = programacoesPedidosStorage.getAll().filter(p => {
+    // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
+    let programacoes = programacoesPedidosStorage.getAll().filter(p => {
       const dataProg = p.dataProgramacao ? new Date(p.dataProgramacao) : new Date(p.dataCriacao);
-      return dataProg >= dataInicio && dataProg <= dataFim;
+      const dentroDoPeriodo = dataProg >= dataInicio && dataProg <= dataFim;
+      
+      if (filtroTurno !== 'todos') {
+        return dentroDoPeriodo && p.turno === filtroTurno;
+      }
+      
+      // Se for 'todos', mostrar apenas programações com turno definido (1, 2 ou 3)
+      return dentroDoPeriodo && (p.turno === '1' || p.turno === '2' || p.turno === '3');
     });
 
     // Calcular total programado da fábrica
@@ -485,6 +502,16 @@ export default function DashboardAdmin() {
           </p>
         </div>
         <div className="flex items-center space-x-4">
+          <select
+            value={filtroTurno}
+            onChange={(e) => setFiltroTurno(e.target.value as '1' | '2' | '3' | 'todos')}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="todos">Todos os Turnos</option>
+            <option value="1">1º Turno (06:30-16:18)</option>
+            <option value="2">2º Turno (16:18-01:30)</option>
+            <option value="3">3º Turno (01:30-06:30)</option>
+          </select>
           <select
             value={periodo}
             onChange={(e) => setPeriodo(parseInt(e.target.value))}

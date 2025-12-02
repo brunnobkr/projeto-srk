@@ -42,13 +42,22 @@ export default function ProtectedRoute({
     );
   }
 
-  if (requiredPermission && !hasPermission(requiredPermission)) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Acesso Negado</h2>
-        <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
-      </div>
-    );
+  if (requiredPermission) {
+    // Controle de Produção: todos os usuários autenticados podem visualizar
+    if (requiredPermission === 'controleProducao') {
+      // Permitir acesso para todos (a atualização será controlada dentro do componente)
+      return <>{children}</>;
+    }
+    
+    // Outras permissões: verificar normalmente
+    if (!hasPermission(requiredPermission)) {
+      return (
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">Acesso Negado</h2>
+          <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
+        </div>
+      );
+    }
   }
 
   return <>{children}</>;

@@ -71,8 +71,12 @@ function AppRoutes() {
 }
 
 function App() {
+  // Detectar base path automaticamente para GitHub Pages
+  // import.meta.env.BASE_URL é definido pelo Vite baseado na configuração
+  const basePath = import.meta.env.BASE_URL || '/';
+  
   return (
-    <Router>
+    <Router basename={basePath}>
       <AppRoutes />
     </Router>
   );

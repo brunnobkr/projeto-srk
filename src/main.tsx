@@ -35,14 +35,40 @@ if ('serviceWorker' in navigator) {
 // Garantir que o elemento root existe antes de renderizar
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  throw new Error('Elemento root não encontrado!');
+  console.error('Elemento root não encontrado! Tentando criar...');
+  const newRoot = document.createElement('div');
+  newRoot.id = 'root';
+  document.body.appendChild(newRoot);
+  ReactDOM.createRoot(newRoot).render(
+    <React.StrictMode>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </React.StrictMode>,
+  );
+} else {
+  try {
+    ReactDOM.createRoot(rootElement).render(
+      <React.StrictMode>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </React.StrictMode>,
+    );
+  } catch (error) {
+    console.error('Erro ao renderizar aplicação:', error);
+    // Tentar renderizar novamente após um pequeno delay
+    setTimeout(() => {
+      if (rootElement) {
+        ReactDOM.createRoot(rootElement).render(
+          <React.StrictMode>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </React.StrictMode>,
+        );
+      }
+    }, 100);
+  }
 }
-
-ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </React.StrictMode>,
-)
 

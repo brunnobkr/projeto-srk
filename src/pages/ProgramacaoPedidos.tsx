@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { processarExcel, processarPDF, criarAIBackend, obterOpenAIKey, salvarOpenAIKey } from '../utils/aiExtraction';
 import { determinarTurno } from '../utils/turno';
+import { determinarTurno } from '../utils/turno';
 
 export default function ProgramacaoPedidos() {
   const { isLogistica, isPreparador, usuario } = useAuth();
@@ -20,20 +21,30 @@ export default function ProgramacaoPedidos() {
   const [editingProgramacao, setEditingProgramacao] = useState<ProgramacaoPedido | null>(null);
   const [viewingProgramacao, setViewingProgramacao] = useState<ProgramacaoPedido | null>(null);
   const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
+  // Função auxiliar para determinar turno válido para produção (apenas 1, 2 ou 3)
+  const determinarTurnoProducao = (): '1' | '2' | '3' => {
+    const turno = determinarTurno();
+    // Se for 'central', usar 1º turno como padrão (turno central não é usado para produção)
+    return turno === 'central' ? '1' : turno as '1' | '2' | '3';
+  };
+
   const [formData, setFormData] = useState({
     codigoProduto: '',
     setor: '',
     linha: '',
     quantidadeProgramada: '',
+    turno: determinarTurnoProducao(),
     atencao: '',
   });
   const [emailData, setEmailData] = useState({
     setor: '',
     linha: '',
     quantidadeProgramada: '',
+    turno: determinarTurnoProducao(),
     atencao: '',
     codigos: '', // Códigos separados por vírgula
   });
+  const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   const [_excelFile, setExcelFile] = useState<File | null>(null);
   const [problemasProducao, setProblemasProducao] = useState<ProblemaTecnico[]>([]);
   const [showAIModal, setShowAIModal] = useState(false);
@@ -116,6 +127,33 @@ export default function ProgramacaoPedidos() {
     setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Função auxiliar para criar registro no Controle de Produção automaticamente
+  const criarControleProducaoAutomatico = (programacao: ProgramacaoPedido) => {
+    // Usar o turno da programação, ou determinar baseado na hora se não tiver
+    // Garantir que não seja 'central' (apenas 1, 2 ou 3)
+    const turnoFinal = programacao.turno || determinarTurnoProducao();
+    
+    const controleProducao: ControleProducao = {
+      id: `prod_${programacao.id}`,
+      codigoTubo: programacao.codigoProduto,
+      setor: programacao.setor,
+      linha: programacao.linha,
+      data: format(new Date(programacao.dataProgramacao || programacao.dataCriacao), 'yyyy-MM-dd'),
+      hora: format(new Date(), 'HH:mm'),
+      turno: turnoFinal as '1' | '2' | '3' | 'central',
+      quantidade30min: 0,
+      quantidadeHora: 0,
+      tempoMontagem: 0,
+      maoObra: 0,
+      maoObraPorLinha: 0,
+      processo: 'Programado',
+      quantidadeTotalLogistica: programacao.quantidadeProgramada,
+      observacoes: `Importado automaticamente da programação de pedidos${programacao.estadoPedido ? ` (Estado: ${programacao.estadoPedido})` : ''}${programacao.atencao ? `. Atenção: ${programacao.atencao}` : ''}${programacao.turno ? ` (Turno: ${programacao.turno}º)` : ''}`,
+    };
+
+    producaoStorage.add(controleProducao);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const programacao: ProgramacaoPedido = {
@@ -125,6 +163,7 @@ export default function ProgramacaoPedidos() {
       linha: formData.linha,
       quantidadeProgramada: parseInt(formData.quantidadeProgramada) || 0,
       dataProgramacao: new Date().toISOString(),
+      turno: formData.turno,
       atencao: formData.atencao || undefined,
       importadoDe: 'manual',
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
@@ -136,9 +175,11 @@ export default function ProgramacaoPedidos() {
       programacoesPedidosStorage.update(editingProgramacao.id, programacao);
     } else {
       programacoesPedidosStorage.add(programacao);
+      // Criar registro no Controle de Produção automaticamente apenas para novas programações
+      criarControleProducaoAutomatico(programacao);
     }
 
-    alert(editingProgramacao ? 'Programação atualizada com sucesso!' : 'Programação criada com sucesso!');
+    alert(editingProgramacao ? 'Programação atualizada com sucesso!' : 'Programação criada com sucesso e enviada automaticamente para o Controle de Produção!');
     resetForm();
     loadData();
   };
@@ -146,6 +187,7 @@ export default function ProgramacaoPedidos() {
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const codigos = emailData.codigos.split(',').map(c => c.trim()).filter(c => c);
+    const programacoesCriadas: ProgramacaoPedido[] = [];
     
     codigos.forEach(codigo => {
       const programacao: ProgramacaoPedido = {
@@ -155,6 +197,7 @@ export default function ProgramacaoPedidos() {
         linha: emailData.linha,
         quantidadeProgramada: parseInt(emailData.quantidadeProgramada) || 0,
         dataProgramacao: new Date().toISOString(),
+        turno: emailData.turno,
         atencao: emailData.atencao || undefined,
         importadoDe: 'email',
         arquivoOrigem: 'Email',
@@ -163,14 +206,18 @@ export default function ProgramacaoPedidos() {
       };
 
       programacoesPedidosStorage.add(programacao);
-
+      programacoesCriadas.push(programacao);
+      
+      // Criar registro no Controle de Produção automaticamente
+      criarControleProducaoAutomatico(programacao);
     });
 
-    alert(`${codigos.length} programação(ões) criada(s) com sucesso!`);
+    alert(`${codigos.length} programação(ões) criada(s) com sucesso e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produção!`);
     setEmailData({
       setor: '',
       linha: '',
       quantidadeProgramada: '',
+      turno: determinarTurnoProducao(),
       atencao: '',
       codigos: '',
     });
@@ -242,6 +289,7 @@ export default function ProgramacaoPedidos() {
         linha: dados.linha,
         quantidadeProgramada: dados.quantidade || 0,
         dataProgramacao: new Date().toISOString(),
+        turno: dados.turno || determinarTurnoProducao(),
         atencao: dados.observacoes,
         importadoDe: 'ia',
         arquivoOrigem: arquivoProcessando?.name || 'Arquivo IA',
@@ -258,25 +306,7 @@ export default function ProgramacaoPedidos() {
 
     // Criar registros no Controle de Produção automaticamente
     programacoesCriadas.forEach(programacao => {
-      const controleProducao: ControleProducao = {
-        id: `prod_${programacao.id}`,
-        codigoTubo: programacao.codigoProduto,
-        setor: programacao.setor,
-        linha: programacao.linha,
-        data: format(new Date(), 'yyyy-MM-dd'),
-        hora: format(new Date(), 'HH:mm'),
-        turno: determinarTurno() as '1' | '2' | '3' | 'central',
-        quantidade30min: 0,
-        quantidadeHora: 0,
-        tempoMontagem: 0,
-        maoObra: 0,
-        maoObraPorLinha: 0,
-        processo: 'Programado',
-        quantidadeTotalLogistica: programacao.quantidadeProgramada,
-        observacoes: `Importado automaticamente da programação de pedidos (Estado: ${programacao.estadoPedido || 'normal'})`,
-      };
-
-      producaoStorage.add(controleProducao);
+      criarControleProducaoAutomatico(programacao);
     });
 
     alert(`${programacoesCriadas.length} programação(ões) criada(s) e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produção!`);
@@ -321,6 +351,7 @@ export default function ProgramacaoPedidos() {
       setor: programacao.setor,
       linha: programacao.linha,
       quantidadeProgramada: programacao.quantidadeProgramada.toString(),
+      turno: programacao.turno || determinarTurnoProducao(),
       atencao: programacao.atencao || '',
     });
     setShowModal(true);
@@ -339,6 +370,7 @@ export default function ProgramacaoPedidos() {
       setor: '',
       linha: '',
       quantidadeProgramada: '',
+      turno: determinarTurnoProducao(),
       atencao: '',
     });
     setAnexosPDF([]);
@@ -370,6 +402,11 @@ export default function ProgramacaoPedidos() {
       if (!setorProgramacao.includes(setorUsuario) && !setorUsuario.includes(setorProgramacao)) {
         return false;
       }
+    }
+    
+    // Filtrar por turno (se não for 'todos')
+    if (filtroTurno !== 'todos' && p.turno !== filtroTurno) {
+      return false;
     }
     
     // Aplicar filtro de busca
@@ -511,15 +548,30 @@ export default function ProgramacaoPedidos() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar por código, setor ou linha..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por código, setor ou linha..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Turno</label>
+            <select
+              value={filtroTurno}
+              onChange={(e) => setFiltroTurno(e.target.value as '1' | '2' | '3' | 'todos')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="todos">Todos os Turnos</option>
+              <option value="1">1º Turno (06:30-16:18)</option>
+              <option value="2">2º Turno (16:18-01:30)</option>
+              <option value="3">3º Turno (01:30-06:30)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -578,6 +630,7 @@ export default function ProgramacaoPedidos() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Setor</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Linha</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turno</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantidade</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origem</th>
@@ -588,7 +641,7 @@ export default function ProgramacaoPedidos() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProgramacoes.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
                     Nenhuma programação encontrada
                   </td>
                 </tr>
@@ -598,6 +651,19 @@ export default function ProgramacaoPedidos() {
                     <td className="px-6 py-4 whitespace-nowrap font-medium">{programacao.codigoProduto}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{programacao.setor}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{programacao.linha}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {programacao.turno ? (
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          programacao.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          programacao.turno === '2' ? 'bg-green-100 text-green-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {programacao.turno}º Turno
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">{programacao.quantidadeProgramada}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {(() => {
@@ -734,15 +800,31 @@ export default function ProgramacaoPedidos() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Quantidade Programada *</label>
-                <input
-                  type="number"
-                  required
-                  value={formData.quantidadeProgramada}
-                  onChange={(e) => setFormData({ ...formData, quantidadeProgramada: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Turno *</label>
+                  <select
+                    required
+                    value={formData.turno}
+                    onChange={(e) => setFormData({ ...formData, turno: e.target.value as '1' | '2' | '3' })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
+                    <option value="1">1º Turno (06:30-16:18)</option>
+                    <option value="2">2º Turno (16:18-01:30)</option>
+                    <option value="3">3º Turno (01:30-06:30)</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Central não é usado para programações de produção</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Quantidade Programada *</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.quantidadeProgramada}
+                    onChange={(e) => setFormData({ ...formData, quantidadeProgramada: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Atenção/Observações</label>
@@ -878,15 +960,30 @@ export default function ProgramacaoPedidos() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Quantidade Programada *</label>
-                <input
-                  type="number"
-                  required
-                  value={emailData.quantidadeProgramada}
-                  onChange={(e) => setEmailData({ ...emailData, quantidadeProgramada: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Turno *</label>
+                  <select
+                    required
+                    value={emailData.turno}
+                    onChange={(e) => setEmailData({ ...emailData, turno: e.target.value as '1' | '2' | '3' })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
+                    <option value="1">1º Turno (06:30-16:18)</option>
+                    <option value="2">2º Turno (16:18-01:30)</option>
+                    <option value="3">3º Turno (01:30-06:30)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Quantidade Programada *</label>
+                  <input
+                    type="number"
+                    required
+                    value={emailData.quantidadeProgramada}
+                    onChange={(e) => setEmailData({ ...emailData, quantidadeProgramada: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Atenções</label>
@@ -1003,6 +1100,20 @@ export default function ProgramacaoPedidos() {
                     <span className="font-medium text-gray-700">Quantidade Programada:</span>
                     <p className="text-gray-900">{viewingProgramacao.quantidadeProgramada}</p>
                   </div>
+                  {viewingProgramacao.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProgramacao.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProgramacao.turno === '2' ? 'bg-green-100 text-green-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {viewingProgramacao.turno}º Turno
+                        </span>
+                      </p>
+                    </div>
+                  )}
                   {viewingProgramacao.atencao && (
                     <div className="col-span-2">
                       <span className="font-medium text-gray-700">Atenção:</span>
@@ -1210,6 +1321,19 @@ export default function ProgramacaoPedidos() {
                             className="w-full px-3 py-2 border rounded-lg text-sm"
                             required
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Turno *</label>
+                          <select
+                            value={dados.turno || determinarTurnoProducao()}
+                            onChange={(e) => handleEditarDadosIA(index, 'turno', e.target.value as '1' | '2' | '3')}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                            required
+                          >
+                            <option value="1">1º Turno (06:30-16:18)</option>
+                            <option value="2">2º Turno (16:18-01:30)</option>
+                            <option value="3">3º Turno (01:30-06:30)</option>
+                          </select>
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-xs text-gray-600 mb-1">Estado do Pedido</label>
