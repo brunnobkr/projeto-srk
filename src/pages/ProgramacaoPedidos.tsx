@@ -7,7 +7,6 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { processarExcel, processarPDF, criarAIBackend, obterOpenAIKey, salvarOpenAIKey } from '../utils/aiExtraction';
 import { determinarTurno } from '../utils/turno';
-import { determinarTurno } from '../utils/turno';
 
 export default function ProgramacaoPedidos() {
   const { isLogistica, isPreparador, usuario } = useAuth();

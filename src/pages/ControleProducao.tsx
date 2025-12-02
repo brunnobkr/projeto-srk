@@ -8,7 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno, getTurnoBadgeColor, getTurnoLabel } from '../utils/turno';
 
 export default function ControleProducao() {
-  const { usuario, isPreparador, podeAtualizarProducao, isAdmin } = useAuth();
+  const { usuario, podeAtualizarProducao, isAdmin } = useAuth();
   const [controles, setControles] = useState<ControleProducao[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -387,6 +387,15 @@ export default function ControleProducao() {
 
   // Função para preparador atualizar produção por hora (versão por código ativo)
   const handleAtualizarHoraCodigo = (setor: string, linha: string, codigo: CodigoAtivoLinha) => {
+    // Buscar programação para obter o turno correto
+    const programacoes = programacoesPedidosStorage.getAll();
+    const programacao = programacoes.find(p => 
+      p.codigoProduto === codigo.codigoProduto &&
+      p.setor === setor &&
+      p.linha === linha &&
+      format(new Date(p.dataProgramacao || p.dataCriacao), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+    );
+    
     // Buscar ou criar controle de produção
     let controle = controles.find(c => 
       c.codigoTubo === codigo.codigoProduto &&
@@ -396,6 +405,12 @@ export default function ControleProducao() {
     );
 
     if (!controle) {
+      // Usar turno da programação se disponível, senão determinar pela hora atual
+      const turnoProgramacao = programacao?.turno;
+      const turnoFinal = (turnoProgramacao && (turnoProgramacao === '1' || turnoProgramacao === '2' || turnoProgramacao === '3'))
+        ? turnoProgramacao
+        : determinarTurno();
+      
       // Criar novo controle
       const novoControle: ControleProducao = {
         id: Date.now().toString(),
@@ -409,10 +424,10 @@ export default function ControleProducao() {
         tempoMontagem: 0,
         maoObra: 0,
         maoObraPorLinha: 0,
-        processo: '',
+        processo: 'Programado',
         quantidadeTotalLogistica: codigo.quantidadePedida,
         atualizacoesHora: [],
-        turno: determinarTurno() as '1' | '2' | '3' | 'central',
+        turno: turnoFinal as '1' | '2' | '3' | 'central',
       };
       producaoStorage.add(novoControle);
       controle = novoControle;
@@ -559,6 +574,10 @@ export default function ControleProducao() {
     setControleParaAtualizar(null);
     setQuantidadeHoraAtual('');
     loadControles();
+    // Recarregar códigos ativos para atualizar a visualização
+    if (podeAtualizarProducao()) {
+      loadCodigosAtivosPorLinha();
+    }
   };
 
   const resetForm = () => {

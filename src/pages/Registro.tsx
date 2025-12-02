@@ -120,6 +120,7 @@ export default function Registro() {
         dashboardAdmin: false,
         gerenciarUsuarios: false,
         programarPedidos: false,
+        atualizarProducaoHora: false,
         criar: true,
         editar: true,
         excluir: false,

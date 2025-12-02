@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dashboardAdmin: false,
         gerenciarUsuarios: false,
         programarPedidos: false,
+        atualizarProducaoHora: false,
       };
 
       const adminInicial: Usuario = {
