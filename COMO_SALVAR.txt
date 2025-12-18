@@ -1,0 +1,41 @@
+========================================
+  COMO SALVAR O PROJETO
+========================================
+
+MÉTODO MAIS FÁCIL:
+------------------
+1. Clique duas vezes em: SALVAR_PROJETO.bat
+2. Aguarde terminar
+3. Pronto! Projeto salvo ✓
+
+O QUE ACONTECE:
+---------------
+✓ Todas as mudanças são salvas
+✓ Um backup .zip é criado na pasta "backups"
+✓ Se tiver Git, cria commit automático
+✓ Registro de mudanças é atualizado
+
+ONDE FICAM OS BACKUPS:
+----------------------
+Pasta: backups/
+Arquivo: backup_projeto_AAAA-MM-DD_HH-mm-ss.zip
+
+RESTAURAR BACKUP:
+-----------------
+1. Vá na pasta "backups"
+2. Escolha o backup desejado
+3. Extraia o .zip
+4. Copie os arquivos de volta
+5. Execute: npm install
+
+MAIS INFORMAÇÕES:
+-----------------
+Leia: GUIA_SALVAMENTO.md
+
+========================================
+
+
+
+
+
+

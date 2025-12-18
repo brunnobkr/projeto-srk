@@ -56,18 +56,6 @@ export default function ConfiguracaoCloud() {
     }
   }, [passwordVerified]);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordInput === SECURITY_PASSWORD) {
-      setPasswordVerified(true);
-      setPasswordError(false);
-      sessionStorage.setItem(PASSWORD_STORAGE_KEY, SECURITY_PASSWORD);
-      setPasswordInput('');
-    } else {
-      setPasswordError(true);
-      setPasswordInput('');
-    }
-  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -152,6 +140,19 @@ export default function ConfiguracaoCloud() {
     }
   };
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === SECURITY_PASSWORD) {
+      setPasswordVerified(true);
+      setPasswordError(false);
+      sessionStorage.setItem(PASSWORD_STORAGE_KEY, SECURITY_PASSWORD);
+      setPasswordInput('');
+    } else {
+      setPasswordError(true);
+      setPasswordInput('');
+    }
+  };
+
   // Verificar se é admin padrão
   if (usuario?.id !== 'admin_inicial') {
     return (
@@ -218,6 +219,7 @@ export default function ConfiguracaoCloud() {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-6 p-6">

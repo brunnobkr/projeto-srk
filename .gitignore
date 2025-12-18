@@ -47,3 +47,8 @@ dist-ssr/
 
 # Pastas temporárias
 Projeto-srk-/
+
+# Backups locais (não versionar backups)
+backups/
+*.zip
+REGISTRO_SALVAMENTO_*.txt

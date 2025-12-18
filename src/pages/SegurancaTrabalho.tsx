@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { Plus, Edit, Trash2, Search, PlusCircle, X, Shield, Clock, Image, FileText, Eye } from 'lucide-react';
 import { segurancaStorage, problemasStorage, acidentesStorage, funcionariosStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente } from '../types';
+import type { SegurancaTrabalho, PassoSeguranca, BotaoMaquina, CheckupSeguranca, ProblemaTecnico, Acidente, Funcionario } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -48,6 +49,131 @@ export default function SegurancaTrabalho() {
   const [showFotoModal, setShowFotoModal] = useState(false);
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
+  const [matriculaBusca, setMatriculaBusca] = useState('');
+  const [resultadosMatricula, setResultadosMatricula] = useState<Acidente[]>([]);
+  const [infoFuncionarioBusca, setInfoFuncionarioBusca] = useState<{ nome?: string; matricula?: string; setor?: string; cargo?: string } | null>(null);
+  const [erroBuscaMatricula, setErroBuscaMatricula] = useState<string | null>(null);
+  const [buscaMatriculaRealizada, setBuscaMatriculaRealizada] = useState(false);
+
+  const funcionariosCache = funcionariosStorage.getAll();
+  const funcionariosMap = new Map<string, Funcionario>();
+  funcionariosCache.forEach((funcionario) => {
+    funcionariosMap.set(funcionario.id, funcionario);
+  });
+  const matriculasDisponiveis = Array.from(
+    new Set(
+      funcionariosCache
+        .map((funcionario) => funcionario.matricula)
+        .filter((matricula): matricula is string => Boolean(matricula))
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  const normalizarMatricula = (valor?: string) =>
+    valor ? valor.replace(/\s+/g, '').toLowerCase() : '';
+
+  const getFuncionarioDoAcidente = (acidente: Acidente) => {
+    return funcionariosMap.get(acidente.funcionarioId) || acidente.funcionario;
+  };
+
+  const formatarDataHoraAcidente = (acidente: Acidente) => {
+    try {
+      const data = new Date(acidente.data);
+      if (Number.isNaN(data.getTime())) {
+        return `${acidente.data || '-'}${acidente.hora ? ` às ${acidente.hora}` : ''}`;
+      }
+      const dataFormatada = format(data, 'dd/MM/yyyy', { locale: ptBR });
+      return acidente.hora ? `${dataFormatada} às ${acidente.hora}` : dataFormatada;
+    } catch {
+      return `${acidente.data || '-'}${acidente.hora ? ` às ${acidente.hora}` : ''}`;
+    }
+  };
+
+  const funcionarioVisualizado = viewingAcidente ? getFuncionarioDoAcidente(viewingAcidente) : undefined;
+
+  const handleBuscarAcidentesPorMatricula = (event?: FormEvent) => {
+    event?.preventDefault();
+    setBuscaMatriculaRealizada(true);
+    setErroBuscaMatricula(null);
+
+    const termo = matriculaBusca.trim();
+    if (!termo) {
+      setErroBuscaMatricula('Informe a matrícula para realizar a busca.');
+      setResultadosMatricula([]);
+      setInfoFuncionarioBusca(null);
+      return;
+    }
+
+    const matriculaNormalizada = normalizarMatricula(termo);
+    const funcionarioEncontrado = funcionariosCache.find(
+      (funcionario) => normalizarMatricula(funcionario.matricula) === matriculaNormalizada
+    );
+
+    const todosAcidentes = acidentesStorage.getAll();
+    const acidentesFiltrados = todosAcidentes
+      .filter((acidente) => {
+        const funcionarioRelacionado = funcionariosMap.get(acidente.funcionarioId);
+        const matriculaRelacionado = normalizarMatricula(funcionarioRelacionado?.matricula);
+        const matriculaRegistrada = normalizarMatricula(acidente.funcionario?.matricula);
+
+        if (matriculaRegistrada && matriculaRegistrada === matriculaNormalizada) {
+          return true;
+        }
+
+        if (matriculaRelacionado && matriculaRelacionado === matriculaNormalizada) {
+          return true;
+        }
+
+        if (funcionarioEncontrado && acidente.funcionarioId === funcionarioEncontrado.id) {
+          return true;
+        }
+
+        return false;
+      })
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+
+    setResultadosMatricula(acidentesFiltrados);
+
+    if (acidentesFiltrados.length === 0) {
+      setInfoFuncionarioBusca(
+        funcionarioEncontrado
+          ? {
+              nome: funcionarioEncontrado.nome,
+              matricula: funcionarioEncontrado.matricula,
+              setor: funcionarioEncontrado.setor,
+              cargo: funcionarioEncontrado.cargo,
+            }
+          : { matricula: termo }
+      );
+      setErroBuscaMatricula('Nenhum acidente encontrado para esta matrícula.');
+      return;
+    }
+
+    const funcionarioInfo =
+      funcionarioEncontrado ||
+      funcionariosMap.get(acidentesFiltrados[0].funcionarioId) ||
+      acidentesFiltrados[0].funcionario ||
+      null;
+
+    setInfoFuncionarioBusca(
+      funcionarioInfo
+        ? {
+            nome: funcionarioInfo.nome,
+            matricula: funcionarioInfo.matricula,
+            setor: funcionarioInfo.setor,
+            cargo: funcionarioInfo.cargo,
+          }
+        : { matricula: termo }
+    );
+    setErroBuscaMatricula(null);
+  };
+
+  const handleLimparBuscaMatricula = () => {
+    setMatriculaBusca('');
+    setResultadosMatricula([]);
+    setInfoFuncionarioBusca(null);
+    setErroBuscaMatricula(null);
+    setBuscaMatriculaRealizada(false);
+  };
 
   useEffect(() => {
     loadSegurancas();
@@ -224,8 +350,10 @@ export default function SegurancaTrabalho() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Acidentes Recentes (Últimos 30 dias)</h3>
               <div className="space-y-3">
-                {acidentesRecentes.map((acidente) => (
-                  <div key={acidente.id} className="border border-red-200 rounded-lg p-4 bg-red-50">
+                {acidentesRecentes.map((acidente) => {
+                  const funcionario = getFuncionarioDoAcidente(acidente);
+                  return (
+                    <div key={acidente.id} className="border border-red-200 rounded-lg p-4 bg-red-50">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
@@ -245,35 +373,19 @@ export default function SegurancaTrabalho() {
                             </span>
                           )}
                           <h4 className="font-semibold text-gray-900">
-                            {(() => {
-                              const funcionarios = funcionariosStorage.getAll();
-                              const funcionario = funcionarios.find(f => f.id === acidente.funcionarioId);
-                              return funcionario ? funcionario.nome : (acidente.funcionarioId || 'Funcionário não identificado');
-                            })()}
+                            {funcionario?.nome || acidente.funcionarioId || 'Funcionário não identificado'}
                           </h4>
                         </div>
-                        {(() => {
-                          const funcionarios = funcionariosStorage.getAll();
-                          const funcionario = funcionarios.find(f => f.id === acidente.funcionarioId);
-                          return funcionario ? (
-                            <p className="text-xs text-gray-500 mb-1">Matrícula: {funcionario.matricula}</p>
-                          ) : null;
-                        })()}
+                        {funcionario?.matricula && (
+                          <p className="text-xs text-gray-500 mb-1">Matrícula: {funcionario.matricula}</p>
+                        )}
                         <p className="text-sm text-gray-600 mt-1">{acidente.descricao}</p>
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                           <span><strong>Setor:</strong> {acidente.setor}</span>
                           <span><strong>Localização:</strong> {acidente.localizacao}</span>
                           <span className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
-                            {(() => {
-                              try {
-                                const data = new Date(acidente.data);
-                                if (isNaN(data.getTime())) return acidente.data || '-';
-                                return `${format(data, 'dd/MM/yyyy', { locale: ptBR })} às ${acidente.hora || '-'}`;
-                              } catch {
-                                return acidente.data || '-';
-                              }
-                            })()}
+                            {formatarDataHoraAcidente(acidente)}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 mt-3 flex-wrap">
@@ -310,7 +422,8 @@ export default function SegurancaTrabalho() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -393,6 +506,168 @@ export default function SegurancaTrabalho() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
         </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Histórico de acidentes por matrícula</h2>
+            <p className="text-sm text-gray-600">Digite a matrícula para visualizar todos os registros associados.</p>
+          </div>
+          {resultadosMatricula.length > 0 && !erroBuscaMatricula && (
+            <span className="text-sm text-gray-500">
+              {resultadosMatricula.length}{' '}
+              {resultadosMatricula.length === 1 ? 'registro encontrado' : 'registros encontrados'}
+            </span>
+          )}
+        </div>
+
+        <form onSubmit={handleBuscarAcidentesPorMatricula} className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              list="matriculas-acidentes"
+              placeholder="Ex: 12345"
+              value={matriculaBusca}
+              onChange={(e) => setMatriculaBusca(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+            <datalist id="matriculas-acidentes">
+              {matriculasDisponiveis.map((matricula) => (
+                <option key={matricula} value={matricula} />
+              ))}
+            </datalist>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Buscar
+            </button>
+            {(buscaMatriculaRealizada || matriculaBusca) && (
+              <button
+                type="button"
+                onClick={handleLimparBuscaMatricula}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+        </form>
+
+        {erroBuscaMatricula && (
+          <div className="text-sm text-red-600">{erroBuscaMatricula}</div>
+        )}
+
+        {buscaMatriculaRealizada && (
+          <div className="space-y-4">
+            {infoFuncionarioBusca && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <strong>Funcionário:</strong> {infoFuncionarioBusca.nome || 'Nome não cadastrado'}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <strong>Matrícula:</strong> {infoFuncionarioBusca.matricula || matriculaBusca || '-'}
+                </p>
+                {(infoFuncionarioBusca.setor || infoFuncionarioBusca.cargo) && (
+                  <p className="text-sm text-gray-700">
+                    <strong>Setor/Cargo:</strong>{' '}
+                    {[infoFuncionarioBusca.setor, infoFuncionarioBusca.cargo].filter(Boolean).join(' • ')}
+                  </p>
+                )}
+                <p className="text-sm text-gray-700 mt-2">
+                  <strong>Total de acidentes registrados:</strong> {resultadosMatricula.length}
+                </p>
+              </div>
+            )}
+
+            {resultadosMatricula.length === 0 && !erroBuscaMatricula && (
+              <p className="text-sm text-gray-500">
+                Nenhum acidente registrado para a matrícula informada.
+              </p>
+            )}
+
+            {resultadosMatricula.length > 0 && (
+              <div className="space-y-3">
+                {resultadosMatricula.map((acidente) => {
+                  const funcionario = getFuncionarioDoAcidente(acidente);
+                  return (
+                    <div key={acidente.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex flex-wrap justify-between gap-3">
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${
+                                acidente.tipo === 'grave'
+                                  ? 'bg-red-600 text-white'
+                                  : acidente.tipo === 'moderado'
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-yellow-500 text-white'
+                              }`}
+                            >
+                              {acidente.tipo === 'grave'
+                                ? 'Grave'
+                                : acidente.tipo === 'moderado'
+                                  ? 'Moderado'
+                                  : 'Leve'}
+                            </span>
+                            {acidente.numeroChamado && (
+                              <span className="px-2 py-1 text-xs font-semibold bg-gray-700 text-white rounded">
+                                {acidente.numeroChamado}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900 mt-2">
+                            {funcionario?.nome || acidente.funcionarioId || 'Funcionário não identificado'}
+                          </p>
+                          {funcionario?.matricula && (
+                            <p className="text-xs text-gray-500">Matrícula: {funcionario.matricula}</p>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p className="flex items-center space-x-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{formatarDataHoraAcidente(acidente)}</span>
+                          </p>
+                          <p>
+                            <strong>Setor:</strong> {acidente.setor}
+                          </p>
+                          <p>
+                            <strong>Localização:</strong> {acidente.localizacao}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 mt-3">{acidente.descricao}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                        {acidente.fotos && acidente.fotos.length > 0 && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                            {acidente.fotos.length}{' '}
+                            {acidente.fotos.length === 1 ? 'foto disponível' : 'fotos disponíveis'}
+                          </span>
+                        )}
+                        {acidente.anexosPDF && acidente.anexosPDF.length > 0 && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                            {acidente.anexosPDF.length}{' '}
+                            {acidente.anexosPDF.length === 1 ? 'PDF anexado' : 'PDFs anexados'}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setViewingAcidente(acidente)}
+                          className="ml-auto px-3 py-1 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+                        >
+                          Ver detalhes
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -599,21 +874,13 @@ export default function SegurancaTrabalho() {
                   <div>
                     <span className="font-medium text-gray-700">Funcionário:</span>
                     <p className="text-gray-900">
-                      {(() => {
-                        const funcionarios = funcionariosStorage.getAll();
-                        const funcionario = funcionarios.find(f => f.id === viewingAcidente.funcionarioId);
-                        return funcionario ? funcionario.nome : (viewingAcidente.funcionarioId || 'Não identificado');
-                      })()}
+                      {funcionarioVisualizado?.nome || viewingAcidente.funcionarioId || 'Não identificado'}
                     </p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Matrícula:</span>
                     <p className="text-gray-900">
-                      {(() => {
-                        const funcionarios = funcionariosStorage.getAll();
-                        const funcionario = funcionarios.find(f => f.id === viewingAcidente.funcionarioId);
-                        return funcionario ? funcionario.matricula : '-';
-                      })()}
+                      {funcionarioVisualizado?.matricula || '-'}
                     </p>
                   </div>
                   <div>
