@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { InstrucaoTrabalho, PassoInstrucao, Setor, AnexoPDF } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function InstrucoesTrabalho() {
   const { usuario, canCreate, canEdit, isEngenharia, isSegurancaTrabalho } = useAuth();
@@ -22,7 +23,8 @@ export default function InstrucoesTrabalho() {
     codigoProduto: '',
     setor: '',
     linha: '',
-    tipoInstrucao: 'insercao' as 'insercao' | 'fechamento' | 'emergencia' | 'marcacao' | 'start' | 'botao' | 'outro',
+    categoriaInstrucao: 'trabalho_controle' as 'trabalho_controle' | 'setup',
+    tipoInstrucao: 'insercao' as InstrucaoTrabalho['tipoInstrucao'],
     titulo: '',
     preparador: false,
     funcionario: false,
@@ -57,9 +59,11 @@ export default function InstrucoesTrabalho() {
   }, [usuario]);
 
   const loadSetores = () => {
+    // Garante que a lista de setores está no novo padrão (110, 120, 130, 140, 180)
+    ensureSetoresPadraoAtualizados(usuario?.nome);
     const todosSetores = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter(s => s.ativo));
+    setSetores(todosSetores.filter((s) => s.ativo));
   };
 
   const loadInstrucoes = () => {
@@ -149,6 +153,7 @@ export default function InstrucoesTrabalho() {
       codigoProduto: formData.codigoProduto,
       setor: formData.setor || undefined,
       linha: formData.linha || undefined,
+      categoriaInstrucao: formData.categoriaInstrucao,
       tipoInstrucao: formData.tipoInstrucao,
       titulo: formData.titulo,
       passos: formData.passos,
@@ -181,10 +186,19 @@ export default function InstrucoesTrabalho() {
       ...p,
       letra: p.letra || String.fromCharCode(64 + ((p as any).ordem || index + 1)),
     }));
+
+    // Inferir categoria para instruções antigas, se não existir
+    const categoriaInferida: 'trabalho_controle' | 'setup' =
+      instrucao.categoriaInstrucao ||
+      (['start', 'botao'].includes((instrucao.tipoInstrucao || '').toLowerCase())
+        ? 'setup'
+        : 'trabalho_controle');
+
     setFormData({
       codigoProduto: instrucao.codigoProduto,
       setor: instrucao.setor || '',
       linha: instrucao.linha || '',
+      categoriaInstrucao: categoriaInferida,
       tipoInstrucao: instrucao.tipoInstrucao || 'insercao',
       titulo: instrucao.titulo,
       preparador: instrucao.preparador,
@@ -298,6 +312,7 @@ export default function InstrucoesTrabalho() {
       codigoProduto: '',
       setor: '',
       linha: '',
+      categoriaInstrucao: 'trabalho_controle',
       tipoInstrucao: 'insercao',
       titulo: '',
       preparador: false,
@@ -336,15 +351,27 @@ export default function InstrucoesTrabalho() {
 
   const getTipoInstrucaoLabel = (tipo: string) => {
     const labels: Record<string, string> = {
-      insercao: 'Inserção',
+      insercao: 'Instruções de Inserção',
       fechamento: 'Fechamento',
       emergencia: 'Emergência',
       marcacao: 'Marcação',
       start: 'Start na Máquina',
       botao: 'Botão',
       outro: 'Outro',
+      clipagem: 'Instruções de Clipagem',
+      estanquiedade: 'Instruções de Estanquiedade',
+      dima_controle: 'Dima de Controle',
     };
     return labels[tipo] || tipo;
+  };
+
+  const getCategoriaInstrucaoLabel = (categoria?: string) => {
+    const labels: Record<string, string> = {
+      trabalho_controle: 'Instruções de Trabalho e Controle',
+      setup: 'Instruções de Setup',
+    };
+    if (!categoria) return 'Padrão';
+    return labels[categoria] || categoria;
   };
 
   const filteredInstrucoes = instrucoes.filter((i) => {
@@ -620,20 +647,60 @@ export default function InstrucoesTrabalho() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Tipo de Instrução *</label>
-                  <select 
-                    required 
-                    value={formData.tipoInstrucao} 
-                    onChange={(e) => setFormData({ ...formData, tipoInstrucao: e.target.value as any })} 
+                  <label className="block text-sm font-medium mb-1">Categoria da Instrução *</label>
+                  <select
+                    required
+                    value={formData.categoriaInstrucao}
+                    onChange={(e) => {
+                      const categoria = e.target.value as 'trabalho_controle' | 'setup';
+                      setFormData({
+                        ...formData,
+                        categoriaInstrucao: categoria,
+                        // Ajusta o tipo padrão ao trocar de categoria
+                        tipoInstrucao:
+                          categoria === 'trabalho_controle'
+                            ? 'insercao'
+                            : (formData.tipoInstrucao === 'start' ||
+                               formData.tipoInstrucao === 'fechamento' ||
+                               formData.tipoInstrucao === 'botao' ||
+                               formData.tipoInstrucao === 'outro')
+                            ? formData.tipoInstrucao
+                            : 'start',
+                      });
+                    }}
                     className="w-full px-3 py-2 border rounded-lg"
                   >
-                    <option value="insercao">Inserção</option>
-                    <option value="fechamento">Fechamento</option>
-                    <option value="emergencia">Emergência</option>
-                    <option value="marcacao">Marcação</option>
-                    <option value="start">Start na Máquina</option>
-                    <option value="botao">Botão</option>
-                    <option value="outro">Outro</option>
+                    <option value="trabalho_controle">
+                      Instruções de Trabalho e Controle
+                    </option>
+                    <option value="setup">Instruções de Setup</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tipo de Instrução *</label>
+                  <select
+                    required
+                    value={formData.tipoInstrucao}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tipoInstrucao: e.target.value as any })
+                    }
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
+                    {formData.categoriaInstrucao === 'trabalho_controle' ? (
+                      <>
+                        <option value="insercao">Instruções de Inserção</option>
+                        <option value="clipagem">Instruções de Clipagem</option>
+                        <option value="estanquiedade">Instruções de Estanquiedade</option>
+                        <option value="dima_controle">Dima de Controle</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="start">Setup - Start na Máquina</option>
+                        <option value="fechamento">Setup - Fechamento</option>
+                        <option value="botao">Setup - Botões / Ajustes</option>
+                        <option value="outro">Setup - Outro</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div className="col-span-2">
@@ -899,6 +966,12 @@ export default function InstrucoesTrabalho() {
                   <div>
                     <span className="font-medium text-gray-700">Código do Produto:</span>
                     <p className="text-gray-900">{viewingInstrucao.codigoProduto}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Categoria:</span>
+                    <p className="text-gray-900">
+                      {getCategoriaInstrucaoLabel(viewingInstrucao.categoriaInstrucao)}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Tipo de Instrução:</span>
