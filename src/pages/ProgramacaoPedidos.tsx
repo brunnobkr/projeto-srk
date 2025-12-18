@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { processarExcel, processarPDF, criarAIBackend, obterOpenAIKey, salvarOpenAIKey } from '../utils/aiExtraction';
 import { determinarTurno } from '../utils/turno';
+import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function ProgramacaoPedidos() {
   const { isLogistica, isPreparador, usuario } = useAuth();
@@ -63,11 +64,13 @@ export default function ProgramacaoPedidos() {
   }, []);
 
   const loadData = () => {
+    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
+    ensureSetoresPadraoAtualizados(usuario?.nome);
     setProgramacoes(programacoesPedidosStorage.getAll());
     setComponentes(componentesStorage.getAll());
     const todosSetores = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter(s => s.ativo));
+    setSetores(todosSetores.filter((s) => s.ativo));
   };
 
   const loadProblemasProducao = () => {

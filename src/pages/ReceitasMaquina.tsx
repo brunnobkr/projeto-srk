@@ -6,6 +6,7 @@ import type { ReceitaMaquina, HistoricoVersao, Setor, AnexoPDF } from '../types'
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import HistoricoModal from '../components/HistoricoModal';
+import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function ReceitasMaquina() {
   const { canCreate, canEdit, isEngenharia, usuario } = useAuth();
@@ -68,9 +69,11 @@ export default function ReceitasMaquina() {
   }, [usuario, editingReceita]);
 
   const loadSetores = () => {
+    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
+    ensureSetoresPadraoAtualizados(usuario?.nome);
     const todosSetores = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter(s => s.ativo));
+    setSetores(todosSetores.filter((s) => s.ativo));
   };
 
   const loadReceitas = () => {

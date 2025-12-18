@@ -6,6 +6,7 @@ import type { ProblemaTecnico, Setor, Notificacao } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
+import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function ProblemasTecnicos() {
   const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
@@ -33,6 +34,8 @@ export default function ProblemasTecnicos() {
   });
 
   useEffect(() => {
+    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
+    ensureSetoresPadraoAtualizados(usuario?.nome);
     loadProblemas();
     loadSetores();
     // Atualizar turno a cada minuto
@@ -47,7 +50,7 @@ export default function ProblemasTecnicos() {
   const loadSetores = () => {
     const todosSetores = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter(s => s.ativo));
+    setSetores(todosSetores.filter((s) => s.ativo));
   };
 
   useEffect(() => {

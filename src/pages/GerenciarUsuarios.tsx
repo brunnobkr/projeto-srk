@@ -3,6 +3,7 @@ import { Edit, Trash2, Search, X, Save, Eye, EyeOff, UserPlus, CheckCircle, XCir
 // Plus removido - não usado
 import { usuariosStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
+import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 import type { Usuario, Permissoes, PermissoesModulo, Setor } from '../types';
 
 const permissoesModuloPadrao: PermissoesModulo = {
@@ -57,6 +58,8 @@ export default function GerenciarUsuarios() {
   useEffect(() => {
     if (isAdminPadrao) {
       loadUsuarios();
+      // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
+      ensureSetoresPadraoAtualizados(usuarioLogado?.nome);
       setSetores(setoresStorage.getAll());
     }
   }, [isAdminPadrao]);
