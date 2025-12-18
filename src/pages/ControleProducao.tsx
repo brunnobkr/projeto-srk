@@ -6,7 +6,6 @@ import type { ControleProducao, Setor, AtualizacaoHora, CodigoAtivoLinha } from 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno, getTurnoBadgeColor, getTurnoLabel } from '../utils/turno';
-import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function ControleProducao() {
   const { usuario, podeAtualizarProducao, isAdmin } = useAuth();
@@ -65,11 +64,9 @@ export default function ControleProducao() {
   }, [filtroTurno]);
 
   const loadSetores = () => {
-    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
-    ensureSetoresPadraoAtualizados(usuario?.nome);
     const todosSetores = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter((s) => s.ativo));
+    setSetores(todosSetores.filter(s => s.ativo));
   };
 
   const loadControles = () => {

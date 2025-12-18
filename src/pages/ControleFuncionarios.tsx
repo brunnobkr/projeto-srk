@@ -6,7 +6,6 @@ import type { ControleFuncionarios, Funcionario, Setor, Acidente, AnexoPDF } fro
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
-import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 export default function ControleFuncionarios() {
   const { usuario } = useAuth();
@@ -103,8 +102,6 @@ export default function ControleFuncionarios() {
   const loadData = () => {
     const controlesData = controleFuncionariosStorage.getAll();
     const funcsData = funcionariosStorage.getAll();
-    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
-    ensureSetoresPadraoAtualizados(usuario?.nome);
     const setoresData = setoresStorage.getAll();
     
     // Enriquecer controles com dados dos funcionários

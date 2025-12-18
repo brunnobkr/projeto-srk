@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
-import { chamadosStorage, setoresStorage } from '../utils/storage';
+import { chamadosStorage } from '../utils/storage';
+import { setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import type { ChamadoManutencao } from '../types';
 import { determinarTurno } from '../utils/turno';
-import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 
 interface ChamadosManutencaoProps {
   tipo: 'mecanica' | 'eletrica' | 'ferramentaria' | 'sistema';
@@ -60,11 +60,9 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   };
 
   const loadSetores = () => {
-    // Garante que os setores estão no novo padrão (110, 120, 130, 140, 180)
-    ensureSetoresPadraoAtualizados(usuario?.nome);
     const setoresData = setoresStorage.getAll();
     // Filtrar apenas setores ativos
-    setSetores(setoresData.filter((s) => s.ativo));
+    setSetores(setoresData.filter(s => s.ativo));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

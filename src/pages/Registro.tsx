@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { usuariosStorage, mapeamentoFuncoesStorage, setoresStorage } from '../utils/storage';
-import { ensureSetoresPadraoAtualizados } from '../utils/setoresConfig';
 import type { Usuario, Permissoes, PermissoesModulo } from '../types';
 
 export default function Registro() {
@@ -37,7 +36,6 @@ export default function Registro() {
     mapeamentoFuncoesStorage.inicializarPadroes();
     
     // Carregar setores
-    ensureSetoresPadraoAtualizados();
     const setoresData = setoresStorage.getAll();
     setSetores(setoresData);
   }, []);

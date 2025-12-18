@@ -321,29 +321,7 @@ export interface InstrucaoTrabalho {
   codigoProduto: string;
   setor?: string;
   linha?: string;
-  // Categoria principal da instrução
-  // - trabalho_controle: instruções de trabalho e controle
-  // - setup: instruções de setup de máquina/processo
-  categoriaInstrucao?: 'trabalho_controle' | 'setup';
-  // Tipo detalhado da instrução dentro da categoria
-  // Trabalho e Controle:
-  // - insercao: Instruções de inserção
-  // - clipagem: Instruções de clipagem
-  // - estanquiedade: Instruções de estanquiedade
-  // - dima_controle: Dima de controle (molde do produto final)
-  // Setup:
-  // - fechamento, emergencia, marcacao, start, botao, outro
-  tipoInstrucao:
-    | 'insercao'
-    | 'fechamento'
-    | 'emergencia'
-    | 'marcacao'
-    | 'start'
-    | 'botao'
-    | 'outro'
-    | 'clipagem'
-    | 'estanquiedade'
-    | 'dima_controle';
+  tipoInstrucao: 'insercao' | 'fechamento' | 'emergencia' | 'marcacao' | 'start' | 'botao' | 'outro';
   titulo: string;
   passos: PassoInstrucao[];
   preparador: boolean;
