@@ -63,7 +63,7 @@ const COLORS_STATUS = {
 const COLORS_PIE = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
 
 export default function AcompanhamentoProducao() {
-  const { usuario, podeAtualizarProducao } = useAuth();
+  const { usuario } = useAuth();
   const [dataSelecionada, setDataSelecionada] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   const [resumoProducao, setResumoProducao] = useState<ProducaoResumo[]>([]);
@@ -839,16 +839,14 @@ export default function AcompanhamentoProducao() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      {podeAtualizarProducao && podeAtualizarProducao() && (
-                        <button
-                          onClick={() => handleAtualizarProducao(resumo)}
-                          className="text-primary-600 hover:text-primary-900 flex items-center justify-center space-x-1"
-                          title="Atualizar produção"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span className="text-sm">Atualizar</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleAtualizarProducao(resumo)}
+                        className="text-primary-600 hover:text-primary-900 flex items-center justify-center space-x-1"
+                        title="Atualizar produção"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span className="text-sm">Atualizar</span>
+                      </button>
                     </td>
                   </tr>
                 ))

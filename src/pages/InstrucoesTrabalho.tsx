@@ -7,11 +7,9 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
-  const { canCreate, canEdit, isEngenharia, isSegurancaTrabalho, usuario } = useAuth();
+  const { usuario, canCreate, canEdit, isEngenharia, isSegurancaTrabalho } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filtroSetor, setFiltroSetor] = useState('');
-  const [filtroLinha, setFiltroLinha] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingInstrucao, setEditingInstrucao] = useState<InstrucaoTrabalho | null>(null);
   const [viewingInstrucao, setViewingInstrucao] = useState<InstrucaoTrabalho | null>(null);
@@ -137,9 +135,6 @@ export default function InstrucoesTrabalho() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nomeUsuario = usuario?.nome || 'Usuário';
-    const agora = new Date().toISOString();
-    
     const instrucao: InstrucaoTrabalho = {
       id: editingInstrucao?.id || Date.now().toString(),
       codigoProduto: formData.codigoProduto,
@@ -152,10 +147,10 @@ export default function InstrucoesTrabalho() {
       funcionario: formData.funcionario,
       fotos: fotosGerais.length > 0 ? fotosGerais : undefined,
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
-      dataCriacao: editingInstrucao?.dataCriacao || agora,
-      dataAtualizacao: agora,
-      criadoPor: editingInstrucao?.criadoPor || nomeUsuario,
-      atualizadoPor: editingInstrucao ? nomeUsuario : undefined,
+      dataCriacao: editingInstrucao?.dataCriacao || new Date().toISOString(),
+      dataAtualizacao: new Date().toISOString(),
+      criadoPor: editingInstrucao?.criadoPor || usuario?.nome || 'Usuário',
+      atualizadoPor: editingInstrucao ? (usuario?.nome || 'Usuário') : undefined,
     };
 
     if (editingInstrucao) {
@@ -343,23 +338,12 @@ export default function InstrucoesTrabalho() {
     };
     return labels[tipo] || tipo;
   };
-  const filteredInstrucoes = instrucoes.filter((i) => {
-    const termo = searchTerm.toLowerCase().trim();
 
-    const matchesTexto =
-      !termo ||
-      i.codigoProduto.toLowerCase().includes(termo) ||
-      i.titulo.toLowerCase().includes(termo) ||
-      getTipoInstrucaoLabel(i.tipoInstrucao || 'insercao').toLowerCase().includes(termo);
-
-    const matchesSetor =
-      !filtroSetor || (i.setor || '').toLowerCase() === filtroSetor.toLowerCase();
-
-    const matchesLinha =
-      !filtroLinha || (i.linha || '').toLowerCase() === filtroLinha.toLowerCase();
-
-    return matchesTexto && matchesSetor && matchesLinha;
-  });
+  const filteredInstrucoes = instrucoes.filter(i =>
+    i.codigoProduto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    i.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    getTipoInstrucaoLabel(i.tipoInstrucao || 'insercao').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Agrupar instruções por código de produto, setor e linha
   const instrucoesAgrupadas = filteredInstrucoes.reduce((acc, instrucao) => {
@@ -420,64 +404,6 @@ export default function InstrucoesTrabalho() {
             }}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
-        </div>
-        {/* Filtros por setor e linha - disponíveis para todos (inclusive usuários só de visualização) */}
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Filtrar por Setor</label>
-            <select
-              value={filtroSetor}
-              onChange={(e) => {
-                setFiltroSetor(e.target.value);
-                setFiltroLinha('');
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">Todos os setores</option>
-              {setores
-                .filter((s) => s.ativo)
-                .map((setor) => (
-                  <option key={setor.id} value={setor.nome}>
-                    {setor.nome}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Filtrar por Linha</label>
-            <select
-              value={filtroLinha}
-              onChange={(e) => setFiltroLinha(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              disabled={!filtroSetor}
-            >
-              <option value="">Todas as linhas</option>
-              {setores
-                .find((s) => s.nome === filtroSetor)
-                ?.linhas.filter((l) => l.ativo)
-                .map((linha) => (
-                  <option key={linha.id} value={linha.nome}>
-                    {linha.nome}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            {(filtroSetor || filtroLinha) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setFiltroSetor('');
-                  setFiltroLinha('');
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 w-full md:w-auto"
-              >
-                Limpar filtros
-              </button>
-            )}
-          </div>
         </div>
         {searchTerm.trim() && filteredInstrucoes.length > 0 && (
           <p className="text-xs text-gray-500 mt-2">

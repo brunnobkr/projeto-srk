@@ -8,22 +8,12 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
 
 export default function ProblemasTecnicos() {
-  const { usuario, canEdit, canCreate, isCentralMecanica, isPreparador } = useAuth();
+  const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
   const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filtroLinha, setFiltroLinha] = useState('');
-  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
-  const [filtroIdChamado, setFiltroIdChamado] = useState('');
-  const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
   const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
-  const [showResolveModal, setShowResolveModal] = useState(false);
-  const [problemaParaResolver, setProblemaParaResolver] = useState<ProblemaTecnico | null>(null);
-  const [resolveFormData, setResolveFormData] = useState({
-    resolvidoPor: '',
-    matriculaResolvidoPor: '',
-  });
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -41,9 +31,6 @@ export default function ProblemasTecnicos() {
     observacoes: '',
     engenhariaChamada: false,
   });
-
-  const podeCriarEditar =
-    canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica();
 
   useEffect(() => {
     loadProblemas();
@@ -207,51 +194,26 @@ export default function ProblemasTecnicos() {
   };
 
   const handleResolve = (id: string) => {
-    // Verificar permissões: apenas mecânicos, eletricistas, ferramentários ou quem tem permissão de editar problemas técnicos
-    const temPermissao = isCentralMecanica() || canEdit('problemasTecnicos');
+    // Verificar permissões: precisa ter permissão de editar ou criar na central de mecânica
+    const temPermissao = canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica();
     
     if (!temPermissao) {
-      alert('Você não tem permissão para marcar problemas técnicos como resolvidos. Apenas eletricistas, mecânicos, ferramentários e usuários com autorização para editar na Central de Mecânica podem fazer isso.');
+      alert('Você não tem permissão para marcar problemas técnicos como resolvidos. Apenas usuários com permissão de editar ou criar na Central de Mecânica podem fazer isso.');
       return;
     }
     
     const problema = problemas.find(p => p.id === id);
     if (problema) {
-      // Preencher automaticamente com dados do usuário logado se disponível
-      setResolveFormData({
-        resolvidoPor: usuario?.nome || '',
-        matriculaResolvidoPor: usuario?.matricula || '',
-      });
-      setProblemaParaResolver(problema);
-      setShowResolveModal(true);
+      const resolvidoPor = prompt('Quem resolveu o problema?');
+      if (resolvidoPor) {
+        problemasStorage.update(id, {
+          status: 'resolvido',
+          resolvidoPor,
+          dataResolucao: new Date().toISOString(),
+        });
+        loadProblemas();
+      }
     }
-  };
-
-  const confirmarResolucao = () => {
-    if (!problemaParaResolver) return;
-    
-    if (!resolveFormData.resolvidoPor.trim()) {
-      alert('Por favor, informe o nome de quem resolveu o problema.');
-      return;
-    }
-    
-    // Calcular tempo de resolução se houver data de início
-    const dataInicio = new Date(`${problemaParaResolver.data}T${problemaParaResolver.hora}`);
-    const dataFim = new Date();
-    const tempoResolucao = Math.floor((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60)); // em minutos
-
-    problemasStorage.update(problemaParaResolver.id, {
-      status: 'resolvido',
-      resolvidoPor: resolveFormData.resolvidoPor.trim(),
-      matriculaResolvidoPor: resolveFormData.matriculaResolvidoPor.trim() || undefined,
-      dataResolucao: new Date().toISOString(),
-      tempoResolucao,
-    });
-    
-    setShowResolveModal(false);
-    setProblemaParaResolver(null);
-    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
-    loadProblemas();
   };
 
   const handleDelete = (id: string) => {
@@ -301,39 +263,11 @@ export default function ProblemasTecnicos() {
     return labels[status] || status;
   };
 
-  const filteredProblemas = problemas.filter(p => {
-    // Filtro de busca geral
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch =
-      !searchLower ||
-      p.maquina.toLowerCase().includes(searchLower) ||
-      p.descricao.toLowerCase().includes(searchLower) ||
-      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchLower));
-
-    // Filtro por ID do chamado
-    const idFilter = filtroIdChamado.trim().toLowerCase();
-    const matchesId =
-      !idFilter ||
-      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(idFilter)) ||
-      p.id.toLowerCase().includes(idFilter);
-
-    // Filtro por linha
-    const linhaFilter = filtroLinha.trim().toLowerCase();
-    const matchesLinha =
-      !linhaFilter || (p.linha || '').toLowerCase().includes(linhaFilter);
-
-    // Filtro por turno
-    const matchesTurno =
-      filtroTurno === 'todos' || p.turno === filtroTurno;
-
-    // Filtro "apenas meus chamados" (apenas para preparadores)
-    const matchesMeus =
-      !mostrarSomenteMeus ||
-      !usuario ||
-      (p.reportadoPor && p.reportadoPor.toLowerCase() === usuario.nome.toLowerCase());
-
-    return matchesSearch && matchesId && matchesLinha && matchesTurno && matchesMeus;
-  });
+  const filteredProblemas = problemas.filter(p =>
+    p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6">
@@ -344,100 +278,25 @@ export default function ProblemasTecnicos() {
             Registre e acompanhe problemas mecânicos, elétricos e de sistema
           </p>
         </div>
-        {podeCriarEditar && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Novo Problema
-          </button>
-        )}
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Novo Problema
+        </button>
       </div>
 
-      {/* Filtros de Busca */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar por ID do chamado, máquina ou descrição..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          {/* Filtros adicionais apenas para preparadores */}
-          {isPreparador() && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Linha</label>
-                  <input
-                    type="text"
-                    placeholder="Digite o nome da linha..."
-                    value={filtroLinha}
-                    onChange={(e) => setFiltroLinha(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por ID do Chamado</label>
-                  <input
-                    type="text"
-                    placeholder="Digite o ID do chamado..."
-                    value={filtroIdChamado}
-                    onChange={(e) => setFiltroIdChamado(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Turno</label>
-                  <select
-                    value={filtroTurno}
-                    onChange={(e) => setFiltroTurno(e.target.value as any)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="todos">Todos os Turnos</option>
-                    <option value="1">1º Turno</option>
-                    <option value="2">2º Turno</option>
-                    <option value="3">3º Turno</option>
-                    <option value="central">Central</option>
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={mostrarSomenteMeus}
-                      onChange={(e) => setMostrarSomenteMeus(e.target.checked)}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span>Apenas meus chamados</span>
-                  </label>
-                </div>
-              </div>
-              {(filtroLinha || filtroIdChamado || filtroTurno !== 'todos' || mostrarSomenteMeus) && (
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => {
-                      setFiltroLinha('');
-                      setFiltroIdChamado('');
-                      setFiltroTurno('todos');
-                      setMostrarSomenteMeus(false);
-                    }}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
-                    Limpar filtros
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Buscar por ID do chamado, máquina ou descrição..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          />
         </div>
       </div>
 
@@ -536,23 +395,12 @@ export default function ProblemasTecnicos() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {problema.resolvidoPor ? (
-                        <div>
-                          <div>{problema.resolvidoPor}</div>
-                          {problema.matriculaResolvidoPor && (
-                            <div className="text-xs text-gray-500">Mat: {problema.matriculaResolvidoPor}</div>
-                          )}
-                        </div>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{problema.resolvidoPor || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button onClick={() => setViewingProblema(problema)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
                         <Eye className="w-5 h-5" />
                       </button>
-                      {problema.status !== 'resolvido' && podeCriarEditar && (
+                      {problema.status !== 'resolvido' && (canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica()) && (
                         <button
                           onClick={() => handleResolve(problema.id)}
                           className="text-green-600 hover:text-green-900 mr-4"
@@ -561,22 +409,12 @@ export default function ProblemasTecnicos() {
                           <CheckCircle className="w-5 h-5" />
                         </button>
                       )}
-                      {podeCriarEditar && (
-                        <>
-                          <button
-                            onClick={() => handleEdit(problema)}
-                            className="text-primary-600 hover:text-primary-900 mr-4"
-                          >
-                            <Edit className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(problema.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </>
-                      )}
+                      <button onClick={() => handleEdit(problema)} className="text-primary-600 hover:text-primary-900 mr-4">
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => handleDelete(problema.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -810,12 +648,7 @@ export default function ProblemasTecnicos() {
                   {viewingProblema.resolvidoPor && (
                     <div>
                       <span className="font-medium text-gray-700">Resolvido por:</span>
-                      <p className="text-gray-900">
-                        {viewingProblema.resolvidoPor}
-                        {viewingProblema.matriculaResolvidoPor && (
-                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
-                        )}
-                      </p>
+                      <p className="text-gray-900">{viewingProblema.resolvidoPor}</p>
                     </div>
                   )}
                   {viewingProblema.dataResolucao && (
@@ -874,86 +707,6 @@ export default function ProblemasTecnicos() {
                 Fechar
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Resolução */}
-      {showResolveModal && problemaParaResolver && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
-              <button
-                onClick={() => {
-                  setShowResolveModal(false);
-                  setProblemaParaResolver(null);
-                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800">
-                <strong>Problema:</strong> {problemaParaResolver.maquina}
-              </p>
-              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              confirmarResolucao();
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome de quem resolveu *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={resolveFormData.resolvidoPor}
-                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  placeholder="Nome completo"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Matrícula
-                </label>
-                <input
-                  type="text"
-                  value={resolveFormData.matriculaResolvidoPor}
-                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  placeholder="Matrícula (opcional)"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowResolveModal(false);
-                    setProblemaParaResolver(null);
-                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Confirmar Resolução
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
