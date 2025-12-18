@@ -8,9 +8,13 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
 
 export default function ProblemasTecnicos() {
-  const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
+  const { usuario, canEdit, canCreate, isCentralMecanica, isPreparador } = useAuth();
   const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filtroLinha, setFiltroLinha] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
+  const [filtroIdChamado, setFiltroIdChamado] = useState('');
+  const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
   const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
@@ -297,11 +301,39 @@ export default function ProblemasTecnicos() {
     return labels[status] || status;
   };
 
-  const filteredProblemas = problemas.filter(p =>
-    p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProblemas = problemas.filter(p => {
+    // Filtro de busca geral
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      !searchLower ||
+      p.maquina.toLowerCase().includes(searchLower) ||
+      p.descricao.toLowerCase().includes(searchLower) ||
+      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchLower));
+
+    // Filtro por ID do chamado
+    const idFilter = filtroIdChamado.trim().toLowerCase();
+    const matchesId =
+      !idFilter ||
+      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(idFilter)) ||
+      p.id.toLowerCase().includes(idFilter);
+
+    // Filtro por linha
+    const linhaFilter = filtroLinha.trim().toLowerCase();
+    const matchesLinha =
+      !linhaFilter || (p.linha || '').toLowerCase().includes(linhaFilter);
+
+    // Filtro por turno
+    const matchesTurno =
+      filtroTurno === 'todos' || p.turno === filtroTurno;
+
+    // Filtro "apenas meus chamados" (apenas para preparadores)
+    const matchesMeus =
+      !mostrarSomenteMeus ||
+      !usuario ||
+      (p.reportadoPor && p.reportadoPor.toLowerCase() === usuario.nome.toLowerCase());
+
+    return matchesSearch && matchesId && matchesLinha && matchesTurno && matchesMeus;
+  });
 
   return (
     <div className="space-y-6">
@@ -323,16 +355,89 @@ export default function ProblemasTecnicos() {
         )}
       </div>
 
+      {/* Filtros de Busca */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar por ID do chamado, máquina ou descrição..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-          />
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por ID do chamado, máquina ou descrição..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          {/* Filtros adicionais apenas para preparadores */}
+          {isPreparador() && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Linha</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o nome da linha..."
+                    value={filtroLinha}
+                    onChange={(e) => setFiltroLinha(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por ID do Chamado</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o ID do chamado..."
+                    value={filtroIdChamado}
+                    onChange={(e) => setFiltroIdChamado(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Turno</label>
+                  <select
+                    value={filtroTurno}
+                    onChange={(e) => setFiltroTurno(e.target.value as any)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="todos">Todos os Turnos</option>
+                    <option value="1">1º Turno</option>
+                    <option value="2">2º Turno</option>
+                    <option value="3">3º Turno</option>
+                    <option value="central">Central</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={mostrarSomenteMeus}
+                      onChange={(e) => setMostrarSomenteMeus(e.target.checked)}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>Apenas meus chamados</span>
+                  </label>
+                </div>
+              </div>
+              {(filtroLinha || filtroIdChamado || filtroTurno !== 'todos' || mostrarSomenteMeus) && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => {
+                      setFiltroLinha('');
+                      setFiltroIdChamado('');
+                      setFiltroTurno('todos');
+                      setMostrarSomenteMeus(false);
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 

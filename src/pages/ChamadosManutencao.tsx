@@ -15,7 +15,7 @@ interface ChamadosManutencaoProps {
 }
 
 export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: ChamadosManutencaoProps) {
-  const { usuario, isCentralMecanica, isPreparador } = useAuth();
+  const { usuario, isCentralMecanica } = useAuth();
   const [chamados, setChamados] = useState<ChamadoManutencao[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<ChamadoManutencao['status'] | 'todos'>('todos');
@@ -41,7 +41,6 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
 
   const ehCentralMecanica = isCentralMecanica();
-  const ehPreparador = isPreparador();
 
   useEffect(() => {
     loadChamados();
