@@ -683,14 +683,22 @@ export default function SegurancaTrabalho() {
                   <h3 className="text-lg font-semibold text-gray-900">{seguranca.titulo}</h3>
                   <p className="text-sm text-gray-500">Código: {seguranca.codigoProduto}</p>
                 </div>
-                <div className="flex space-x-2">
-                  <button onClick={() => handleEdit(seguranca)} className="text-primary-600 hover:text-primary-900">
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button onClick={() => handleDelete(seguranca.id)} className="text-red-600 hover:text-red-900">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
+                {podeCriarEditar && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEdit(seguranca)}
+                      className="text-primary-600 hover:text-primary-900"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(seguranca.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="space-y-2 text-sm">
                 <div><strong>Passos de Montagem:</strong> {seguranca.passosMontagem.length}</div>

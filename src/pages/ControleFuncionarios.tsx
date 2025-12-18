@@ -8,7 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
 
 export default function ControleFuncionarios() {
-  const { usuario } = useAuth();
+  const { usuario, canCreate, canEdit } = useAuth();
   const [controles, setControles] = useState<ControleFuncionarios[]>([]);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
@@ -66,6 +66,9 @@ export default function ControleFuncionarios() {
   const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
   const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
   const [tiposExpandidos, setTiposExpandidos] = useState<Record<string, boolean>>({});
+
+  const podeCriarEditar =
+    canCreate('controleFuncionarios') || canEdit('controleFuncionarios');
 
   useEffect(() => {
     loadData();
@@ -453,42 +456,44 @@ export default function ControleFuncionarios() {
             Gerencie faltas, ausências, tempo ocioso, chegadas atrasadas e transferências
           </p>
         </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setShowAcidenteModal(true)}
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg animate-pulse"
-          >
-            <AlertTriangle className="w-5 h-5 mr-2" />
-            ACIDENTE - Segurança do Trabalho
-          </button>
-          <button
-            onClick={() => {
-              setFormData({
-                ...formData,
-                tipo: 'saida-cedo', // Pré-seleciona um tipo de ocorrência
-              });
-              setShowModal(true);
-            }}
-            className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-          >
-            <FileWarning className="w-5 h-5 mr-2" />
-            Ocorrências
-          </button>
-          <button
-            onClick={() => setShowFuncModal(true)}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            <UserPlus className="w-5 h-5 mr-2" />
-            Novo Funcionário
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Novo Registro
-          </button>
-        </div>
+        {podeCriarEditar && (
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowAcidenteModal(true)}
+              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg animate-pulse"
+            >
+              <AlertTriangle className="w-5 h-5 mr-2" />
+              ACIDENTE - Segurança do Trabalho
+            </button>
+            <button
+              onClick={() => {
+                setFormData({
+                  ...formData,
+                  tipo: 'saida-cedo', // Pré-seleciona um tipo de ocorrência
+                });
+                setShowModal(true);
+              }}
+              className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+            >
+              <FileWarning className="w-5 h-5 mr-2" />
+              Ocorrências
+            </button>
+            <button
+              onClick={() => setShowFuncModal(true)}
+              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Novo Funcionário
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Novo Registro
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
@@ -705,12 +710,22 @@ export default function ControleFuncionarios() {
                                 {controle.setorOrigem && controle.setorDestino ? `${controle.setorOrigem} → ${controle.setorDestino}` : '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <button onClick={() => handleEdit(controle)} className="text-primary-600 hover:text-primary-900 mr-4">
+                            {podeCriarEditar && (
+                              <>
+                                <button
+                                  onClick={() => handleEdit(controle)}
+                                  className="text-primary-600 hover:text-primary-900 mr-4"
+                                >
                                   <Edit className="w-5 h-5" />
                                 </button>
-                                <button onClick={() => handleDelete(controle.id)} className="text-red-600 hover:text-red-900">
+                                <button
+                                  onClick={() => handleDelete(controle.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
                                   <Trash2 className="w-5 h-5" />
                                 </button>
+                              </>
+                            )}
                               </td>
                             </tr>
                           ))}

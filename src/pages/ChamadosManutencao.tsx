@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import type { ChamadoManutencao } from '../types';
-import { determinarTurno } from '../utils/turno';
+import { determinarTurno, getTurnoBadgeColor } from '../utils/turno';
 
 interface ChamadosManutencaoProps {
   tipo: 'mecanica' | 'eletrica' | 'ferramentaria' | 'sistema';
@@ -15,7 +15,7 @@ interface ChamadosManutencaoProps {
 }
 
 export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: ChamadosManutencaoProps) {
-  const { usuario } = useAuth();
+  const { usuario, isCentralMecanica, isPreparador } = useAuth();
   const [chamados, setChamados] = useState<ChamadoManutencao[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<ChamadoManutencao['status'] | 'todos'>('todos');
@@ -35,6 +35,13 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   const [fotos, setFotos] = useState<string[]>([]);
   const [setores, setSetores] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
+  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
+  const [filtroLinha, setFiltroLinha] = useState('');
+  const [filtroIdChamado, setFiltroIdChamado] = useState('');
+  const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
+
+  const ehCentralMecanica = isCentralMecanica();
+  const ehPreparador = isPreparador();
 
   useEffect(() => {
     loadChamados();
@@ -43,7 +50,9 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
 
   useEffect(() => {
     if (formData.setor) {
-      const setorSelecionado = setores.find(s => s.id === formData.setor);
+      // Em Chamados de Manutenção o campo setor guarda o NOME do setor,
+      // então precisamos comparar pelo nome ao carregar as linhas.
+      const setorSelecionado = setores.find(s => s.nome === formData.setor);
       if (setorSelecionado) {
         setLinhas(setorSelecionado.linhas || []);
       } else {
@@ -136,6 +145,10 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       pecasUtilizadas: editingChamado?.pecasUtilizadas,
       custoEstimado: editingChamado?.custoEstimado,
       custoReal: editingChamado?.custoReal,
+      excluido: editingChamado?.excluido,
+      exclusaoAutorizadaPorNome: editingChamado?.exclusaoAutorizadaPorNome,
+      exclusaoAutorizadaPorMatricula: editingChamado?.exclusaoAutorizadaPorMatricula,
+      dataExclusao: editingChamado?.dataExclusao,
     };
 
     if (editingChamado) {
@@ -165,10 +178,34 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este chamado?')) {
-      chamadosStorage.delete(id);
-      loadChamados();
+    if (!usuario || !ehCentralMecanica) {
+      alert('Apenas a equipe da mecânica pode excluir/cancelar chamados.');
+      return;
     }
+
+    const chamado = chamadosStorage.getById(id);
+    if (!chamado) return;
+
+    const mensagemConfirmacao = `Tem certeza que deseja EXCLUIR/ENCERRAR este chamado?\n\n` +
+      `Esta ação será registrada em nome de ${usuario.nome}` +
+      (usuario.matricula ? ` (Matrícula: ${usuario.matricula})` : '') +
+      ` e o chamado deixará de aparecer na lista padrão.`;
+
+    if (!confirm(mensagemConfirmacao)) {
+      return;
+    }
+
+    const agora = new Date().toISOString();
+
+    chamadosStorage.update(id, {
+      status: 'cancelado',
+      excluido: true,
+      exclusaoAutorizadaPorNome: usuario.nome,
+      exclusaoAutorizadaPorMatricula: usuario.matricula,
+      dataExclusao: agora,
+    });
+
+    loadChamados();
   };
 
   const handleView = (chamado: ChamadoManutencao) => {
@@ -228,9 +265,24 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
     }
   };
 
+  const podeEditarChamado = (chamado: ChamadoManutencao) => {
+    if (!usuario) return false;
+    if (ehCentralMecanica) return true;
+    // Qualquer usuário pode editar os chamados que ele mesmo abriu
+    return chamado.solicitadoPor === usuario.id;
+  };
+
+  const podeExcluirChamado = ehCentralMecanica;
+
   const filteredChamados = chamados.filter(c => {
+    if (c.excluido) {
+      // Chamados excluídos/cancelados pela mecânica não aparecem na lista padrão
+      return false;
+    }
+
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
+      !searchLower ||
       c.id.toLowerCase().includes(searchLower) ||
       c.titulo.toLowerCase().includes(searchLower) ||
       c.descricao.toLowerCase().includes(searchLower) ||
@@ -238,8 +290,32 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       c.setor.toLowerCase().includes(searchLower) ||
       c.categoria?.toLowerCase().includes(searchLower) ||
       c.linha?.toLowerCase().includes(searchLower);
+
     const matchesStatus = statusFilter === 'todos' || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    const idFilter = filtroIdChamado.trim().toLowerCase();
+    const matchesId =
+      !idFilter || c.id.toLowerCase().includes(idFilter);
+
+    const linhaFilter = filtroLinha.trim().toLowerCase();
+    const matchesLinha =
+      !linhaFilter || (c.linha || '').toLowerCase().includes(linhaFilter);
+
+    const matchesTurno =
+      filtroTurno === 'todos' || c.turno === filtroTurno;
+
+    const matchesMeus =
+      !mostrarSomenteMeus ||
+      (!usuario ? false : c.solicitadoPor === usuario.id);
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesId &&
+      matchesLinha &&
+      matchesTurno &&
+      matchesMeus
+    );
   });
 
   return (
@@ -266,15 +342,15 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Buscar por ID, título, descrição, máquina, setor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-              />
+            <input
+              type="text"
+              placeholder="Buscar por título, descrição, máquina, setor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
           </div>
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
@@ -288,7 +364,45 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
               <option value="resolvido">Resolvido</option>
               <option value="cancelado">Cancelado</option>
             </select>
+            <select
+              value={filtroTurno}
+              onChange={(e) => setFiltroTurno(e.target.value as any)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="todos">Todos os Turnos</option>
+              <option value="1">1º Turno</option>
+              <option value="2">2º Turno</option>
+              <option value="3">3º Turno</option>
+              <option value="central">Central</option>
+            </select>
+            {usuario && (
+              <label className="flex items-center space-x-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={mostrarSomenteMeus}
+                  onChange={(e) => setMostrarSomenteMeus(e.target.checked)}
+                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span>Apenas meus chamados</span>
+              </label>
+            )}
           </div>
+        </div>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            placeholder="Filtrar por linha..."
+            value={filtroLinha}
+            onChange={(e) => setFiltroLinha(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          />
+          <input
+            type="text"
+            placeholder="Filtrar por ID do chamado..."
+            value={filtroIdChamado}
+            onChange={(e) => setFiltroIdChamado(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          />
         </div>
       </div>
 
@@ -323,6 +437,24 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                     {chamado.maquina && <span><strong>Máquina:</strong> {chamado.maquina}</span>}
                     <span><strong>Solicitado por:</strong> {chamado.solicitadoPorNome}</span>
                     <span><strong>Data:</strong> {format(new Date(chamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {chamado.horaSolicitacao}</span>
+                    {chamado.turno && (
+                      <span>
+                        <strong>Turno:</strong>{' '}
+                        <span
+                          className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                            chamado.turno
+                          )}`}
+                        >
+                          {chamado.turno === '1'
+                            ? '1º Turno'
+                            : chamado.turno === '2'
+                            ? '2º Turno'
+                            : chamado.turno === '3'
+                            ? '3º Turno'
+                            : 'Central'}
+                        </span>
+                      </span>
+                    )}
                     {chamado.atribuidoParaNome && (
                       <span><strong>Atribuído para:</strong> {chamado.atribuidoParaNome}</span>
                     )}
@@ -336,20 +468,24 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Eye className="w-5 h-5" />
                   </button>
-                  <button
-                    onClick={() => handleEdit(chamado)}
-                    className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                    title="Editar"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(chamado.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Excluir"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  {podeEditarChamado(chamado) && (
+                    <button
+                      onClick={() => handleEdit(chamado)}
+                      className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                      title="Editar"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
+                  )}
+                  {podeExcluirChamado && (
+                    <button
+                      onClick={() => handleDelete(chamado.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -605,6 +741,24 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   <div>
                     <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
                   </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
                   {viewingChamado.atribuidoParaNome && (
                     <div>
                       <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}

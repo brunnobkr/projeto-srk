@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
-  const { canCreate, canEdit, isEngenharia, isSegurancaTrabalho } = useAuth();
+  const { canCreate, canEdit, isEngenharia, isSegurancaTrabalho, usuario } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroSetor, setFiltroSetor] = useState('');
@@ -137,6 +137,9 @@ export default function InstrucoesTrabalho() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const nomeUsuario = usuario?.nome || 'Usuário';
+    const agora = new Date().toISOString();
+    
     const instrucao: InstrucaoTrabalho = {
       id: editingInstrucao?.id || Date.now().toString(),
       codigoProduto: formData.codigoProduto,
@@ -149,9 +152,10 @@ export default function InstrucoesTrabalho() {
       funcionario: formData.funcionario,
       fotos: fotosGerais.length > 0 ? fotosGerais : undefined,
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
-      dataCriacao: editingInstrucao?.dataCriacao || new Date().toISOString(),
-      dataAtualizacao: new Date().toISOString(),
-      criadoPor: 'Usuário',
+      dataCriacao: editingInstrucao?.dataCriacao || agora,
+      dataAtualizacao: agora,
+      criadoPor: editingInstrucao?.criadoPor || nomeUsuario,
+      atualizadoPor: editingInstrucao ? nomeUsuario : undefined,
     };
 
     if (editingInstrucao) {
@@ -937,6 +941,12 @@ export default function InstrucoesTrabalho() {
                     <div>
                       <span className="font-medium text-gray-700">Criado por:</span>
                       <p className="text-gray-900">{viewingInstrucao.criadoPor}</p>
+                    </div>
+                  )}
+                  {viewingInstrucao.atualizadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Última atualização por:</span>
+                      <p className="text-gray-900">{viewingInstrucao.atualizadoPor}</p>
                     </div>
                   )}
                 </div>
