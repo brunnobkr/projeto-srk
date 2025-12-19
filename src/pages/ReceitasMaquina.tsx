@@ -56,7 +56,7 @@ export default function ReceitasMaquina() {
     loadSetores();
   }, []);
 
-  // Atualizar nome e matr├¡cula quando o usu├írio mudar
+  // Atualizar nome e matrícula quando o usuário mudar
   useEffect(() => {
     if (usuario && !editingReceita) {
       setFormData(prev => ({
@@ -122,7 +122,7 @@ export default function ReceitasMaquina() {
     Array.from(files).forEach((file) => {
       if (file.type === 'application/pdf') {
         if (file.size > 10 * 1024 * 1024) {
-          alert(`O arquivo ${file.name} ├® muito grande. Tamanho m├íximo: 10MB`);
+          alert(`O arquivo ${file.name} ├® muito grande. Tamanho máximo: 10MB`);
           return;
         }
 
@@ -184,7 +184,7 @@ export default function ReceitasMaquina() {
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
       dataCriacao: editingReceita?.dataCriacao || new Date().toISOString(),
       dataAtualizacao: new Date().toISOString(),
-      criadoPor: formData.nomeResponsavel || 'Usu├írio',
+      criadoPor: formData.nomeResponsavel || 'Usuário',
     };
 
     if (editingReceita) {
@@ -293,15 +293,15 @@ export default function ReceitasMaquina() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Receitas de M├íquina</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Receitas de Máquina</h1>
           <p className="mt-2 text-gray-600">
-            Configure e gerencie receitas de m├íquina para cada c├│digo de produto
+            Configure e gerencie receitas de máquina para cada código de produto
           </p>
         </div>
         {podeCriarEditar && (
           <button
             onClick={() => {
-              // Preencher automaticamente com dados do usu├írio logado
+              // Preencher automaticamente com dados do usuário logado
               setFormData(prev => ({
                 ...prev,
                 nomeResponsavel: usuario?.nome || '',
@@ -323,7 +323,7 @@ export default function ReceitasMaquina() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por c├│digo do produto, nome ou matr├¡cula..."
+            placeholder="Buscar por código do produto, nome ou matrícula..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -338,7 +338,7 @@ export default function ReceitasMaquina() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  C├│digo do Produto
+                  Código do Produto
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Setor
@@ -347,7 +347,7 @@ export default function ReceitasMaquina() {
                   Linha
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Angula├º├úo
+                  Angulação
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Velocidade
@@ -356,22 +356,22 @@ export default function ReceitasMaquina() {
                   Dist├óncia
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vaz├úo L1/L2
+                  Vazão L1/L2
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Conectores
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  M├úo de Obra
+                  Mão de Obra
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tempo Montagem
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Respons├ível
+                  Responsável
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Matr├¡cula
+                  Matrícula
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fotos
@@ -380,7 +380,7 @@ export default function ReceitasMaquina() {
                   Atualizado
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  A├º├Áes
+                  Ações
                 </th>
               </tr>
             </thead>
@@ -470,7 +470,7 @@ export default function ReceitasMaquina() {
                       <button
                         onClick={() => handleViewHistorico(receita)}
                         className="text-purple-600 hover:text-purple-900 mr-4"
-                        title="Ver hist├│rico"
+                        title="Ver histórico"
                       >
                         <History className="w-5 h-5" />
                       </button>
@@ -507,13 +507,13 @@ export default function ReceitasMaquina() {
               {editingReceita ? 'Editar Receita' : 'Nova Receita'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Informa├º├Áes do Respons├ível */}
+              {/* InformaçÇes do Responsável */}
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informa├º├Áes do Respons├ível</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">InformaçÇes do Responsável</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nome do Respons├ível *
+                      Nome do Responsável *
                     </label>
                     <input
                       type="text"
@@ -527,7 +527,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Matr├¡cula do Respons├ível *
+                      Matrícula do Responsável *
                     </label>
                     <input
                       type="text"
@@ -545,7 +545,7 @@ export default function ReceitasMaquina() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    C├│digo do Produto *
+                    Código do Produto *
                   </label>
                   <input
                     type="text"
@@ -553,7 +553,7 @@ export default function ReceitasMaquina() {
                     value={formData.codigoTubo}
                     onChange={(e) => setFormData({ ...formData, codigoTubo: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                    placeholder="Digite o c├│digo do produto"
+                    placeholder="Digite o código do produto"
                   />
                 </div>
                 <div>
@@ -592,7 +592,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Angula├º├úo (┬░) *
+                    Angulação (┬░) *
                   </label>
                   <input
                     type="number"
@@ -631,7 +631,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vaz├úo Lado 1 *
+                    Vazúo Lado 1 *
                   </label>
                   <input
                     type="number"
@@ -644,7 +644,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vaz├úo Lado 2 *
+                    Vazúo Lado 2 *
                   </label>
                   <input
                     type="number"
@@ -657,13 +657,13 @@ export default function ReceitasMaquina() {
                 </div>
               </div>
 
-              {/* Se├º├úo: Inser├º├úo Lado A */}
+              {/* Seçúo: Inserçúo Lado A */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configura├º├Áes Lado A</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ConfiguraçÇes Lado A</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      ├éngulo de Inser├º├úo Lado A (┬░) *
+                      ├éngulo de Inserçúo Lado A (┬░) *
                     </label>
                     <input
                       type="number"
@@ -689,7 +689,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Velocidade M├íquina Lado A *
+                      Velocidade Máquina Lado A *
                     </label>
                     <input
                       type="number"
@@ -702,7 +702,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Limite Inser├º├úo Lado A *
+                      Limite Inserçúo Lado A *
                     </label>
                     <input
                       type="number"
@@ -718,7 +718,7 @@ export default function ReceitasMaquina() {
                 {/* Fotos Lado A */}
                 <div className="mt-4 pt-4 border-t">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fotos da Configura├º├úo Lado A
+                    Fotos da Configuraçúo Lado A
                   </label>
                   <input
                     type="file"
@@ -756,13 +756,13 @@ export default function ReceitasMaquina() {
                 </div>
               </div>
 
-              {/* Se├º├úo: Inser├º├úo Lado B */}
+              {/* Seçúo: Inserçúo Lado B */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configura├º├Áes Lado B</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ConfiguraçÇes Lado B</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      ├éngulo de Inser├º├úo Lado B (┬░) *
+                      ├éngulo de Inserçúo Lado B (┬░) *
                     </label>
                     <input
                       type="number"
@@ -788,7 +788,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Velocidade M├íquina Lado B *
+                      Velocidade Máquina Lado B *
                     </label>
                     <input
                       type="number"
@@ -801,7 +801,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Limite Inser├º├úo Lado B *
+                      Limite Inserçúo Lado B *
                     </label>
                     <input
                       type="number"
@@ -817,7 +817,7 @@ export default function ReceitasMaquina() {
                 {/* Fotos Lado B */}
                 <div className="mt-4 pt-4 border-t">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fotos da Configura├º├úo Lado B
+                    Fotos da Configuraçúo Lado B
                   </label>
                   <input
                     type="file"
@@ -855,13 +855,13 @@ export default function ReceitasMaquina() {
                 </div>
               </div>
 
-              {/* Se├º├úo: M├úo de Obra e Tempo */}
+              {/* Seçúo: Múo de Obra e Tempo */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">M├úo de Obra e Tempo de Montagem</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Múo de Obra e Tempo de Montagem</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      M├úo de Obra Necess├íria *
+                      Mão de Obra Necessária *
                     </label>
                     <input
                       type="number"
@@ -870,7 +870,7 @@ export default function ReceitasMaquina() {
                       value={formData.maoObraNecessaria}
                       onChange={(e) => setFormData({ ...formData, maoObraNecessaria: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      placeholder="Quantidade de m├úo de obra"
+                      placeholder="Quantidade de múo de obra"
                     />
                   </div>
                   <div>
@@ -892,7 +892,7 @@ export default function ReceitasMaquina() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Conectores (separados por v├¡rgula)
+                  Conectores (separados por vírgula)
                 </label>
                 <input
                   type="text"
@@ -903,7 +903,7 @@ export default function ReceitasMaquina() {
                 />
               </div>
 
-              {/* Se├º├úo de Fotos */}
+              {/* Seçúo de Fotos */}
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Fotos</h3>
                 <div>
@@ -918,7 +918,7 @@ export default function ReceitasMaquina() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Voc├¬ pode selecionar m├║ltiplas imagens
+                    Você pode selecionar m├║ltiplas imagens
                   </p>
                 </div>
                 {fotos.length > 0 && (
@@ -949,7 +949,7 @@ export default function ReceitasMaquina() {
                 )}
               </div>
 
-              {/* Se├º├úo de Anexos PDF */}
+              {/* Seçúo de Anexos PDF */}
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Anexos PDF</h3>
                 <div>
@@ -961,7 +961,7 @@ export default function ReceitasMaquina() {
                     onChange={handlePDFUpload}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Tamanho m├íximo: 10MB por arquivo</p>
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
                 </div>
                 {anexosPDF.length > 0 && (
                   <div className="mt-4">
@@ -997,12 +997,12 @@ export default function ReceitasMaquina() {
               {editingReceita && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Motivo da Altera├º├úo (opcional)
+                    Motivo da Alteraçúo (opcional)
                   </label>
                   <textarea
                     value={formData.motivo}
                     onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
-                    placeholder="Descreva o motivo da altera├º├úo..."
+                    placeholder="Descreva o motivo da alteraçúo..."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   />
@@ -1028,15 +1028,15 @@ export default function ReceitasMaquina() {
         </div>
       )}
 
-      {/* Modal de Hist├│rico */}
+      {/* Modal de Histórico */}
       <HistoricoModal
         isOpen={showHistoricoModal}
         onClose={() => setShowHistoricoModal(false)}
         historico={historicoSelecionado}
-        titulo="Hist├│rico de Altera├º├Áes da Receita"
+        titulo="Histórico de AlteraçÇes da Receita"
       />
 
-      {/* Modal de Visualiza├º├úo de Fotos */}
+      {/* Modal de Visualizaçúo de Fotos */}
       {showFotoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -1083,7 +1083,7 @@ export default function ReceitasMaquina() {
                     className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
                     disabled={fotosModalAtual.indexOf(fotoSelecionada) === fotosModalAtual.length - 1}
                   >
-                    Pr├│xima
+                    Próxima
                   </button>
                   <button
                     onClick={() => setFotoSelecionada(null)}
@@ -1114,7 +1114,7 @@ export default function ReceitasMaquina() {
         </div>
       )}
 
-      {/* Modal de Visualiza├º├úo Detalhada */}
+      {/* Modal de Visualizaçúo Detalhada */}
       {viewingReceita && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -1142,13 +1142,13 @@ export default function ReceitasMaquina() {
             </div>
 
             <div className="space-y-4">
-              {/* Informa├º├Áes do Respons├ível */}
+              {/* InformaçÇes do Responsável */}
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informa├º├Áes do Respons├ível</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">InformaçÇes do Responsável</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nome do Respons├ível *
+                      Nome do Responsável *
                     </label>
                     <input
                       type="text"
@@ -1159,7 +1159,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Matr├¡cula do Respons├ível *
+                      Matrícula do Responsável *
                     </label>
                     <input
                       type="text"
@@ -1174,7 +1174,7 @@ export default function ReceitasMaquina() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    C├│digo do Produto *
+                    Código do Produto *
                   </label>
                   <input
                     type="text"
@@ -1207,7 +1207,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Angula├º├úo (┬░) *
+                    Angulação (┬░) *
                   </label>
                   <input
                     type="number"
@@ -1243,7 +1243,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vaz├úo Lado 1 *
+                    Vazúo Lado 1 *
                   </label>
                   <input
                     type="number"
@@ -1255,7 +1255,7 @@ export default function ReceitasMaquina() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vaz├úo Lado 2 *
+                    Vazúo Lado 2 *
                   </label>
                   <input
                     type="number"
@@ -1267,13 +1267,13 @@ export default function ReceitasMaquina() {
                 </div>
               </div>
 
-              {/* Se├º├úo: Inser├º├úo Lado A */}
+              {/* Seçúo: Inserçúo Lado A */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configura├º├Áes Lado A</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ConfiguraçÇes Lado A</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      ├éngulo de Inser├º├úo Lado A (┬░) *
+                      ├éngulo de Inserçúo Lado A (┬░) *
                     </label>
                     <input
                       type="number"
@@ -1297,7 +1297,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Velocidade M├íquina Lado A *
+                      Velocidade Máquina Lado A *
                     </label>
                     <input
                       type="number"
@@ -1309,7 +1309,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Limite Inser├º├úo Lado A *
+                      Limite Inserçúo Lado A *
                     </label>
                     <input
                       type="number"
@@ -1325,7 +1325,7 @@ export default function ReceitasMaquina() {
                 {viewingReceita.fotosLadoA && viewingReceita.fotosLadoA.length > 0 && (
                   <div className="mt-4 pt-4 border-t">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fotos da Configura├º├úo Lado A ({viewingReceita.fotosLadoA.length})
+                      Fotos da Configuraçúo Lado A ({viewingReceita.fotosLadoA.length})
                     </label>
                     <div className="grid grid-cols-3 gap-4">
                       {viewingReceita.fotosLadoA.map((foto, index) => (
@@ -1347,13 +1347,13 @@ export default function ReceitasMaquina() {
                 )}
               </div>
 
-              {/* Se├º├úo: Inser├º├úo Lado B */}
+              {/* Seçúo: Inserçúo Lado B */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Configura├º├Áes Lado B</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ConfiguraçÇes Lado B</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      ├éngulo de Inser├º├úo Lado B (┬░) *
+                      ├éngulo de Inserçúo Lado B (┬░) *
                     </label>
                     <input
                       type="number"
@@ -1377,7 +1377,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Velocidade M├íquina Lado B *
+                      Velocidade Máquina Lado B *
                     </label>
                     <input
                       type="number"
@@ -1389,7 +1389,7 @@ export default function ReceitasMaquina() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Limite Inser├º├úo Lado B *
+                      Limite Inserçúo Lado B *
                     </label>
                     <input
                       type="number"
@@ -1405,7 +1405,7 @@ export default function ReceitasMaquina() {
                 {viewingReceita.fotosLadoB && viewingReceita.fotosLadoB.length > 0 && (
                   <div className="mt-4 pt-4 border-t">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fotos da Configura├º├úo Lado B ({viewingReceita.fotosLadoB.length})
+                      Fotos da Configuraçúo Lado B ({viewingReceita.fotosLadoB.length})
                     </label>
                     <div className="grid grid-cols-3 gap-4">
                       {viewingReceita.fotosLadoB.map((foto, index) => (
@@ -1427,13 +1427,13 @@ export default function ReceitasMaquina() {
                 )}
               </div>
 
-              {/* Se├º├úo: M├úo de Obra e Tempo */}
+              {/* Seçúo: Múo de Obra e Tempo */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">M├úo de Obra e Tempo de Montagem</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Múo de Obra e Tempo de Montagem</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      M├úo de Obra Necess├íria *
+                      Mão de Obra Necessária *
                     </label>
                     <input
                       type="number"
@@ -1460,7 +1460,7 @@ export default function ReceitasMaquina() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Conectores (separados por v├¡rgula)
+                  Conectores (separados por vírgula)
                 </label>
                 <input
                   type="text"
@@ -1542,7 +1542,7 @@ export default function ReceitasMaquina() {
                 </div>
               )}
 
-              {/* Informa├º├Áes de Data */}
+              {/* InformaçÇes de Data */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>

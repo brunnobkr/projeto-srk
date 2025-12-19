@@ -19,7 +19,7 @@ export default function ControleProducao() {
   const [showAtualizacaoHoraModal, setShowAtualizacaoHoraModal] = useState(false);
   const [controleParaAtualizar, setControleParaAtualizar] = useState<ControleProducao | null>(null);
   const [quantidadeHoraAtual, setQuantidadeHoraAtual] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'tabela' | 'linhas'>('tabela'); // Modo de visualiza├º├úo
+  const [viewMode, setViewMode] = useState<'tabela' | 'linhas'>('tabela'); // Modo de visualizaçúo
   const [codigosAtivosPorLinha, setCodigosAtivosPorLinha] = useState<Record<string, CodigoAtivoLinha[]>>({});
   const [showPausaAlmocoModal, setShowPausaAlmocoModal] = useState(false);
   const [linhaParaPausa, setLinhaParaPausa] = useState<{ setor: string; linha: string } | null>(null);
@@ -48,12 +48,12 @@ export default function ControleProducao() {
     loadControles();
     loadSetores();
     
-    // Carregar c├│digos ativos para quem pode atualizar produ├º├úo
+    // Carregar códigos ativos para quem pode atualizar produçúo
     if (podeAtualizarProducao()) {
       loadCodigosAtivosPorLinha();
     }
     
-    // Atualizar controles a cada minuto para quem pode atualizar ver atualiza├º├Áes em tempo real
+    // Atualizar controles a cada minuto para quem pode atualizar ver atualizaçÇes em tempo real
     if (podeAtualizarProducao()) {
       const interval = setInterval(() => {
         loadControles();
@@ -80,7 +80,7 @@ export default function ControleProducao() {
       todosControles = todosControles.filter(c => c.turno === '1' || c.turno === '2' || c.turno === '3');
     }
     
-    // Se for quem pode atualizar produ├º├úo (preparador ou autorizado), filtrar apenas do seu setor
+    // Se for quem pode atualizar produçúo (preparador ou autorizado), filtrar apenas do seu setor
     if (podeAtualizarProducao() && usuario?.setor) {
       const setorUsuario = usuario.setor.toLowerCase().trim();
       todosControles = todosControles.filter(c => {
@@ -89,12 +89,12 @@ export default function ControleProducao() {
       });
     }
     
-    // Calcular efici├¬ncia e quantidade final para cada controle
+    // Calcular eficiência e quantidade final para cada controle
     todosControles = todosControles.map(controle => {
       const atualizacoes = controle.atualizacoesHora || [];
       const quantidadeFinal = atualizacoes.reduce((sum, atualizacao) => sum + atualizacao.quantidadeRealizada, 0);
       
-      // Calcular efici├¬ncia se tiver quantidade da log├¡stica
+      // Calcular eficiência se tiver quantidade da logística
       let eficiencia: number | undefined;
       if (controle.quantidadeTotalLogistica && controle.quantidadeTotalLogistica > 0) {
         eficiencia = (quantidadeFinal / controle.quantidadeTotalLogistica) * 100;
@@ -110,7 +110,7 @@ export default function ControleProducao() {
     setControles(todosControles);
   };
 
-    // Carregar c├│digos ativos por linha (para quem pode atualizar produ├º├úo)
+    // Carregar códigos ativos por linha (para quem pode atualizar produçúo)
   const loadCodigosAtivosPorLinha = () => {
     if (!usuario?.setor || !podeAtualizarProducao()) return;
 
@@ -120,7 +120,7 @@ export default function ControleProducao() {
     let programacoes = programacoesPedidosStorage.getAll();
     let controles = producaoStorage.getAll();
     
-    // Filtrar programa├º├Áes do dia atual (comparar apenas a data, n├úo a hora)
+    // Filtrar programaçÇes do dia atual (comparar apenas a data, núo a hora)
     programacoes = programacoes.filter(p => {
       try {
         const dataProg = p.dataProgramacao ? new Date(p.dataProgramacao) : new Date(p.dataCriacao);
@@ -141,7 +141,7 @@ export default function ControleProducao() {
       controles = controles.filter(c => c.turno === '1' || c.turno === '2' || c.turno === '3');
     }
 
-    // Filtrar programa├º├Áes do setor do preparador
+    // Filtrar programaçÇes do setor do preparador
     const programacoesSetor = programacoes.filter(p => {
       const setorProgramacao = (p.setor || '').toLowerCase().trim();
       return setorProgramacao.includes(setorUsuario) || setorUsuario.includes(setorProgramacao);
@@ -153,7 +153,7 @@ export default function ControleProducao() {
     programacoesSetor.forEach(programacao => {
       const chaveLinha = `${programacao.setor}_${programacao.linha}`;
       
-      // Buscar controle de produ├º├úo correspondente (comparar apenas a data)
+      // Buscar controle de produçúo correspondente (comparar apenas a data)
       const controle = controles.find(c => {
         const dataControle = c.data;
         let dataProgFormatada: string;
@@ -176,16 +176,16 @@ export default function ControleProducao() {
         ? (quantidadeFinal / programacao.quantidadeProgramada) * 100 
         : undefined;
 
-      // Verificar se j├í existe c├│digo ativo para esta linha
+      // Verificar se já existe código ativo para esta linha
       if (!codigosPorLinha[chaveLinha]) {
         codigosPorLinha[chaveLinha] = [];
       }
 
-      // Verificar se j├í existe este c├│digo na linha
+      // Verificar se já existe este código na linha
       const codigoExistente = codigosPorLinha[chaveLinha].find(c => c.codigoProduto === programacao.codigoProduto);
       
       if (!codigoExistente) {
-        // Criar novo c├│digo ativo
+        // Criar novo código ativo
         const codigoAtivo: CodigoAtivoLinha = {
           id: controle?.id || programacao.id,
           codigoProduto: programacao.codigoProduto,
@@ -206,7 +206,7 @@ export default function ControleProducao() {
         
         codigosPorLinha[chaveLinha].push(codigoAtivo);
       } else {
-        // Atualizar c├│digo existente
+        // Atualizar código existente
         codigoExistente.quantidadeRealizada = quantidadeFinal;
         codigoExistente.eficiencia = eficiencia;
         codigoExistente.atualizacoesHora = atualizacoes;
@@ -214,15 +214,15 @@ export default function ControleProducao() {
       }
     });
 
-    // Carregar c├│digos j├í marcados como ativos (do localStorage ou do estado anterior)
+    // Carregar códigos já marcados como ativos (do localStorage ou do estado anterior)
     const codigosAtivosSalvos = localStorage.getItem(`codigosAtivos_${usuario.setor}`);
     if (codigosAtivosSalvos) {
       try {
         const salvos = JSON.parse(codigosAtivosSalvos) as Record<string, CodigoAtivoLinha[]>;
-        // Mesclar com os c├│digos carregados das programa├º├Áes
+        // Mesclar com os códigos carregados das programaçÇes
         Object.keys(salvos).forEach(chave => {
           if (codigosPorLinha[chave]) {
-            // Manter c├│digos marcados como ativos
+            // Manter códigos marcados como ativos
             salvos[chave].forEach(codigoSalvo => {
               const codigoExistente = codigosPorLinha[chave].find(c => c.codigoProduto === codigoSalvo.codigoProduto);
               if (codigoExistente) {
@@ -233,34 +233,34 @@ export default function ControleProducao() {
           }
         });
       } catch (e) {
-        console.error('Erro ao carregar c├│digos ativos salvos:', e);
+        console.error('Erro ao carregar códigos ativos salvos:', e);
       }
     }
 
     setCodigosAtivosPorLinha(codigosPorLinha);
   };
 
-  // Salvar c├│digos ativos por linha
+  // Salvar códigos ativos por linha
   const salvarCodigosAtivos = () => {
     if (usuario?.setor) {
       localStorage.setItem(`codigosAtivos_${usuario.setor}`, JSON.stringify(codigosAtivosPorLinha));
     }
   };
 
-  // Adicionar c├│digo ativo a uma linha
+  // Adicionar código ativo a uma linha
   const adicionarCodigoAtivo = (setor: string, linha: string, codigoProduto: string, quantidadePedida: number) => {
     const chaveLinha = `${setor}_${linha}`;
     const codigosLinha = codigosAtivosPorLinha[chaveLinha] || [];
     
-    // Verificar se j├í existe
+    // Verificar se já existe
     if (codigosLinha.find(c => c.codigoProduto === codigoProduto)) {
-      alert('Este c├│digo j├í est├í ativo nesta linha');
+      alert('Este código já está ativo nesta linha');
       return;
     }
 
-    // Verificar limite de 3 c├│digos por linha
+    // Verificar limite de 3 códigos por linha
     if (codigosLinha.length >= 3) {
-      alert('Limite de 3 c├│digos por linha atingido. Finalize um c├│digo antes de adicionar outro.');
+      alert('Limite de 3 códigos por linha atingido. Finalize um código antes de adicionar outro.');
       return;
     }
 
@@ -281,7 +281,7 @@ export default function ControleProducao() {
     salvarCodigosAtivos();
   };
 
-  // Remover c├│digo ativo de uma linha
+  // Remover código ativo de uma linha
   const removerCodigoAtivo = (setor: string, linha: string, codigoId: string) => {
     const chaveLinha = `${setor}_${linha}`;
     const codigosLinha = codigosAtivosPorLinha[chaveLinha] || [];
@@ -294,7 +294,7 @@ export default function ControleProducao() {
     salvarCodigosAtivos();
   };
 
-  // Buscar receita de m├íquina automaticamente quando o c├│digo for informado
+  // Buscar receita de máquina automaticamente quando o código for informado
   const buscarReceitaPorCodigo = (codigo: string) => {
     if (!codigo) return;
     
@@ -302,7 +302,7 @@ export default function ControleProducao() {
     const receita = receitas.find(r => r.codigoTubo === codigo);
     
     if (receita) {
-      // Preencher automaticamente tempo de montagem e m├úo de obra da receita
+      // Preencher automaticamente tempo de montagem e múo de obra da receita
       if (receita.tempoMontagem) {
         setFormData(prev => ({
           ...prev,
@@ -385,9 +385,9 @@ export default function ControleProducao() {
     }
   };
 
-  // Fun├º├úo para preparador atualizar produ├º├úo por hora (vers├úo por c├│digo ativo)
+  // Funçúo para preparador atualizar produçúo por hora (versúo por código ativo)
   const handleAtualizarHoraCodigo = (setor: string, linha: string, codigo: CodigoAtivoLinha) => {
-    // Buscar programa├º├úo para obter o turno correto
+    // Buscar programaçúo para obter o turno correto
     const programacoes = programacoesPedidosStorage.getAll();
     const programacao = programacoes.find(p => 
       p.codigoProduto === codigo.codigoProduto &&
@@ -396,7 +396,7 @@ export default function ControleProducao() {
       format(new Date(p.dataProgramacao || p.dataCriacao), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
     );
     
-    // Buscar ou criar controle de produ├º├úo
+    // Buscar ou criar controle de produçúo
     let controle = controles.find(c => 
       c.codigoTubo === codigo.codigoProduto &&
       c.setor === setor &&
@@ -405,7 +405,7 @@ export default function ControleProducao() {
     );
 
     if (!controle) {
-      // Usar turno da programa├º├úo se dispon├¡vel, sen├úo determinar pela hora atual
+      // Usar turno da programaçúo se disponível, senúo determinar pela hora atual
       const turnoProgramacao = programacao?.turno;
       const turnoFinal = (turnoProgramacao && (turnoProgramacao === '1' || turnoProgramacao === '2' || turnoProgramacao === '3'))
         ? turnoProgramacao
@@ -439,21 +439,21 @@ export default function ControleProducao() {
     setShowAtualizacaoHoraModal(true);
   };
 
-  // Fun├º├úo para preparador atualizar produ├º├úo por hora (vers├úo antiga - mantida para compatibilidade)
+  // Funçúo para preparador atualizar produçúo por hora (versúo antiga - mantida para compatibilidade)
   const handleAtualizarHora = (controle: ControleProducao) => {
     setControleParaAtualizar(controle);
     setQuantidadeHoraAtual('');
     setShowAtualizacaoHoraModal(true);
   };
 
-  // Fun├º├úo para iniciar pausa de almo├ºo
+  // Funçúo para iniciar pausa de almoço
   const handleIniciarPausaAlmoco = (setor: string, linha: string, codigo: CodigoAtivoLinha) => {
     setLinhaParaPausa({ setor, linha });
     setCodigoParaPausa(codigo);
     setShowPausaAlmocoModal(true);
   };
 
-  // Fun├º├úo para finalizar pausa de almo├ºo
+  // Funçúo para finalizar pausa de almoço
   const handleFinalizarPausaAlmoco = (setor: string, linha: string, codigoId: string) => {
     const chaveLinha = `${setor}_${linha}`;
     const codigosLinha = codigosAtivosPorLinha[chaveLinha] || [];
@@ -482,11 +482,11 @@ export default function ControleProducao() {
       }));
 
       salvarCodigosAtivos();
-      alert(`Pausa de almo├ºo finalizada. Dura├º├úo: ${duracaoMinutos} minutos`);
+      alert(`Pausa de almoço finalizada. Duraçúo: ${duracaoMinutos} minutos`);
     }
   };
 
-  // Confirmar atualiza├º├úo por hora
+  // Confirmar atualizaçúo por hora
   const handleConfirmarAtualizacaoHora = () => {
     if (!controleParaAtualizar || !quantidadeHoraAtual) {
       alert('Por favor, informe a quantidade realizada nesta hora');
@@ -495,26 +495,26 @@ export default function ControleProducao() {
 
     const quantidade = parseInt(quantidadeHoraAtual);
     if (isNaN(quantidade) || quantidade < 0) {
-      alert('Por favor, informe uma quantidade v├ílida');
+      alert('Por favor, informe uma quantidade válida');
       return;
     }
 
     const horaAtual = format(new Date(), 'HH:00'); // Arredondar para hora cheia (ex: 08:00, 09:00)
     const atualizacoesExistentes = controleParaAtualizar.atualizacoesHora || [];
     
-    // Verificar se j├í existe atualiza├º├úo para esta hora
+    // Verificar se já existe atualizaçúo para esta hora
     const atualizacaoExistente = atualizacoesExistentes.find(a => a.hora === horaAtual);
     
     let novasAtualizacoes: AtualizacaoHora[];
     if (atualizacaoExistente) {
-      // Atualizar atualiza├º├úo existente
+      // Atualizar atualizaçúo existente
       novasAtualizacoes = atualizacoesExistentes.map(a => 
         a.hora === horaAtual 
           ? { ...a, quantidadeRealizada: quantidade, dataAtualizacao: new Date().toISOString(), atualizadoPor: usuario?.nome || 'Preparador' }
           : a
       );
     } else {
-      // Criar nova atualiza├º├úo
+      // Criar nova atualizaçúo
       const novaAtualizacao: AtualizacaoHora = {
         id: `${controleParaAtualizar.id}_${horaAtual}_${Date.now()}`,
         hora: horaAtual,
@@ -525,7 +525,7 @@ export default function ControleProducao() {
       novasAtualizacoes = [...atualizacoesExistentes, novaAtualizacao];
     }
 
-    // Calcular quantidade final e efici├¬ncia
+    // Calcular quantidade final e eficiência
     const quantidadeFinal = novasAtualizacoes.reduce((sum, a) => sum + a.quantidadeRealizada, 0);
     let eficiencia: number | undefined;
     if (controleParaAtualizar.quantidadeTotalLogistica && controleParaAtualizar.quantidadeTotalLogistica > 0) {
@@ -543,7 +543,7 @@ export default function ControleProducao() {
 
     producaoStorage.update(controleParaAtualizar.id, controleAtualizado);
     
-    // Atualizar c├│digo ativo na linha correspondente
+    // Atualizar código ativo na linha correspondente
     if (controleParaAtualizar.setor && controleParaAtualizar.linha) {
       const chaveLinha = `${controleParaAtualizar.setor}_${controleParaAtualizar.linha}`;
       const codigosLinha = codigosAtivosPorLinha[chaveLinha] || [];
@@ -568,13 +568,13 @@ export default function ControleProducao() {
       }
     }
     
-    alert(`Atualiza├º├úo registrada! Quantidade desta hora: ${quantidade}. Total realizado: ${quantidadeFinal}${controleParaAtualizar.quantidadeTotalLogistica ? ` (${eficiencia?.toFixed(1)}% de efici├¬ncia)` : ''}`);
+    alert(`Atualizaçúo registrada! Quantidade desta hora: ${quantidade}. Total realizado: ${quantidadeFinal}${controleParaAtualizar.quantidadeTotalLogistica ? ` (${eficiencia?.toFixed(1)}% de eficiência)` : ''}`);
     
     setShowAtualizacaoHoraModal(false);
     setControleParaAtualizar(null);
     setQuantidadeHoraAtual('');
     loadControles();
-    // Recarregar c├│digos ativos para atualizar a visualiza├º├úo
+    // Recarregar códigos ativos para atualizar a visualizaçúo
     if (podeAtualizarProducao()) {
       loadCodigosAtivosPorLinha();
     }
@@ -614,11 +614,11 @@ export default function ControleProducao() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Controle de Produ├º├úo</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Controle de Produção</h1>
           <p className="mt-2 text-gray-600">
             {podeAtualizarProducao() 
-              ? 'Atualize a produ├º├úo de hora em hora e acompanhe a efici├¬ncia do seu setor'
-              : 'Visualize e acompanhe a produ├º├úo por hora e a cada 30 minutos'}
+              ? 'Atualize a produção de hora em hora e acompanhe a eficiência do seu setor'
+              : 'Visualize e acompanhe a produção por hora e a cada 30 minutos'}
           </p>
           {podeAtualizarProducao() && usuario?.setor && (
             <p className="mt-1 text-sm text-blue-600 font-medium">
@@ -627,7 +627,7 @@ export default function ControleProducao() {
           )}
           {!podeAtualizarProducao() && (
             <p className="mt-1 text-sm text-orange-600 font-medium">
-              ÔÜá´©Å Apenas usu├írios autorizados podem atualizar a produ├º├úo hora a hora
+              ÔÜá´©Å Apenas usuários autorizados podem atualizar a produçúo hora a hora
             </p>
           )}
         </div>
@@ -642,7 +642,7 @@ export default function ControleProducao() {
                     : 'text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Vis├úo por Linhas
+                Visúo por Linhas
               </button>
               <button
                 onClick={() => setViewMode('tabela')}
@@ -689,7 +689,7 @@ export default function ControleProducao() {
               }
             });
             
-            // Filtrar por turno se n├úo for 'todos' (apenas 1, 2 ou 3, excluindo central)
+            // Filtrar por turno se núo for 'todos' (apenas 1, 2 ou 3, excluindo central)
             if (filtroTurno !== 'todos') {
               programacoes = programacoes.filter(p => p.turno === filtroTurno);
             } else {
@@ -704,12 +704,12 @@ export default function ControleProducao() {
                       Linha {linha} - Setor {setor}
                     </h3>
                     <p className="text-sm text-gray-500 mt-1">
-                      {codigos.filter(c => c.status === 'rodando').length} c├│digo(s) ativo(s) de {codigos.length} total
+                      {codigos.filter(c => c.status === 'rodando').length} código(s) ativo(s) de {codigos.length} total
                     </p>
                   </div>
                 </div>
 
-                {/* C├│digos Ativos */}
+                {/* Códigos Ativos */}
                 <div className="space-y-3 mb-4">
                   {codigos.map((codigo) => (
                     <div 
@@ -740,13 +740,13 @@ export default function ControleProducao() {
                                 codigo.eficiencia >= 80 ? 'bg-yellow-100 text-yellow-800' :
                                 'bg-red-100 text-red-800'
                               }`}>
-                                Efici├¬ncia: {codigo.eficiencia.toFixed(1)}%
+                                Eficiência: {codigo.eficiencia.toFixed(1)}%
                               </span>
                             )}
                           </div>
                           {codigo.pausaAlmoco && codigo.pausaAlmoco.inicio && (
                             <div className="mt-2 text-sm text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
-                              ÔÅ©´©Å Pausa para almo├ºo desde {format(new Date(codigo.pausaAlmoco.inicio), 'HH:mm')}
+                              ÔÅ©´©Å Pausa para almoço desde {format(new Date(codigo.pausaAlmoco.inicio), 'HH:mm')}
                               {codigo.pausaAlmoco.fim && ` at├® ${format(new Date(codigo.pausaAlmoco.fim), 'HH:mm')} (${codigo.pausaAlmoco.duracaoMinutos} min)`}
                             </div>
                           )}
@@ -757,7 +757,7 @@ export default function ControleProducao() {
                               <button
                                 onClick={() => handleAtualizarHoraCodigo(setor, linha, codigo)}
                                 className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm flex items-center"
-                                title="Atualizar produ├º├úo desta hora"
+                                title="Atualizar produçúo desta hora"
                               >
                                 <Clock className="w-4 h-4 mr-1" />
                                 Atualizar Hora
@@ -765,9 +765,9 @@ export default function ControleProducao() {
                               <button
                                 onClick={() => handleIniciarPausaAlmoco(setor, linha, codigo)}
                                 className="px-3 py-1 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm"
-                                title="Iniciar pausa para almo├ºo"
+                                title="Iniciar pausa para almoço"
                               >
-                                ÔÅ©´©Å Pausa Almo├ºo
+                                ÔÅ©´©Å Pausa Almoço
                               </button>
                             </>
                           )}
@@ -775,7 +775,7 @@ export default function ControleProducao() {
                             <button
                               onClick={() => handleFinalizarPausaAlmoco(setor, linha, codigo.id)}
                               className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-                              title="Finalizar pausa para almo├ºo"
+                              title="Finalizar pausa para almoço"
                             >
                               ÔûÂ´©Å Retomar
                             </button>
@@ -783,7 +783,7 @@ export default function ControleProducao() {
                           <button
                             onClick={() => removerCodigoAtivo(setor, linha, codigo.id)}
                             className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-                            title="Remover c├│digo"
+                            title="Remover código"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -793,11 +793,11 @@ export default function ControleProducao() {
                   ))}
                 </div>
 
-                {/* Adicionar Novo C├│digo */}
+                {/* Adicionar Novo Código */}
                 {codigos.length < 3 && (
                   <div className="border-t pt-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Adicionar c├│digo ativo nesta linha:
+                      Adicionar código ativo nesta linha:
                     </label>
                     <select
                       onChange={(e) => {
@@ -812,7 +812,7 @@ export default function ControleProducao() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                       defaultValue=""
                     >
-                      <option value="">Selecione um c├│digo programado...</option>
+                      <option value="">Selecione um código programado...</option>
                       {programacoes
                         .filter(p => !codigos.find(c => c.codigoProduto === p.codigoProduto))
                         .map(p => (
@@ -829,8 +829,8 @@ export default function ControleProducao() {
 
           {Object.keys(codigosAtivosPorLinha).length === 0 && (
             <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-500">Nenhuma linha com c├│digos ativos no momento.</p>
-              <p className="text-sm text-gray-400 mt-2">Os c├│digos aparecer├úo aqui quando houver programa├º├Áes da log├¡stica para seu setor.</p>
+              <p className="text-gray-500">Nenhuma linha com códigos ativos no momento.</p>
+              <p className="text-sm text-gray-400 mt-2">Os códigos aparecerúo aqui quando houver programaçÇes da logística para seu setor.</p>
             </div>
           )}
         </div>
@@ -842,7 +842,7 @@ export default function ControleProducao() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Buscar por c├│digo do produto, processo ou preparador..."
+                  placeholder="Buscar por código do produto, processo ou preparador..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -860,7 +860,7 @@ export default function ControleProducao() {
                   <option value="2">2┬║ Turno (16:18-01:30)</option>
                   <option value="3">3┬║ Turno (01:30-06:30)</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Central n├úo ├® usado para produ├º├úo</p>
+                <p className="text-xs text-gray-500 mt-1">Central não é usado para produção</p>
               </div>
             </div>
           </div>
@@ -870,7 +870,7 @@ export default function ControleProducao() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">C├│digo do Produto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código do Produto</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Setor</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Linha</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
@@ -878,14 +878,14 @@ export default function ControleProducao() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd 30min</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Hora</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Montagem</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">M├úo de Obra</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">M├úo de Obra por Linha</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mão de Obra</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mão de Obra por Linha</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Processo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Pedida</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Realizada</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Efici├¬ncia</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Eficiência</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preparador</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">A├º├Áes</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -948,7 +948,7 @@ export default function ControleProducao() {
                         <button 
                           onClick={() => handleAtualizarHora(controle)} 
                           className="text-purple-600 hover:text-purple-900 mr-2" 
-                          title="Atualizar produ├º├úo desta hora"
+                          title="Atualizar produçúo desta hora"
                         >
                           <Clock className="w-5 h-5" />
                         </button>
@@ -980,24 +980,24 @@ export default function ControleProducao() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">{editingControle ? 'Editar' : 'Novo'} Registro de Produ├º├úo</h2>
+            <h2 className="text-2xl font-bold mb-4">{editingControle ? 'Editar' : 'Novo'} Registro de Produçúo</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">C├│digo do Produto *</label>
+                  <label className="block text-sm font-medium mb-1">Código do Produto *</label>
                   <input 
                     type="text" 
                     required 
                     value={formData.codigoTubo} 
                     onChange={(e) => {
                       setFormData({ ...formData, codigoTubo: e.target.value });
-                      // Buscar receita automaticamente quando o c├│digo for informado
+                      // Buscar receita automaticamente quando o código for informado
                       buscarReceitaPorCodigo(e.target.value);
                     }} 
                     className="w-full px-3 py-2 border rounded-lg" 
-                    placeholder="Digite o c├│digo do produto"
+                    placeholder="Digite o código do produto"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Tempo de montagem e m├úo de obra ser├úo preenchidos automaticamente da receita</p>
+                  <p className="text-xs text-gray-500 mt-1">Tempo de montagem e múo de obra serúo preenchidos automaticamente da receita</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Setor</label>
@@ -1082,14 +1082,14 @@ export default function ControleProducao() {
                     onChange={(e) => setFormData({ ...formData, tempoMontagem: e.target.value })} 
                     className="w-full px-3 py-2 border rounded-lg" 
                     readOnly={!!formData.codigoTubo && formData.tempoMontagem !== ''}
-                    title={formData.codigoTubo && formData.tempoMontagem !== '' ? 'Preenchido automaticamente da receita de m├íquina' : ''}
+                    title={formData.codigoTubo && formData.tempoMontagem !== '' ? 'Preenchido automaticamente da receita de máquina' : ''}
                   />
                   {formData.codigoTubo && formData.tempoMontagem !== '' && (
                     <p className="text-xs text-green-600 mt-1">Ô£ô Preenchido automaticamente da receita</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">M├úo de Obra *</label>
+                  <label className="block text-sm font-medium mb-1">Múo de Obra *</label>
                   <input 
                     type="number" 
                     step="0.1" 
@@ -1098,32 +1098,32 @@ export default function ControleProducao() {
                     onChange={(e) => setFormData({ ...formData, maoObra: e.target.value })} 
                     className="w-full px-3 py-2 border rounded-lg" 
                     readOnly={!!formData.codigoTubo && formData.maoObra !== ''}
-                    title={formData.codigoTubo && formData.maoObra !== '' ? 'Preenchido automaticamente da receita de m├íquina' : ''}
+                    title={formData.codigoTubo && formData.maoObra !== '' ? 'Preenchido automaticamente da receita de máquina' : ''}
                   />
                   {formData.codigoTubo && formData.maoObra !== '' && (
                     <p className="text-xs text-green-600 mt-1">Ô£ô Preenchido automaticamente da receita</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">M├úo de Obra por Linha *</label>
+                  <label className="block text-sm font-medium mb-1">Múo de Obra por Linha *</label>
                   <input type="number" step="0.1" required value={formData.maoObraPorLinha} onChange={(e) => setFormData({ ...formData, maoObraPorLinha: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                  <p className="text-xs text-gray-500 mt-1">M├úo de obra necess├íria por linha</p>
+                  <p className="text-xs text-gray-500 mt-1">Múo de obra necessária por linha</p>
                 </div>
               </div>
 
-              {/* Se├º├úo: Log├¡stica e Preparador */}
+              {/* Seçúo: Logística e Preparador */}
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Log├¡stica e Preparador</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Logística e Preparador</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Quantidade Total Log├¡stica</label>
+                    <label className="block text-sm font-medium mb-1">Quantidade Total Logística</label>
                     <input 
                       type="number" 
                       step="0.1"
                       value={formData.quantidadeTotalLogistica} 
                       onChange={(e) => setFormData({ ...formData, quantidadeTotalLogistica: e.target.value })} 
                       className="w-full px-3 py-2 border rounded-lg" 
-                      placeholder="Quantidade total passada pela log├¡stica"
+                      placeholder="Quantidade total passada pela logística"
                     />
                   </div>
                   <div>
@@ -1144,30 +1144,30 @@ export default function ControleProducao() {
                         onChange={(e) => setFormData({ ...formData, atualizacaoHora: e.target.checked })}
                         className="mr-2"
                       />
-                      <span className="text-sm font-medium">Atualiza├º├úo hor├íria (preparador atualizou a cada hora)</span>
+                      <span className="text-sm font-medium">Atualizaçúo horária (preparador atualizou a cada hora)</span>
                     </label>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Observa├º├Áes</label>
+                <label className="block text-sm font-medium mb-1">ObservaçÇes</label>
                 <textarea value={formData.observacoes} onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
               </div>
 
-              {/* Justificativa de Falta de Funcion├írio */}
+              {/* Justificativa de Falta de Funcionário */}
               <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Justificativa de N├úo Realiza├º├úo</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Justificativa de Núo Realizaçúo</h3>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Justificativa por Falta de Funcion├írio</label>
+                  <label className="block text-sm font-medium mb-1">Justificativa por Falta de Funcionário</label>
                   <textarea 
                     value={formData.justificativaFaltaFuncionario} 
                     onChange={(e) => setFormData({ ...formData, justificativaFaltaFuncionario: e.target.value })} 
                     rows={3} 
                     className="w-full px-3 py-2 border rounded-lg" 
-                    placeholder="Justifique a n├úo realiza├º├úo do programado pela log├¡stica por motivos de falta de funcion├írio..."
+                    placeholder="Justifique a núo realizaçúo do programado pela logística por motivos de falta de funcionário..."
                   />
-                  <p className="text-xs text-gray-500 mt-1">Use este campo para justificar quando n├úo foi poss├¡vel atingir a meta programada devido ├á falta de funcion├írios</p>
+                  <p className="text-xs text-gray-500 mt-1">Use este campo para justificar quando núo foi possível atingir a meta programada devido ├á falta de funcionários</p>
                 </div>
               </div>
               <div className="flex justify-end space-x-4 pt-4">
@@ -1179,12 +1179,12 @@ export default function ControleProducao() {
         </div>
       )}
 
-      {/* Modal de Visualiza├º├úo Detalhada */}
+      {/* Modal de Visualizaçúo Detalhada */}
       {viewingControle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Controle de Produ├º├úo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes do Controle de Produçúo</h2>
               <button
                 onClick={() => setViewingControle(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -1195,10 +1195,10 @@ export default function ControleProducao() {
 
             <div className="space-y-6">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Informa├º├Áes Gerais</h3>
+                <h3 className="text-lg font-semibold mb-3">InformaçÇes Gerais</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-700">C├│digo do Produto:</span>
+                    <span className="font-medium text-gray-700">Código do Produto:</span>
                     <p className="text-gray-900">{viewingControle.codigoTubo}</p>
                   </div>
                   {viewingControle.setor && (
@@ -1240,11 +1240,11 @@ export default function ControleProducao() {
                     <p className="text-gray-900">{viewingControle.tempoMontagem} min</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">M├úo de Obra:</span>
+                    <span className="font-medium text-gray-700">Múo de Obra:</span>
                     <p className="text-gray-900">{viewingControle.maoObra}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">M├úo de Obra por Linha:</span>
+                    <span className="font-medium text-gray-700">Múo de Obra por Linha:</span>
                     <p className="text-gray-900">{viewingControle.maoObraPorLinha || (viewingControle as any).pessoasPorMaquina || '-'}</p>
                   </div>
                   <div>
@@ -1253,7 +1253,7 @@ export default function ControleProducao() {
                   </div>
                   {viewingControle.quantidadeTotalLogistica && (
                     <div>
-                      <span className="font-medium text-gray-700">Quantidade Pedida pela Log├¡stica:</span>
+                      <span className="font-medium text-gray-700">Quantidade Pedida pela Logística:</span>
                       <p className="text-gray-900 font-semibold text-blue-600">{viewingControle.quantidadeTotalLogistica}</p>
                     </div>
                   )}
@@ -1267,7 +1267,7 @@ export default function ControleProducao() {
                   )}
                   {viewingControle.eficiencia !== undefined && (
                     <div>
-                      <span className="font-medium text-gray-700">Efici├¬ncia:</span>
+                      <span className="font-medium text-gray-700">Eficiência:</span>
                       <p className="text-gray-900">
                         <span className={`px-3 py-1 text-sm rounded-full font-medium ${
                           viewingControle.eficiencia >= 100 ? 'bg-green-100 text-green-800' :
@@ -1281,7 +1281,7 @@ export default function ControleProducao() {
                   )}
                   {viewingControle.atualizacoesHora && viewingControle.atualizacoesHora.length > 0 && (
                     <div className="col-span-2">
-                      <span className="font-medium text-gray-700 mb-2 block">Hist├│rico de Atualiza├º├Áes por Hora:</span>
+                      <span className="font-medium text-gray-700 mb-2 block">Histórico de AtualizaçÇes por Hora:</span>
                       <div className="bg-gray-50 rounded-lg p-3 space-y-2 max-h-60 overflow-y-auto">
                         {viewingControle.atualizacoesHora
                           .sort((a, b) => b.hora.localeCompare(a.hora))
@@ -1310,13 +1310,13 @@ export default function ControleProducao() {
                   )}
                   {viewingControle.observacoes && (
                     <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Observa├º├Áes:</span>
+                      <span className="font-medium text-gray-700">ObservaçÇes:</span>
                       <p className="text-gray-900">{viewingControle.observacoes}</p>
                     </div>
                   )}
                   {viewingControle.justificativaFaltaFuncionario && (
                     <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Justificativa Falta de Funcion├írio:</span>
+                      <span className="font-medium text-gray-700">Justificativa Falta de Funcionário:</span>
                       <p className="text-gray-900">{viewingControle.justificativaFaltaFuncionario}</p>
                     </div>
                   )}
@@ -1335,14 +1335,14 @@ export default function ControleProducao() {
           </div>
         </div>
       )}
-      {/* Modal de Atualiza├º├úo por Hora (para Preparadores) */}
+      {/* Modal de Atualizaçúo por Hora (para Preparadores) */}
       {showAtualizacaoHoraModal && controleParaAtualizar && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                 <Clock className="w-6 h-6 mr-2 text-purple-600" />
-                Atualizar Produ├º├úo por Hora
+                Atualizar Produçúo por Hora
               </h2>
               <button
                 onClick={() => {
@@ -1359,7 +1359,7 @@ export default function ControleProducao() {
             <div className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>C├│digo:</strong> {controleParaAtualizar.codigoTubo}
+                  <strong>Código:</strong> {controleParaAtualizar.codigoTubo}
                 </p>
                 <p className="text-sm text-blue-800 mt-1">
                   <strong>Setor:</strong> {controleParaAtualizar.setor || '-'} | <strong>Linha:</strong> {controleParaAtualizar.linha || '-'}
@@ -1372,7 +1372,7 @@ export default function ControleProducao() {
                 </p>
                 {controleParaAtualizar.eficiencia !== undefined && (
                   <p className="text-sm text-blue-800 mt-1">
-                    <strong>Efici├¬ncia Atual:</strong> {controleParaAtualizar.eficiencia.toFixed(1)}%
+                    <strong>Eficiência Atual:</strong> {controleParaAtualizar.eficiencia.toFixed(1)}%
                   </p>
                 )}
               </div>
@@ -1391,14 +1391,14 @@ export default function ControleProducao() {
                   autoFocus
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Esta quantidade ser├í somada ao total realizado
+                  Esta quantidade será somada ao total realizado
                 </p>
               </div>
 
               {controleParaAtualizar.atualizacoesHora && controleParaAtualizar.atualizacoesHora.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hist├│rico de Atualiza├º├Áes
+                    Histórico de AtualizaçÇes
                   </label>
                   <div className="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto">
                     <div className="space-y-2">
@@ -1436,7 +1436,7 @@ export default function ControleProducao() {
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
                 >
                   <CheckCircle className="w-5 h-5 mr-2" />
-                  Confirmar Atualiza├º├úo
+                  Confirmar Atualizaçúo
                 </button>
               </div>
             </div>
@@ -1444,12 +1444,12 @@ export default function ControleProducao() {
         </div>
       )}
 
-      {/* Modal de Pausa para Almo├ºo */}
+      {/* Modal de Pausa para Almoço */}
       {showPausaAlmocoModal && linhaParaPausa && codigoParaPausa && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Pausa para Almo├ºo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Pausa para Almoço</h2>
               <button
                 onClick={() => {
                   setShowPausaAlmocoModal(false);
@@ -1465,7 +1465,7 @@ export default function ControleProducao() {
             <div className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>C├│digo:</strong> {codigoParaPausa.codigoProduto}
+                  <strong>Código:</strong> {codigoParaPausa.codigoProduto}
                 </p>
                 <p className="text-sm text-blue-800 mt-1">
                   <strong>Linha:</strong> {linhaParaPausa.linha} | <strong>Setor:</strong> {linhaParaPausa.setor}
@@ -1474,7 +1474,7 @@ export default function ControleProducao() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hor├írio de in├¡cio da pausa:
+                  Horário de início da pausa:
                 </label>
                 <input
                   type="time"
@@ -1486,7 +1486,7 @@ export default function ControleProducao() {
 
               <div className="bg-yellow-50 p-3 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                  ÔÜá´©Å A pausa ser├í registrada automaticamente. Lembre-se de finalizar a pausa quando retornar!
+                  ÔÜá´©Å A pausa será registrada automaticamente. Lembre-se de finalizar a pausa quando retornar!
                 </p>
               </div>
 
@@ -1528,7 +1528,7 @@ export default function ControleProducao() {
                     }));
 
                     salvarCodigosAtivos();
-                    alert('Pausa para almo├ºo iniciada! N├úo esque├ºa de finalizar quando retornar.');
+                    alert('Pausa para almoço iniciada! Núo esqueça de finalizar quando retornar.');
                     
                     setShowPausaAlmocoModal(false);
                     setLinhaParaPausa(null);
