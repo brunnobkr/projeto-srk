@@ -26,7 +26,7 @@ export default function Equipe() {
 
   // Normalizar cargo para agrupamento consistente
   // O setor é apenas informativo (para localizar linhas), o agrupamento é baseado no CARGO
-  const normalizarCargoParaGrupo = (cargo: string | undefined): string => {
+  const normalizarCargoParaGrupo = (cargo: string | undefined, setor?: string): string => {
     if (!cargo) return 'Outros';
     
     const cargoLower = cargo.toLowerCase();
