@@ -153,8 +153,8 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       exclusaoAutorizadaPorNome: editingChamado?.exclusaoAutorizadaPorNome,
       exclusaoAutorizadaPorMatricula: editingChamado?.exclusaoAutorizadaPorMatricula,
       dataExclusao: editingChamado?.dataExclusao,
-      atualizadoPor: editingChamado ? usuario.nome : editingChamado?.atualizadoPor,
-      matriculaAtualizadoPor: editingChamado ? usuario.matricula : editingChamado?.matriculaAtualizadoPor,
+      atualizadoPor: editingChamado ? usuario.nome : undefined,
+      matriculaAtualizadoPor: editingChamado ? usuario.matricula : undefined,
     };
 
     if (editingChamado) {
