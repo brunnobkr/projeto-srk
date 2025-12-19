@@ -292,6 +292,11 @@ export interface ProblemaTecnico {
   dataChamadaEngenharia?: string; // Data/hora que a engenharia foi chamada
   chamadoPor?: string; // Quem chamou a engenharia
   anexosPDF?: AnexoPDF[];
+  // Campos de rastreamento
+  criadoPor?: string; // Quem criou o problema
+  dataCriacao?: string; // Data/hora de criação
+  atualizadoPor?: string; // Quem atualizou o problema
+  dataAtualizacao?: string; // Data/hora da última atualização
 }
 
 export interface MudancaMelhoria {
@@ -483,6 +488,10 @@ export interface ChamadoManutencao {
   dataExclusao?: string;
   atualizadoPor?: string;
   matriculaAtualizadoPor?: string;
+  // Campos de rastreamento
+  criadoPor?: string; // Quem criou o chamado
+  dataCriacao?: string; // Data/hora de criação
+  dataAtualizacao?: string; // Data/hora da última atualização
 }
 
 export interface PecaUtilizada {

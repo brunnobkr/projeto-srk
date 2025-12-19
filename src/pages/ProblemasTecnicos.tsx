@@ -96,6 +96,7 @@ export default function ProblemasTecnicos() {
     // Determinar turno se não foi definido
     const turno = formData.turno || determinarTurno(formData.hora);
     
+    const agora = new Date().toISOString();
     const problema: ProblemaTecnico = {
       id: editingProblema?.id || Date.now().toString(),
       numeroChamado: editingProblema?.numeroChamado || gerarNumeroChamado(),
@@ -111,15 +112,27 @@ export default function ProblemasTecnicos() {
       status: formData.status,
       reportadoPor: editingProblema?.reportadoPor || usuario?.nome || undefined,
       resolvidoPor: formData.resolvidoPor || undefined,
-      dataResolucao: formData.status === 'resolvido' ? new Date().toISOString() : undefined,
+      matriculaResolvidoPor: formData.status === 'resolvido' && formData.resolvidoPor
+        ? (editingProblema?.status !== 'resolvido' && usuario?.matricula 
+            ? usuario.matricula 
+            : editingProblema?.matriculaResolvidoPor)
+        : editingProblema?.matriculaResolvidoPor,
+      dataResolucao: formData.status === 'resolvido' && editingProblema?.status !== 'resolvido'
+        ? agora
+        : editingProblema?.dataResolucao,
       observacoes: formData.observacoes || undefined,
       engenhariaChamada: formData.engenhariaChamada,
       dataChamadaEngenharia: formData.engenhariaChamada && !editingProblema?.engenhariaChamada 
-        ? new Date().toISOString() 
+        ? agora
         : editingProblema?.dataChamadaEngenharia,
       chamadoPor: formData.engenhariaChamada && !editingProblema?.engenhariaChamada
         ? usuario?.nome || undefined
         : editingProblema?.chamadoPor,
+      // Campos de rastreamento
+      criadoPor: editingProblema?.criadoPor || usuario?.nome || undefined,
+      dataCriacao: editingProblema?.dataCriacao || agora,
+      atualizadoPor: editingProblema ? usuario?.nome : undefined,
+      dataAtualizacao: editingProblema ? agora : undefined,
     };
 
     if (editingProblema) {
@@ -212,9 +225,11 @@ export default function ProblemasTecnicos() {
     if (problema) {
       const resolvidoPor = prompt('Quem resolveu o problema?');
       if (resolvidoPor) {
+        const matriculaResolvidoPor = prompt('Matrícula de quem resolveu o problema? (opcional)') || undefined;
         problemasStorage.update(id, {
           status: 'resolvido',
           resolvidoPor,
+          matriculaResolvidoPor,
           dataResolucao: new Date().toISOString(),
         });
         loadProblemas();
@@ -269,11 +284,50 @@ export default function ProblemasTecnicos() {
     return labels[status] || status;
   };
 
-  const filteredProblemas = problemas.filter(p =>
-    p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProblemas = problemas.filter(p => {
+    // Filtro de busca geral (searchTerm)
+    const matchesSearch = !searchTerm ||
+      p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    // Filtros adicionais apenas para preparadores
+    if (isPreparador()) {
+      // Filtro por linha - se filtro está preenchido, problema deve ter linha e corresponder
+      if (filtroLinha) {
+        if (!p.linha || !p.linha.toLowerCase().includes(filtroLinha.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Filtro por ID do chamado - se filtro está preenchido, problema deve ter número e corresponder
+      if (filtroIdChamado) {
+        if (!p.numeroChamado || !p.numeroChamado.toLowerCase().includes(filtroIdChamado.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Filtro por turno - se não for 'todos', deve corresponder exatamente
+      if (filtroTurno !== 'todos') {
+        if (p.turno !== filtroTurno) {
+          return false;
+        }
+      }
+
+      // Filtro para mostrar apenas meus chamados - se ativado, deve corresponder ao usuário
+      if (mostrarSomenteMeus) {
+        if (!p.reportadoPor || p.reportadoPor !== usuario?.nome) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -475,7 +529,16 @@ export default function ProblemasTecnicos() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{problema.resolvidoPor || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {problema.resolvidoPor ? (
+                        <div>
+                          <div>{problema.resolvidoPor}</div>
+                          {problema.matriculaResolvidoPor && (
+                            <div className="text-xs text-gray-500">Mat: {problema.matriculaResolvidoPor}</div>
+                          )}
+                        </div>
+                      ) : '-'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button onClick={() => setViewingProblema(problema)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
                         <Eye className="w-5 h-5" />
@@ -599,17 +662,51 @@ export default function ProblemasTecnicos() {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">Status *</label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
+                  <select 
+                    required 
+                    value={formData.status} 
+                    onChange={(e) => {
+                      const novoStatus = e.target.value as 'aberto' | 'em-andamento' | 'resolvido';
+                      // Restrição: apenas membros da mecânica podem marcar como resolvido
+                      if (novoStatus === 'resolvido') {
+                        const temPermissao = canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica();
+                        if (!temPermissao) {
+                          alert('Você não tem permissão para marcar problemas técnicos como resolvidos. Apenas usuários com permissão de editar ou criar na Central de Mecânica podem fazer isso.');
+                          return;
+                        }
+                      }
+                      setFormData({ ...formData, status: novoStatus });
+                    }} 
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
                     <option value="aberto">Aberto</option>
                     <option value="em-andamento">Em Andamento</option>
-                    <option value="resolvido">Resolvido</option>
+                    <option value="resolvido" disabled={!(canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica())}>
+                      Resolvido {!(canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica()) && '(Apenas Mecânica)'}
+                    </option>
                   </select>
                 </div>
                 {formData.status === 'resolvido' && (
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Resolvido Por</label>
-                    <input type="text" value={formData.resolvidoPor} onChange={(e) => setFormData({ ...formData, resolvidoPor: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                  </div>
+                  <>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium mb-1">Resolvido Por *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.resolvidoPor} 
+                        onChange={(e) => setFormData({ ...formData, resolvidoPor: e.target.value })} 
+                        className="w-full px-3 py-2 border rounded-lg" 
+                        placeholder="Nome de quem resolveu"
+                      />
+                    </div>
+                    {usuario?.matricula && (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium mb-1 text-gray-500">
+                          Matrícula será registrada automaticamente: {usuario.matricula}
+                        </label>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <div>
@@ -744,7 +841,10 @@ export default function ProblemasTecnicos() {
                   {viewingProblema.resolvidoPor && (
                     <div>
                       <span className="font-medium text-gray-700">Resolvido por:</span>
-                      <p className="text-gray-900">{viewingProblema.resolvidoPor}</p>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && ` (Matrícula: ${viewingProblema.matriculaResolvidoPor})`}
+                      </p>
                     </div>
                   )}
                   {viewingProblema.dataResolucao && (
@@ -789,6 +889,31 @@ export default function ProblemasTecnicos() {
                     <div className="col-span-2">
                       <span className="font-medium text-gray-700">Observações:</span>
                       <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                  {/* Campos de rastreamento */}
+                  {viewingProblema.criadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Criado por:</span>
+                      <p className="text-gray-900">{viewingProblema.criadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.dataCriacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de criação:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.atualizadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Atualizado por:</span>
+                      <p className="text-gray-900">{viewingProblema.atualizadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.dataAtualizacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Última atualização:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataAtualizacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                     </div>
                   )}
                 </div>
