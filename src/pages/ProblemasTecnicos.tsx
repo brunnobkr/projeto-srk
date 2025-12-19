@@ -9,6 +9,8 @@ import { determinarTurno } from '../utils/turno';
 
 export default function ProblemasTecnicos() {
   const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
+  const podeCriarEditar = canCreate('problemasTecnicos') || canEdit('problemasTecnicos');
+  const isPreparador = () => usuario?.cargo?.toLowerCase().includes('preparador') || false;
   const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -16,6 +18,10 @@ export default function ProblemasTecnicos() {
   const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
+  const [filtroLinha, setFiltroLinha] = useState('');
+  const [filtroIdChamado, setFiltroIdChamado] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
+  const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
   const [formData, setFormData] = useState({
     tipo: 'mecanico' as 'mecanico' | 'eletrico' | 'sistema' | 'ferramentaria',
     maquina: '',
@@ -214,33 +220,6 @@ export default function ProblemasTecnicos() {
         loadProblemas();
       }
     }
-  };
-
-  const confirmarResolucao = () => {
-    if (!problemaParaResolver) return;
-    
-    if (!resolveFormData.resolvidoPor.trim()) {
-      alert('Por favor, informe o nome de quem resolveu o problema.');
-      return;
-    }
-    
-    // Calcular tempo de resolução se houver data de início
-    const dataInicio = new Date(`${problemaParaResolver.data}T${problemaParaResolver.hora}`);
-    const dataFim = new Date();
-    const tempoResolucao = Math.floor((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60)); // em minutos
-
-    problemasStorage.update(problemaParaResolver.id, {
-          status: 'resolvido',
-      resolvidoPor: resolveFormData.resolvidoPor.trim(),
-      matriculaResolvidoPor: resolveFormData.matriculaResolvidoPor.trim() || undefined,
-      dataResolucao: new Date().toISOString(),
-      tempoResolucao,
-    });
-    
-    setShowResolveModal(false);
-    setProblemaParaResolver(null);
-    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
-    loadProblemas();
   };
 
   const handleDelete = (id: string) => {

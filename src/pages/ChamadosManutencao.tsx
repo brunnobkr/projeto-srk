@@ -59,6 +59,16 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
     setChamados(todosChamados);
   };
 
+  const podeEditarChamado = () => {
+    // Lógica para verificar se pode editar
+    return true; // Temporário
+  };
+
+  const podeExcluirChamado = () => {
+    // Lógica para verificar se pode excluir
+    return true; // Temporário
+  };
+
   const loadSetores = () => {
     const setoresData = setoresStorage.getAll();
     // Filtrar apenas setores ativos
@@ -165,9 +175,9 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este chamado?')) {
-      chamadosStorage.delete(id);
-      loadChamados();
+    if (!usuario) {
+      alert('Usuário não logado');
+      return;
     }
 
     const chamado = chamadosStorage.getById(id);
@@ -294,7 +304,6 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
               <input
                 type="text"
                 placeholder="Buscar por ID, título, descrição, máquina, setor..."
-              placeholder="Buscar por título, descrição, máquina, setor..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -362,7 +371,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Eye className="w-5 h-5" />
                   </button>
-                  {podeEditarChamado(chamado) && (
+                  {podeEditarChamado() && (
                   <button
                     onClick={() => handleEdit(chamado)}
                     className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
@@ -371,7 +380,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                     <Edit className="w-5 h-5" />
                   </button>
                   )}
-                  {podeExcluirChamado && (
+                  {podeExcluirChamado() && (
                   <button
                     onClick={() => handleDelete(chamado.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

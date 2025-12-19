@@ -283,6 +283,7 @@ export interface ProblemaTecnico {
   linha: string; // Linha onde ocorreu o problema (obrigatório)
   causa?: string; // Causa do problema
   resolvidoPor?: string;
+  matriculaResolvidoPor?: string;
   dataResolucao?: string;
   tempoResolucao?: number; // em minutos
   observacoes?: string;
@@ -475,6 +476,13 @@ export interface ChamadoManutencao {
   pecasUtilizadas?: PecaUtilizada[];
   custoEstimado?: number;
   custoReal?: number;
+  // Campos de auditoria
+  excluido?: boolean;
+  exclusaoAutorizadaPorNome?: string;
+  exclusaoAutorizadaPorMatricula?: string;
+  dataExclusao?: string;
+  atualizadoPor?: string;
+  matriculaAtualizadoPor?: string;
 }
 
 export interface PecaUtilizada {
