@@ -155,6 +155,10 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       dataExclusao: editingChamado?.dataExclusao,
       atualizadoPor: editingChamado ? usuario.nome : undefined,
       matriculaAtualizadoPor: editingChamado ? usuario.matricula : undefined,
+      // Campos de rastreamento
+      criadoPor: editingChamado?.criadoPor || usuario.nome,
+      dataCriacao: editingChamado?.dataCriacao || agora.toISOString(),
+      dataAtualizacao: editingChamado ? agora.toISOString() : undefined,
     };
 
     if (editingChamado) {
@@ -686,6 +690,22 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                     <div>
                       <strong className="text-gray-700">Última atualização por:</strong> {viewingChamado.atualizadoPor}
                       {viewingChamado.matriculaAtualizadoPor && ` (Matrícula: ${viewingChamado.matriculaAtualizadoPor})`}
+                    </div>
+                  )}
+                  {/* Campos de rastreamento */}
+                  {viewingChamado.criadoPor && (
+                    <div>
+                      <strong className="text-gray-700">Criado por:</strong> {viewingChamado.criadoPor}
+                    </div>
+                  )}
+                  {viewingChamado.dataCriacao && (
+                    <div>
+                      <strong className="text-gray-700">Data de criação:</strong> {format(new Date(viewingChamado.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </div>
+                  )}
+                  {viewingChamado.dataAtualizacao && (
+                    <div>
+                      <strong className="text-gray-700">Última atualização:</strong> {format(new Date(viewingChamado.dataAtualizacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                     </div>
                   )}
                 </div>

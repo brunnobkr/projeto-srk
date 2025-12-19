@@ -96,6 +96,7 @@ export default function ProblemasTecnicos() {
     // Determinar turno se não foi definido
     const turno = formData.turno || determinarTurno(formData.hora);
     
+    const agora = new Date().toISOString();
     const problema: ProblemaTecnico = {
       id: editingProblema?.id || Date.now().toString(),
       numeroChamado: editingProblema?.numeroChamado || gerarNumeroChamado(),
@@ -117,16 +118,21 @@ export default function ProblemasTecnicos() {
             : editingProblema?.matriculaResolvidoPor)
         : editingProblema?.matriculaResolvidoPor,
       dataResolucao: formData.status === 'resolvido' && editingProblema?.status !== 'resolvido'
-        ? new Date().toISOString()
+        ? agora
         : editingProblema?.dataResolucao,
       observacoes: formData.observacoes || undefined,
       engenhariaChamada: formData.engenhariaChamada,
       dataChamadaEngenharia: formData.engenhariaChamada && !editingProblema?.engenhariaChamada 
-        ? new Date().toISOString() 
+        ? agora
         : editingProblema?.dataChamadaEngenharia,
       chamadoPor: formData.engenhariaChamada && !editingProblema?.engenhariaChamada
         ? usuario?.nome || undefined
         : editingProblema?.chamadoPor,
+      // Campos de rastreamento
+      criadoPor: editingProblema?.criadoPor || usuario?.nome || undefined,
+      dataCriacao: editingProblema?.dataCriacao || agora,
+      atualizadoPor: editingProblema ? usuario?.nome : undefined,
+      dataAtualizacao: editingProblema ? agora : undefined,
     };
 
     if (editingProblema) {
@@ -865,6 +871,31 @@ export default function ProblemasTecnicos() {
                     <div className="col-span-2">
                       <span className="font-medium text-gray-700">Observações:</span>
                       <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                  {/* Campos de rastreamento */}
+                  {viewingProblema.criadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Criado por:</span>
+                      <p className="text-gray-900">{viewingProblema.criadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.dataCriacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de criação:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataCriacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.atualizadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Atualizado por:</span>
+                      <p className="text-gray-900">{viewingProblema.atualizadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.dataAtualizacao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Última atualização:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataAtualizacao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                     </div>
                   )}
                 </div>
