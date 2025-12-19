@@ -216,6 +216,36 @@ export default function ProblemasTecnicos() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const confirmarResolucao = () => {
+    if (!problemaParaResolver) return;
+    
+    if (!resolveFormData.resolvidoPor.trim()) {
+      alert('Por favor, informe o nome de quem resolveu o problema.');
+      return;
+    }
+    
+    // Calcular tempo de resolução se houver data de início
+    const dataInicio = new Date(`${problemaParaResolver.data}T${problemaParaResolver.hora}`);
+    const dataFim = new Date();
+    const tempoResolucao = Math.floor((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60)); // em minutos
+
+    problemasStorage.update(problemaParaResolver.id, {
+          status: 'resolvido',
+      resolvidoPor: resolveFormData.resolvidoPor.trim(),
+      matriculaResolvidoPor: resolveFormData.matriculaResolvidoPor.trim() || undefined,
+      dataResolucao: new Date().toISOString(),
+      tempoResolucao,
+    });
+    
+    setShowResolveModal(false);
+    setProblemaParaResolver(null);
+    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+    loadProblemas();
+  };
+
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este problema?')) {
       problemasStorage.delete(id);
@@ -278,6 +308,10 @@ export default function ProblemasTecnicos() {
             Registre e acompanhe problemas mecânicos, elétricos e de sistema
           </p>
         </div>
+<<<<<<< HEAD
+=======
+        {podeCriarEditar && (
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -285,9 +319,17 @@ export default function ProblemasTecnicos() {
           <Plus className="w-5 h-5 mr-2" />
           Novo Problema
         </button>
+<<<<<<< HEAD
+=======
+        )}
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
+<<<<<<< HEAD
+=======
+        <div className="space-y-4">
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -297,6 +339,80 @@ export default function ProblemasTecnicos() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
+<<<<<<< HEAD
+=======
+          </div>
+
+          {/* Filtros adicionais apenas para preparadores */}
+          {isPreparador() && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Linha</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o nome da linha..."
+                    value={filtroLinha}
+                    onChange={(e) => setFiltroLinha(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por ID do Chamado</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o ID do chamado..."
+                    value={filtroIdChamado}
+                    onChange={(e) => setFiltroIdChamado(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Turno</label>
+                  <select
+                    value={filtroTurno}
+                    onChange={(e) => setFiltroTurno(e.target.value as any)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="todos">Todos os Turnos</option>
+                    <option value="1">1º Turno</option>
+                    <option value="2">2º Turno</option>
+                    <option value="3">3º Turno</option>
+                    <option value="central">Central</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={mostrarSomenteMeus}
+                      onChange={(e) => setMostrarSomenteMeus(e.target.checked)}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>Apenas meus chamados</span>
+                  </label>
+                </div>
+              </div>
+              {(filtroLinha || filtroIdChamado || filtroTurno !== 'todos' || mostrarSomenteMeus) && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => {
+                      setFiltroLinha('');
+                      setFiltroIdChamado('');
+                      setFiltroTurno('todos');
+                      setMostrarSomenteMeus(false);
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         </div>
       </div>
 
@@ -409,12 +525,31 @@ export default function ProblemasTecnicos() {
                           <CheckCircle className="w-5 h-5" />
                         </button>
                       )}
+<<<<<<< HEAD
                       <button onClick={() => handleEdit(problema)} className="text-primary-600 hover:text-primary-900 mr-4">
                         <Edit className="w-5 h-5" />
                       </button>
                       <button onClick={() => handleDelete(problema.id)} className="text-red-600 hover:text-red-900">
                         <Trash2 className="w-5 h-5" />
                       </button>
+=======
+                      {podeCriarEditar && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(problema)}
+                            className="text-primary-600 hover:text-primary-900 mr-4"
+                          >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                          <button
+                            onClick={() => handleDelete(problema.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                        </>
+                      )}
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                     </td>
                   </tr>
                 ))
@@ -707,6 +842,6428 @@ export default function ProblemasTecnicos() {
                 Fechar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Problema Técnico</h2>
+                {viewingProblema.numeroChamado && (
+                  <div className="mt-2">
+                    <span className="px-4 py-2 text-sm font-bold rounded-full bg-primary-600 text-white">
+                      ID: {viewingProblema.numeroChamado}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Informações Gerais</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.tipo === 'mecanico' ? 'bg-orange-100 text-orange-800' :
+                        viewingProblema.tipo === 'eletrico' ? 'bg-yellow-100 text-yellow-800' :
+                        viewingProblema.tipo === 'ferramentaria' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {getTipoLabel(viewingProblema.tipo)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Máquina:</span>
+                    <p className="text-gray-900">{viewingProblema.maquina}</p>
+                  </div>
+                  {viewingProblema.setor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Setor:</span>
+                      <p className="text-gray-900">{viewingProblema.setor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.linha && (
+                    <div>
+                      <span className="font-medium text-gray-700">Linha:</span>
+                      <p className="text-gray-900">{viewingProblema.linha}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Data/Hora:</span>
+                    <p className="text-gray-900">{format(new Date(viewingProblema.data), 'dd/MM/yyyy', { locale: ptBR })} {viewingProblema.hora}</p>
+                  </div>
+                  {viewingProblema.turno && (
+                    <div>
+                      <span className="font-medium text-gray-700">Turno:</span>
+                      <p className="text-gray-900">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          viewingProblema.turno === '1' ? 'bg-blue-100 text-blue-800' :
+                          viewingProblema.turno === '2' ? 'bg-green-100 text-green-800' :
+                          viewingProblema.turno === '3' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {viewingProblema.turno === '1' ? '1º Turno' :
+                           viewingProblema.turno === '2' ? '2º Turno' :
+                           viewingProblema.turno === '3' ? '3º Turno' :
+                           'Central'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Status:</span>
+                    <p className="text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        viewingProblema.status === 'aberto' ? 'bg-red-100 text-red-800' :
+                        viewingProblema.status === 'em-andamento' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {getStatusLabel(viewingProblema.status)}
+                      </span>
+                    </p>
+                  </div>
+                  {viewingProblema.reportadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Reportado por:</span>
+                      <p className="text-gray-900">{viewingProblema.reportadoPor}</p>
+                    </div>
+                  )}
+                  {viewingProblema.resolvidoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Resolvido por:</span>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && (
+                          <span className="text-gray-500 ml-2">(Matrícula: {viewingProblema.matriculaResolvidoPor})</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {viewingProblema.dataResolucao && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data de Resolução:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataResolucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Engenharia Chamada:</span>
+                    <p className="text-gray-900">
+                      {viewingProblema.engenhariaChamada ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Sim</span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Não</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingProblema.dataChamadaEngenharia && (
+                    <div>
+                      <span className="font-medium text-gray-700">Data Chamada Engenharia:</span>
+                      <p className="text-gray-900">{format(new Date(viewingProblema.dataChamadaEngenharia), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                    </div>
+                  )}
+                  {viewingProblema.chamadoPor && (
+                    <div>
+                      <span className="font-medium text-gray-700">Chamado por:</span>
+                      <p className="text-gray-900">{viewingProblema.chamadoPor}</p>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="font-medium text-gray-700">Descrição:</span>
+                    <p className="text-gray-900">{viewingProblema.descricao}</p>
+                  </div>
+                  {viewingProblema.causa && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Causa:</span>
+                      <p className="text-gray-900">{viewingProblema.causa}</p>
+                    </div>
+                  )}
+                  {viewingProblema.observacoes && (
+                    <div className="col-span-2">
+                      <span className="font-medium text-gray-700">Observações:</span>
+                      <p className="text-gray-900">{viewingProblema.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewingProblema(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resolução */}
+      {showResolveModal && problemaParaResolver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Marcar como Resolvido</h2>
+              <button
+                onClick={() => {
+                  setShowResolveModal(false);
+                  setProblemaParaResolver(null);
+                  setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Problema:</strong> {problemaParaResolver.maquina}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">{problemaParaResolver.descricao}</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              confirmarResolucao();
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de quem resolveu *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resolveFormData.resolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, resolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Matrícula
+                </label>
+                <input
+                  type="text"
+                  value={resolveFormData.matriculaResolvidoPor}
+                  onChange={(e) => setResolveFormData({ ...resolveFormData, matriculaResolvidoPor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  placeholder="Matrícula (opcional)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setProblemaParaResolver(null);
+                    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Confirmar Resolução
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

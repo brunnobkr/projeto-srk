@@ -1098,3 +1098,84 @@ export default function InstrucoesTrabalho() {
   );
 }
 
+
+      {showFotoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Visualização de Fotos</h2>
+              <button
+                onClick={() => {
+                  setShowFotoModal(false);
+                  setFotoSelecionada(null);
+                  setFotosModalAtual([]);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {fotoSelecionada ? (
+              <div className="space-y-4">
+                <img
+                  src={fotoSelecionada}
+                  alt="Foto ampliada"
+                  className="w-full h-auto rounded-lg"
+                />
+                <div className="flex justify-center space-x-2">
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex > 0) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex - 1]);
+                      }
+                    }}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === 0}
+                  >
+                    Anterior
+                  </button>
+                  <button
+                    onClick={() => {
+                      const currentIndex = fotosModalAtual.indexOf(fotoSelecionada);
+                      if (currentIndex < fotosModalAtual.length - 1) {
+                        setFotoSelecionada(fotosModalAtual[currentIndex + 1]);
+                      }
+                    }}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                    disabled={fotosModalAtual.indexOf(fotoSelecionada) === fotosModalAtual.length - 1}
+                  >
+                    Próxima
+                  </button>
+                  <button
+                    onClick={() => setFotoSelecionada(null)}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  >
+                    Ver Todas
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {fotosModalAtual.map((foto, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={foto}
+                      alt={`Foto ${index + 1}`}
+                      className="w-full h-64 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => setFotoSelecionada(foto)}
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                      Foto {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

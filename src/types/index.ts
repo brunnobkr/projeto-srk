@@ -546,3 +546,185 @@ export interface Chamada {
   duracao?: number; // Duração em segundos
 }
 
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+
+
+  status: 'chamando' | 'em-andamento' | 'finalizada' | 'recusada' | 'perdida';
+  dataInicio: string;
+  dataFim?: string;
+  duracao?: number; // Duração em segundos
+}
+

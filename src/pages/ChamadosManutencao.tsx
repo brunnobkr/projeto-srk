@@ -169,6 +169,33 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       chamadosStorage.delete(id);
       loadChamados();
     }
+<<<<<<< HEAD
+=======
+
+    const chamado = chamadosStorage.getById(id);
+    if (!chamado) return;
+
+    const mensagemConfirmacao = `Tem certeza que deseja EXCLUIR/ENCERRAR este chamado?\n\n` +
+      `Esta ação será registrada em nome de ${usuario.nome}` +
+      (usuario.matricula ? ` (Matrícula: ${usuario.matricula})` : '') +
+      ` e o chamado deixará de aparecer na lista padrão.`;
+
+    if (!confirm(mensagemConfirmacao)) {
+      return;
+    }
+
+    const agora = new Date().toISOString();
+
+    chamadosStorage.update(id, {
+      status: 'cancelado',
+      excluido: true,
+      exclusaoAutorizadaPorNome: usuario.nome,
+      exclusaoAutorizadaPorMatricula: usuario.matricula,
+      dataExclusao: agora,
+    });
+
+      loadChamados();
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
   };
 
   const handleView = (chamado: ChamadoManutencao) => {
@@ -231,6 +258,10 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   const filteredChamados = chamados.filter(c => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
+<<<<<<< HEAD
+=======
+      !searchLower ||
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
       c.id.toLowerCase().includes(searchLower) ||
       c.titulo.toLowerCase().includes(searchLower) ||
       c.descricao.toLowerCase().includes(searchLower) ||
@@ -268,7 +299,11 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
+<<<<<<< HEAD
                 placeholder="Buscar por ID, título, descrição, máquina, setor..."
+=======
+              placeholder="Buscar por título, descrição, máquina, setor..."
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -336,6 +371,10 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Eye className="w-5 h-5" />
                   </button>
+<<<<<<< HEAD
+=======
+                  {podeEditarChamado(chamado) && (
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                   <button
                     onClick={() => handleEdit(chamado)}
                     className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
@@ -343,6 +382,11 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Edit className="w-5 h-5" />
                   </button>
+<<<<<<< HEAD
+=======
+                  )}
+                  {podeExcluirChamado && (
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                   <button
                     onClick={() => handleDelete(chamado.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -350,6 +394,10 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
+<<<<<<< HEAD
+=======
+                  )}
+>>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                 </div>
               </div>
             </div>
@@ -605,6 +653,3984 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   <div>
                     <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
                   </div>
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
+                  {viewingChamado.atribuidoParaNome && (
+                    <div>
+                      <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
+                    </div>
+                  )}
+                  {viewingChamado.observacoes && (
+                    <div className="col-span-2">
+                      <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                </div>
+
+                {viewingChamado.fotos && viewingChamado.fotos.length > 0 && (
+                  <div>
+                    <strong className="text-gray-700 block mb-2">Fotos:</strong>
+                    <div className="grid grid-cols-4 gap-2">
+                      {viewingChamado.fotos.map((foto, index) => (
+                        <img key={index} src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  {fotos.length > 0 && (
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {fotos.map((foto, index) => (
+                        <div key={index} className="relative">
+                          <img src={foto} alt={`Foto ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            onClick={() => removeFoto(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {editingChamado ? 'Atualizar' : 'Criar'} Chamado
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
+      {viewingChamado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Chamado</h2>
+                <button
+                  onClick={() => setViewingChamado(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{viewingChamado.titulo}</h3>
+                    <span className="px-3 py-1 text-sm font-mono font-semibold bg-gray-200 text-gray-700 rounded">
+                      ID: {viewingChamado.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(viewingChamado.status)}`}>
+                      {getStatusLabel(viewingChamado.status)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPrioridadeColor(viewingChamado.prioridade)}`}>
+                      {viewingChamado.prioridade.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700">{viewingChamado.descricao}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <strong className="text-gray-700">Categoria:</strong> {viewingChamado.categoria}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Setor:</strong> {viewingChamado.setor}
+                  </div>
+                  {viewingChamado.linha && (
+                    <div>
+                      <strong className="text-gray-700">Linha:</strong> {viewingChamado.linha}
+                    </div>
+                  )}
+                  {viewingChamado.maquina && (
+                    <div>
+                      <strong className="text-gray-700">Máquina:</strong> {viewingChamado.maquina}
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-700">Solicitado por:</strong> {viewingChamado.solicitadoPorNome}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Data:</strong> {format(new Date(viewingChamado.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })} às {viewingChamado.horaSolicitacao}
+                  </div>
+                  {viewingChamado.turno && (
+                    <div>
+                      <strong className="text-gray-700">Turno:</strong>{' '}
+                      <span
+                        className={`ml-1 px-2 py-0.5 text-xs rounded-full font-medium ${getTurnoBadgeColor(
+                          viewingChamado.turno
+                        )}`}
+                      >
+                        {viewingChamado.turno === '1'
+                          ? '1º Turno'
+                          : viewingChamado.turno === '2'
+                          ? '2º Turno'
+                          : viewingChamado.turno === '3'
+                          ? '3º Turno'
+                          : 'Central'}
+                      </span>
+                    </div>
+                  )}
                   {viewingChamado.atribuidoParaNome && (
                     <div>
                       <strong className="text-gray-700">Atribuído para:</strong> {viewingChamado.atribuidoParaNome}
