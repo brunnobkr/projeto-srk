@@ -216,8 +216,6 @@ export default function ProblemasTecnicos() {
     }
   };
 
-<<<<<<< HEAD
-=======
   const confirmarResolucao = () => {
     if (!problemaParaResolver) return;
     
@@ -245,7 +243,6 @@ export default function ProblemasTecnicos() {
     loadProblemas();
   };
 
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este problema?')) {
       problemasStorage.delete(id);
@@ -308,10 +305,7 @@ export default function ProblemasTecnicos() {
             Registre e acompanhe problemas mecânicos, elétricos e de sistema
           </p>
         </div>
-<<<<<<< HEAD
-=======
         {podeCriarEditar && (
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -319,17 +313,11 @@ export default function ProblemasTecnicos() {
           <Plus className="w-5 h-5 mr-2" />
           Novo Problema
         </button>
-<<<<<<< HEAD
-=======
         )}
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
-<<<<<<< HEAD
-=======
         <div className="space-y-4">
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -339,8 +327,6 @@ export default function ProblemasTecnicos() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
-<<<<<<< HEAD
-=======
           </div>
 
           {/* Filtros adicionais apenas para preparadores */}
@@ -412,7 +398,6 @@ export default function ProblemasTecnicos() {
               )}
             </>
           )}
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         </div>
       </div>
 
@@ -525,14 +510,12 @@ export default function ProblemasTecnicos() {
                           <CheckCircle className="w-5 h-5" />
                         </button>
                       )}
-<<<<<<< HEAD
                       <button onClick={() => handleEdit(problema)} className="text-primary-600 hover:text-primary-900 mr-4">
                         <Edit className="w-5 h-5" />
                       </button>
                       <button onClick={() => handleDelete(problema.id)} className="text-red-600 hover:text-red-900">
                         <Trash2 className="w-5 h-5" />
                       </button>
-=======
                       {podeCriarEditar && (
                         <>
                           <button
@@ -549,7 +532,6 @@ export default function ProblemasTecnicos() {
                       </button>
                         </>
                       )}
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                     </td>
                   </tr>
                 ))

@@ -169,8 +169,6 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       chamadosStorage.delete(id);
       loadChamados();
     }
-<<<<<<< HEAD
-=======
 
     const chamado = chamadosStorage.getById(id);
     if (!chamado) return;
@@ -195,7 +193,6 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
     });
 
       loadChamados();
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
   };
 
   const handleView = (chamado: ChamadoManutencao) => {
@@ -258,10 +255,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
   const filteredChamados = chamados.filter(c => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-<<<<<<< HEAD
-=======
       !searchLower ||
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
       c.id.toLowerCase().includes(searchLower) ||
       c.titulo.toLowerCase().includes(searchLower) ||
       c.descricao.toLowerCase().includes(searchLower) ||
@@ -299,11 +293,8 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-<<<<<<< HEAD
                 placeholder="Buscar por ID, título, descrição, máquina, setor..."
-=======
               placeholder="Buscar por título, descrição, máquina, setor..."
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -371,10 +362,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Eye className="w-5 h-5" />
                   </button>
-<<<<<<< HEAD
-=======
                   {podeEditarChamado(chamado) && (
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                   <button
                     onClick={() => handleEdit(chamado)}
                     className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
@@ -382,11 +370,8 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Edit className="w-5 h-5" />
                   </button>
-<<<<<<< HEAD
-=======
                   )}
                   {podeExcluirChamado && (
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                   <button
                     onClick={() => handleDelete(chamado.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -394,10 +379,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
-<<<<<<< HEAD
-=======
                   )}
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
                 </div>
               </div>
             </div>

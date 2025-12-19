@@ -453,10 +453,7 @@ export default function ControleFuncionarios() {
             Gerencie faltas, ausências, tempo ocioso, chegadas atrasadas e transferências
           </p>
         </div>
-<<<<<<< HEAD
-=======
         {podeCriarEditar && (
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
         <div className="flex space-x-2">
           <button
             onClick={() => setShowAcidenteModal(true)}
@@ -493,10 +490,7 @@ export default function ControleFuncionarios() {
             Novo Registro
           </button>
         </div>
-<<<<<<< HEAD
-=======
         )}
->>>>>>> a99d161 (fix: correÃ§Ãµes de permissÃµes e tipos - adicionar atualizadoPor em InstrucoesTrabalho, melhorias em filtros e permissÃµes)
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4">
