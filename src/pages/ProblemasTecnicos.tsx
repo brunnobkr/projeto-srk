@@ -285,30 +285,42 @@ export default function ProblemasTecnicos() {
       p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    if (!matchesSearch) {
+      return false;
+    }
+
     // Filtros adicionais apenas para preparadores
     if (isPreparador()) {
-      // Filtro por linha
-      if (filtroLinha && p.linha && !p.linha.toLowerCase().includes(filtroLinha.toLowerCase())) {
-        return false;
+      // Filtro por linha - se filtro está preenchido, problema deve ter linha e corresponder
+      if (filtroLinha) {
+        if (!p.linha || !p.linha.toLowerCase().includes(filtroLinha.toLowerCase())) {
+          return false;
+        }
       }
 
-      // Filtro por ID do chamado
-      if (filtroIdChamado && (!p.numeroChamado || !p.numeroChamado.toLowerCase().includes(filtroIdChamado.toLowerCase()))) {
-        return false;
+      // Filtro por ID do chamado - se filtro está preenchido, problema deve ter número e corresponder
+      if (filtroIdChamado) {
+        if (!p.numeroChamado || !p.numeroChamado.toLowerCase().includes(filtroIdChamado.toLowerCase())) {
+          return false;
+        }
       }
 
-      // Filtro por turno
-      if (filtroTurno !== 'todos' && p.turno !== filtroTurno) {
-        return false;
+      // Filtro por turno - se não for 'todos', deve corresponder exatamente
+      if (filtroTurno !== 'todos') {
+        if (p.turno !== filtroTurno) {
+          return false;
+        }
       }
 
-      // Filtro para mostrar apenas meus chamados
-      if (mostrarSomenteMeus && p.reportadoPor !== usuario?.nome) {
-        return false;
+      // Filtro para mostrar apenas meus chamados - se ativado, deve corresponder ao usuário
+      if (mostrarSomenteMeus) {
+        if (!p.reportadoPor || p.reportadoPor !== usuario?.nome) {
+          return false;
+        }
       }
     }
 
-    return matchesSearch;
+    return true;
   });
 
   return (
