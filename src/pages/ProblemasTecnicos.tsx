@@ -662,10 +662,28 @@ export default function ProblemasTecnicos() {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">Status *</label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
+                  <select 
+                    required 
+                    value={formData.status} 
+                    onChange={(e) => {
+                      const novoStatus = e.target.value as 'aberto' | 'em-andamento' | 'resolvido';
+                      // Restrição: apenas membros da mecânica podem marcar como resolvido
+                      if (novoStatus === 'resolvido') {
+                        const temPermissao = canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica();
+                        if (!temPermissao) {
+                          alert('Você não tem permissão para marcar problemas técnicos como resolvidos. Apenas usuários com permissão de editar ou criar na Central de Mecânica podem fazer isso.');
+                          return;
+                        }
+                      }
+                      setFormData({ ...formData, status: novoStatus });
+                    }} 
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
                     <option value="aberto">Aberto</option>
                     <option value="em-andamento">Em Andamento</option>
-                    <option value="resolvido">Resolvido</option>
+                    <option value="resolvido" disabled={!(canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica())}>
+                      Resolvido {!(canEdit('problemasTecnicos') || canCreate('problemasTecnicos') || isCentralMecanica()) && '(Apenas Mecânica)'}
+                    </option>
                   </select>
                 </div>
                 {formData.status === 'resolvido' && (
