@@ -75,7 +75,7 @@ self.addEventListener('fetch', (event) => {
     if (!url.protocol.startsWith('http')) {
       return; // Deixa o navegador lidar com essas requisições normalmente
     }
-  } catch (e) {
+  } catch {
     // Se não conseguir criar URL, ignorar a requisição
     return;
   }
@@ -93,7 +93,7 @@ self.addEventListener('fetch', (event) => {
     if (requestUrl.origin !== selfUrl.origin) {
       return fetch(request);
     }
-  } catch (e) {
+  } catch {
     return fetch(request);
   }
   

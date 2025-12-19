@@ -372,14 +372,14 @@ export const sessaoStorage = {
   set: (usuario: Usuario): void => {
     try {
       sessionStorage.setItem(STORAGE_KEYS.sessao, JSON.stringify(usuario.id));
-    } catch (error) {
+    } catch {
       // Silencioso - não logar em produção
     }
   },
   clear: (): void => {
     try {
       sessionStorage.removeItem(STORAGE_KEYS.sessao);
-    } catch (error) {
+    } catch {
       // Silencioso
     }
   },

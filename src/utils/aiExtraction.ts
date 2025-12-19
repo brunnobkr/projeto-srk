@@ -146,7 +146,7 @@ class LocalBackend implements AIBackend {
     const pedidos: DadosExtraidosIA[] = [];
     
     // Padrões para encontrar informações
-    const codigoPattern = /(?:código|cod|produto)[\s:]*([A-Z0-9\-]+)/gi;
+    const codigoPattern = /(?:código|cod|produto)[\s:]*([A-Z0-9-]+)/gi;
     const quantidadePattern = /(?:quantidade|qtd|qtde)[\s:]*(\d+)/gi;
     const setorPattern = /(?:setor)[\s:]*([A-Z0-9\s]+)/gi;
     const linhaPattern = /(?:linha)[\s:]*([A-Z0-9\s]+)/gi;
@@ -187,6 +187,7 @@ class LocalBackend implements AIBackend {
     }];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async extractFromImage(_imageBase64: string): Promise<DadosExtraidosIA[]> {
     // Para processamento local de imagens, precisaríamos de OCR
     // Por enquanto, retornamos erro sugerindo usar texto
@@ -228,6 +229,7 @@ export async function processarExcel(file: File, aiBackend?: AIBackend): Promise
 
 // Processar arquivo PDF
 export async function processarPDF(file: File, aiBackend?: AIBackend): Promise<DadosExtraidosIA[]> {
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
       // Para PDFs, vamos usar uma abordagem diferente

@@ -16,7 +16,7 @@ const isDevMode = () => {
 export const protectDevTools = () => {
   if (isDevMode()) return; // Não proteger em desenvolvimento
 
-  let devtools = { open: false };
+  const devtools = { open: false };
   const element = new Image();
   
   Object.defineProperty(element, 'id', {

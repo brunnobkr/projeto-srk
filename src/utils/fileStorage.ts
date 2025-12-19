@@ -41,6 +41,7 @@ export const fileStorage = {
   },
 
   // Salvar arquivo JSON na pasta compartilhada
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   saveFile: async (_filename: string, _data: any): Promise<boolean> => {
     if (!fileStorage.isEnabled()) {
       return false;
@@ -72,6 +73,7 @@ export const fileStorage = {
   },
 
   // Carregar arquivo JSON da pasta compartilhada
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadFile: async (_filename: string): Promise<any | null> => {
     if (!fileStorage.isEnabled()) {
       return null;

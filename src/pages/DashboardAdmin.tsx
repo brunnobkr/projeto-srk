@@ -105,7 +105,7 @@ export default function DashboardAdmin() {
     // Carregar dados de produção
     // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
     const producoes = producaoStorage.getAll();
-    let producoesFiltradas = producoes.filter(p => {
+    const producoesFiltradas = producoes.filter(p => {
       const dataProd = new Date(p.data);
       const dentroDoPeriodo = dataProd >= dataInicio && dataProd <= dataFim;
       
@@ -124,7 +124,7 @@ export default function DashboardAdmin() {
     // ===== DADOS DE PROGRAMAÇÃO VS REALIZAÇÃO =====
     // Carregar programações do período
     // Filtrar por turno se não for 'todos' (apenas 1, 2 ou 3, excluindo central)
-    let programacoes = programacoesPedidosStorage.getAll().filter(p => {
+    const programacoes = programacoesPedidosStorage.getAll().filter(p => {
       const dataProg = p.dataProgramacao ? new Date(p.dataProgramacao) : new Date(p.dataCriacao);
       const dentroDoPeriodo = dataProg >= dataInicio && dataProg <= dataFim;
       
