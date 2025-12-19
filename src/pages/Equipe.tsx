@@ -26,7 +26,7 @@ export default function Equipe() {
 
   // Normalizar cargo para agrupamento consistente
   // O setor é apenas informativo (para localizar linhas), o agrupamento é baseado no CARGO
-  const normalizarCargoParaGrupo = (cargo: string | undefined, setor?: string): string => {
+  const normalizarCargoParaGrupo = (cargo: string | undefined): string => {
     if (!cargo) return 'Outros';
     
     const cargoLower = cargo.toLowerCase();
@@ -90,7 +90,7 @@ export default function Equipe() {
     const grupos: Record<string, Usuario[]> = {};
     
     usuarios.forEach(usuario => {
-      const grupo = normalizarCargoParaGrupo(usuario.cargo, usuario.setor);
+      const grupo = normalizarCargoParaGrupo(usuario.cargo);
       
       if (!grupos[grupo]) {
         grupos[grupo] = [];
@@ -161,7 +161,7 @@ export default function Equipe() {
     if (!searchTerm) return usuariosGrupo;
     
     const termoLower = searchTerm.toLowerCase();
-    const grupoNome = normalizarCargoParaGrupo(usuariosGrupo[0]?.cargo, usuariosGrupo[0]?.setor);
+    const grupoNome = normalizarCargoParaGrupo(usuariosGrupo[0]?.cargo);
     const grupoLower = grupoNome.toLowerCase();
     
     // Se o termo corresponde ao nome do grupo (cargo), mostrar todos os usuários

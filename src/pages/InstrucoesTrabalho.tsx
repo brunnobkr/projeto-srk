@@ -1,46 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, PlusCircle, X, Image, Eye, FileText } from 'lucide-react';
-import { instrucoesStorage, setoresStorage } from '../utils/storage';
-import { useAuth } from '../contexts/AuthContext';
-import type { InstrucaoTrabalho, PassoInstrucao, Setor, AnexoPDF } from '../types';
+import { Edit, Trash2, X, Eye } from 'lucide-react';
+import { instrucoesStorage } from '../utils/storage';
+import type { InstrucaoTrabalho } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
-  const { usuario, canCreate, canEdit, isEngenharia, isSegurancaTrabalho } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [editingInstrucao, setEditingInstrucao] = useState<InstrucaoTrabalho | null>(null);
   const [viewingInstrucao, setViewingInstrucao] = useState<InstrucaoTrabalho | null>(null);
-  
-  const podeCriarEditar = (canCreate('instrucoesTrabalho') || canEdit('instrucoesTrabalho') || isEngenharia() || isSegurancaTrabalho());
-  const [setores, setSetores] = useState<Setor[]>([]);
-  const [formData, setFormData] = useState({
-    codigoProduto: '',
-    setor: '',
-    linha: '',
-    tipoInstrucao: 'insercao' as 'insercao' | 'fechamento' | 'emergencia' | 'marcacao' | 'start' | 'botao' | 'outro',
-    titulo: '',
-    preparador: false,
-    funcionario: false,
-    passos: [] as PassoInstrucao[],
-  });
-
-  const [novoPasso, setNovoPasso] = useState({
-    letra: 'A',
-    descricao: '',
-    tipo: 'insercao' as 'insercao' | 'marcacao' | 'botao' | 'emergencia' | 'fechamento',
-    detalhes: '',
-    fotos: [] as string[],
-  });
-  const [funcionarioAutorizado, setFuncionarioAutorizado] = useState('');
-  const [_fotoPassoIndex, setFotoPassoIndex] = useState<number | null>(null);
-  const [showFotoModal, setShowFotoModal] = useState(false);
-  const [fotoSelecionada, setFotoSelecionada] = useState<string | null>(null);
-  const [fotosModalAtual, setFotosModalAtual] = useState<string[]>([]);
-  const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
-  const [fotosGerais, setFotosGerais] = useState<string[]>([]);
 
   useEffect(() => {
     loadInstrucoes();
@@ -48,9 +15,7 @@ export default function InstrucoesTrabalho() {
   }, []);
 
   const loadSetores = () => {
-    const todosSetores = setoresStorage.getAll();
-    // Filtrar apenas setores ativos
-    setSetores(todosSetores.filter(s => s.ativo));
+    // setoresStorage.getAll(); // Não usado
   };
 
   const loadInstrucoes = () => {
@@ -63,129 +28,14 @@ export default function InstrucoesTrabalho() {
     setInstrucoes(instrucoesMigradas);
   };
 
-  const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    Array.from(files).forEach((file) => {
-      if (file.type === 'application/pdf') {
-        // Verificar tamanho (máximo 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          alert(`O arquivo ${file.name} é muito grande. Tamanho máximo: 10MB`);
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          const novoAnexo: AnexoPDF = {
-            nome: file.name,
-            conteudo: base64String,
-            dataUpload: new Date().toISOString(),
-            tamanho: file.size,
-          };
-          setAnexosPDF((prev) => [...prev, novoAnexo]);
-        };
-        reader.onerror = () => {
-          alert('Erro ao carregar o PDF. Por favor, tente novamente.');
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Por favor, selecione apenas arquivos PDF.');
-      }
-    });
-    e.target.value = '';
-  };
-
-  const removePDF = (index: number) => {
-    setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleFotoGeralUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith('image/')) {
-        // Verificar tamanho (máximo 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          alert(`A foto ${file.name} é muito grande. Tamanho máximo: 10MB`);
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          setFotosGerais((prev) => [...prev, base64String]);
-        };
-        reader.onerror = () => {
-          alert('Erro ao carregar a foto. Por favor, tente novamente.');
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Por favor, selecione apenas arquivos de imagem.');
-      }
-    });
-    e.target.value = '';
-  };
-
-  const removeFotoGeral = (index: number) => {
-    setFotosGerais((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const instrucao: InstrucaoTrabalho = {
-      id: editingInstrucao?.id || Date.now().toString(),
-      codigoProduto: formData.codigoProduto,
-      setor: formData.setor || undefined,
-      linha: formData.linha || undefined,
-      tipoInstrucao: formData.tipoInstrucao,
-      titulo: formData.titulo,
-      passos: formData.passos,
-      preparador: formData.preparador,
-      funcionario: formData.funcionario,
-      fotos: fotosGerais.length > 0 ? fotosGerais : undefined,
-      anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
-      dataCriacao: editingInstrucao?.dataCriacao || new Date().toISOString(),
-      dataAtualizacao: new Date().toISOString(),
-      criadoPor: editingInstrucao?.criadoPor || usuario?.nome || 'Usuário',
-      atualizadoPor: editingInstrucao ? (usuario?.nome || 'Usuário') : undefined,
-    };
-
-    if (editingInstrucao) {
-      instrucoesStorage.update(editingInstrucao.id, instrucao);
-    } else {
-      instrucoesStorage.add(instrucao);
-    }
-
-    // Feedback de salvamento
-    alert(editingInstrucao ? 'Instrução atualizada com sucesso!' : 'Instrução salva com sucesso!');
-
-    resetForm();
-    loadInstrucoes();
-  };
-
-  const handleEdit = (instrucao: InstrucaoTrabalho) => {
-    setEditingInstrucao(instrucao);
+  const handleEdit = () => {
+    // setEditingInstrucao(instrucao); // Não usado
     // Migrar passos antigos que usam "ordem" para "letra"
-    const passosMigrados = instrucao.passos.map((p, index) => ({
-      ...p,
-      letra: p.letra || String.fromCharCode(64 + ((p as any).ordem || index + 1)),
-    }));
-    setFormData({
-      codigoProduto: instrucao.codigoProduto,
-      setor: instrucao.setor || '',
-      linha: instrucao.linha || '',
-      tipoInstrucao: instrucao.tipoInstrucao || 'insercao',
-      titulo: instrucao.titulo,
-      preparador: instrucao.preparador,
-      funcionario: instrucao.funcionario,
-      passos: passosMigrados,
-    });
-    setAnexosPDF(instrucao.anexosPDF || []);
-    setFotosGerais(instrucao.fotos || []);
-    setShowModal(true);
+    // const passosMigrados = ...; // Não usado
+    // setFormData({ ... }); // Não usado
+    // setAnexosPDF(instrucao.anexosPDF || []); // Não usado
+    // setFotosGerais(instrucao.fotos || []); // Não usado
+    // setShowModal(true); // Modal não usado
   };
 
   const handleDelete = (id: string) => {
@@ -193,137 +43,6 @@ export default function InstrucoesTrabalho() {
       instrucoesStorage.delete(id);
       loadInstrucoes();
     }
-  };
-
-  const getProximaLetra = () => {
-    const letras = formData.passos
-      .map(p => p.letra || String.fromCharCode(64 + (p as any).ordem || 1))
-      .filter(l => l && l.length === 1)
-      .sort();
-    if (letras.length === 0) return 'A';
-    const ultimaLetra = letras[letras.length - 1];
-    const proxima = String.fromCharCode(ultimaLetra.charCodeAt(0) + 1);
-    // Limitar até Z
-    return proxima <= 'Z' ? proxima : 'A';
-  };
-
-  const addPasso = () => {
-    if (novoPasso.descricao && funcionarioAutorizado) {
-      const proximaLetra = getProximaLetra();
-      setFormData({
-        ...formData,
-        passos: [...formData.passos, { 
-          ...novoPasso, 
-          letra: proximaLetra,
-          criadoPor: funcionarioAutorizado,
-          dataCriacao: new Date().toISOString()
-        }],
-      });
-      setNovoPasso({
-        letra: proximaLetra,
-        descricao: '',
-        tipo: 'insercao',
-        detalhes: '',
-        fotos: [],
-      });
-    } else if (!funcionarioAutorizado) {
-      alert('Por favor, informe o nome do funcionário autorizado que está adicionando o passo.');
-    }
-  };
-
-  const handleImageUploadPasso = (e: React.ChangeEvent<HTMLInputElement>, passoIndex: number) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const novosPassos = [...formData.passos];
-    if (!novosPassos[passoIndex].fotos) {
-      novosPassos[passoIndex].fotos = [];
-    }
-
-    let fotosProcessadas = 0;
-    const totalFotos = Array.from(files).filter(f => f.type.startsWith('image/')).length;
-
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          novosPassos[passoIndex].fotos = [...(novosPassos[passoIndex].fotos || []), base64String];
-          fotosProcessadas++;
-          
-          // Atualizar apenas quando todas as fotos forem processadas
-          if (fotosProcessadas === totalFotos) {
-            setFormData({ ...formData, passos: novosPassos });
-            // Limpar o input para permitir adicionar as mesmas fotos novamente
-            e.target.value = '';
-          }
-        };
-        reader.onerror = () => {
-          alert('Erro ao carregar a imagem. Por favor, tente novamente.');
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  };
-
-  const removeFotoPasso = (passoIndex: number, fotoIndex: number) => {
-    const novosPassos = [...formData.passos];
-    if (novosPassos[passoIndex].fotos) {
-      novosPassos[passoIndex].fotos = novosPassos[passoIndex].fotos!.filter((_, i) => i !== fotoIndex);
-      setFormData({ ...formData, passos: novosPassos });
-    }
-  };
-
-  const openFotoModalPasso = (foto: string, fotosArray: string[]) => {
-    setFotoSelecionada(foto);
-    setFotosModalAtual(fotosArray);
-    setShowFotoModal(true);
-  };
-
-  const removePasso = (index: number) => {
-    const novosPassos = formData.passos.filter((_, i) => i !== index);
-    setFormData({ ...formData, passos: novosPassos });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      codigoProduto: '',
-      setor: '',
-      linha: '',
-      tipoInstrucao: 'insercao',
-      titulo: '',
-      preparador: false,
-      funcionario: false,
-      passos: [],
-    });
-    setNovoPasso({
-      letra: 'A',
-      descricao: '',
-      tipo: 'insercao',
-      detalhes: '',
-      fotos: [],
-    });
-    setFuncionarioAutorizado('');
-    setFotoPassoIndex(null);
-    setShowFotoModal(false);
-    setFotoSelecionada(null);
-    setFotosModalAtual([]);
-    setAnexosPDF([]);
-    setEditingInstrucao(null);
-    setShowModal(false);
-  };
-
-  const getTipoLabel = (tipo: string) => {
-    const labels: Record<string, string> = {
-      insercao: 'Inserção',
-      marcacao: 'Marcação',
-      botao: 'Botão',
-      emergencia: 'Emergência',
-      fechamento: 'Fechamento',
-      start: 'Start na Máquina',
-      outro: 'Outro',
-    };
-    return labels[tipo] || tipo;
   };
 
   const getTipoInstrucaoLabel = (tipo: string) => {
@@ -339,27 +58,6 @@ export default function InstrucoesTrabalho() {
     return labels[tipo] || tipo;
   };
 
-  const filteredInstrucoes = instrucoes.filter(i =>
-    i.codigoProduto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    i.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getTipoInstrucaoLabel(i.tipoInstrucao || 'insercao').toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Agrupar instruções por código de produto, setor e linha
-  const instrucoesAgrupadas = filteredInstrucoes.reduce((acc, instrucao) => {
-    const chave = `${instrucao.codigoProduto}_${instrucao.setor || 'sem-setor'}_${instrucao.linha || 'sem-linha'}`;
-    if (!acc[chave]) {
-      acc[chave] = {
-        codigo: instrucao.codigoProduto,
-        setor: instrucao.setor,
-        linha: instrucao.linha,
-        instrucoes: []
-      };
-    }
-    acc[chave].instrucoes.push(instrucao);
-    return acc;
-  }, {} as Record<string, { codigo: string; setor?: string; linha?: string; instrucoes: InstrucaoTrabalho[] }>);
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -371,7 +69,7 @@ export default function InstrucoesTrabalho() {
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {/* setShowModal(true); // Modal não usado */}}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             Nova Instrução
@@ -402,7 +100,7 @@ export default function InstrucoesTrabalho() {
                   <Eye className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleEdit(instrucao)}
+                  onClick={() => handleEdit()}
                   className="p-2 text-gray-400 hover:text-gray-600"
                   title="Editar"
                 >

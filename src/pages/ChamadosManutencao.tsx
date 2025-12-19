@@ -59,12 +59,12 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
     setChamados(todosChamados);
   };
 
-  const podeEditarChamado = (chamado: ChamadoManutencao) => {
+  const podeEditarChamado = () => {
     // Lógica para verificar se pode editar
     return true; // Temporário
   };
 
-  const podeExcluirChamado = (chamado: ChamadoManutencao) => {
+  const podeExcluirChamado = () => {
     // Lógica para verificar se pode excluir
     return true; // Temporário
   };
@@ -371,7 +371,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   >
                     <Eye className="w-5 h-5" />
                   </button>
-                  {podeEditarChamado(chamado) && (
+                  {podeEditarChamado() && (
                   <button
                     onClick={() => handleEdit(chamado)}
                     className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
@@ -380,7 +380,7 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                     <Edit className="w-5 h-5" />
                   </button>
                   )}
-                  {podeExcluirChamado(chamado) && (
+                  {podeExcluirChamado() && (
                   <button
                     onClick={() => handleDelete(chamado.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

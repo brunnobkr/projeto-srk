@@ -16,9 +16,6 @@ export default function ProblemasTecnicos() {
   const [showModal, setShowModal] = useState(false);
   const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
   const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
-  const [showResolveModal, setShowResolveModal] = useState(false);
-  const [problemaParaResolver, setProblemaParaResolver] = useState<ProblemaTecnico | null>(null);
-  const [resolveFormData, setResolveFormData] = useState({ resolvidoPor: '', matriculaResolvidoPor: '' });
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
   const [filtroLinha, setFiltroLinha] = useState('');
@@ -223,33 +220,6 @@ export default function ProblemasTecnicos() {
         loadProblemas();
       }
     }
-  };
-
-  const confirmarResolucao = () => {
-    if (!problemaParaResolver) return;
-    
-    if (!resolveFormData.resolvidoPor.trim()) {
-      alert('Por favor, informe o nome de quem resolveu o problema.');
-      return;
-    }
-    
-    // Calcular tempo de resolução se houver data de início
-    const dataInicio = new Date(`${problemaParaResolver.data}T${problemaParaResolver.hora}`);
-    const dataFim = new Date();
-    const tempoResolucao = Math.floor((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60)); // em minutos
-
-    problemasStorage.update(problemaParaResolver.id, {
-          status: 'resolvido',
-      resolvidoPor: resolveFormData.resolvidoPor.trim(),
-      matriculaResolvidoPor: resolveFormData.matriculaResolvidoPor.trim() || undefined,
-      dataResolucao: new Date().toISOString(),
-      tempoResolucao,
-    });
-    
-    setShowResolveModal(false);
-    setProblemaParaResolver(null);
-    setResolveFormData({ resolvidoPor: '', matriculaResolvidoPor: '' });
-    loadProblemas();
   };
 
   const handleDelete = (id: string) => {
