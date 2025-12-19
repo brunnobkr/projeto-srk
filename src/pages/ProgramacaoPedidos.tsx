@@ -20,10 +20,10 @@ export default function ProgramacaoPedidos() {
   const [editingProgramacao, setEditingProgramacao] = useState<ProgramacaoPedido | null>(null);
   const [viewingProgramacao, setViewingProgramacao] = useState<ProgramacaoPedido | null>(null);
   const [anexosPDF, setAnexosPDF] = useState<AnexoPDF[]>([]);
-  // Fun├º├úo auxiliar para determinar turno v├ílido para produ├º├úo (apenas 1, 2 ou 3)
+  // Funçúo auxiliar para determinar turno válido para produçúo (apenas 1, 2 ou 3)
   const determinarTurnoProducao = (): '1' | '2' | '3' => {
     const turno = determinarTurno();
-    // Se for 'central', usar 1┬║ turno como padr├úo (turno central n├úo ├® usado para produ├º├úo)
+    // Se for 'central', usar 1┬║ turno como padrúo (turno central núo ├® usado para produçúo)
     return turno === 'central' ? '1' : turno as '1' | '2' | '3';
   };
 
@@ -41,7 +41,7 @@ export default function ProgramacaoPedidos() {
     quantidadeProgramada: '',
     turno: determinarTurnoProducao(),
     atencao: '',
-    codigos: '', // C├│digos separados por v├¡rgula
+    codigos: '', // Códigos separados por vírgula
   });
   const [filtroTurno, setFiltroTurno] = useState<'1' | '2' | '3' | 'todos'>('todos');
   const [_excelFile, setExcelFile] = useState<File | null>(null);
@@ -71,22 +71,22 @@ export default function ProgramacaoPedidos() {
   };
 
   const loadProblemasProducao = () => {
-    // Carregar problemas t├®cnicos que afetam produ├º├úo
+    // Carregar problemas t├®cnicos que afetam produçúo
     const todosProblemas = problemasStorage.getAll();
     const problemasAtivos = todosProblemas.filter(p => 
       (p.status === 'aberto' || p.status === 'em-andamento')
     );
     setProblemasProducao(problemasAtivos);
 
-    // Carregar problemas de produ├º├úo (produ├º├Áes com problemas)
-    // const todasProducoes = producaoStorage.getAll(); // N├úo usado
-    // Filtrar produ├º├Áes recentes (├║ltimos 7 dias) que podem ter problemas
-    // const dataLimite = new Date(); // N├úo usado
-    // dataLimite.setDate(dataLimite.getDate() - 7); // N├úo usado
-    // const producoesRecentes = todasProducoes.filter(p => // N├úo usado
-    //   new Date(p.data) >= dataLimite // N├úo usado
-    // ); // N├úo usado
-    // setProblemasProducaoList(producoesRecentes); // N├úo usado
+    // Carregar problemas de produçúo (produçÇes com problemas)
+    // const todasProducoes = producaoStorage.getAll(); // Núo usado
+    // Filtrar produçÇes recentes (├║ltimos 7 dias) que podem ter problemas
+    // const dataLimite = new Date(); // Núo usado
+    // dataLimite.setDate(dataLimite.getDate() - 7); // Núo usado
+    // const producoesRecentes = todasProducoes.filter(p => // Núo usado
+    //   new Date(p.data) >= dataLimite // Núo usado
+    // ); // Núo usado
+    // setProblemasProducaoList(producoesRecentes); // Núo usado
   };
 
   const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +96,7 @@ export default function ProgramacaoPedidos() {
     Array.from(files).forEach((file) => {
       if (file.type === 'application/pdf') {
         if (file.size > 10 * 1024 * 1024) {
-          alert(`O arquivo ${file.name} ├® muito grande. Tamanho m├íximo: 10MB`);
+          alert(`O arquivo ${file.name} ├® muito grande. Tamanho máximo: 10MB`);
           return;
         }
 
@@ -126,10 +126,10 @@ export default function ProgramacaoPedidos() {
     setAnexosPDF((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Fun├º├úo auxiliar para criar registro no Controle de Produ├º├úo automaticamente
+  // Funçúo auxiliar para criar registro no Controle de Produçúo automaticamente
   const criarControleProducaoAutomatico = (programacao: ProgramacaoPedido) => {
-    // Usar o turno da programa├º├úo, ou determinar baseado na hora se n├úo tiver
-    // Garantir que n├úo seja 'central' (apenas 1, 2 ou 3)
+    // Usar o turno da programaçúo, ou determinar baseado na hora se núo tiver
+    // Garantir que núo seja 'central' (apenas 1, 2 ou 3)
     const turnoFinal = programacao.turno || determinarTurnoProducao();
     
     const controleProducao: ControleProducao = {
@@ -147,7 +147,7 @@ export default function ProgramacaoPedidos() {
       maoObraPorLinha: 0,
       processo: 'Programado',
       quantidadeTotalLogistica: programacao.quantidadeProgramada,
-      observacoes: `Importado automaticamente da programa├º├úo de pedidos${programacao.estadoPedido ? ` (Estado: ${programacao.estadoPedido})` : ''}${programacao.atencao ? `. Aten├º├úo: ${programacao.atencao}` : ''}${programacao.turno ? ` (Turno: ${programacao.turno}┬║)` : ''}`,
+      observacoes: `Importado automaticamente da programaçúo de pedidos${programacao.estadoPedido ? ` (Estado: ${programacao.estadoPedido})` : ''}${programacao.atencao ? `. Atençúo: ${programacao.atencao}` : ''}${programacao.turno ? ` (Turno: ${programacao.turno}┬║)` : ''}`,
     };
 
     producaoStorage.add(controleProducao);
@@ -166,7 +166,7 @@ export default function ProgramacaoPedidos() {
       atencao: formData.atencao || undefined,
       importadoDe: 'manual',
       anexosPDF: anexosPDF.length > 0 ? anexosPDF : undefined,
-      criadoPor: usuario?.nome || 'Log├¡stica',
+      criadoPor: usuario?.nome || 'Logística',
       dataCriacao: editingProgramacao?.dataCriacao || new Date().toISOString(),
     };
 
@@ -174,11 +174,11 @@ export default function ProgramacaoPedidos() {
       programacoesPedidosStorage.update(editingProgramacao.id, programacao);
     } else {
       programacoesPedidosStorage.add(programacao);
-      // Criar registro no Controle de Produ├º├úo automaticamente apenas para novas programa├º├Áes
+      // Criar registro no Controle de Produçúo automaticamente apenas para novas programaçÇes
       criarControleProducaoAutomatico(programacao);
     }
 
-    alert(editingProgramacao ? 'Programa├º├úo atualizada com sucesso!' : 'Programa├º├úo criada com sucesso e enviada automaticamente para o Controle de Produ├º├úo!');
+    alert(editingProgramacao ? 'Programaçúo atualizada com sucesso!' : 'Programaçúo criada com sucesso e enviada automaticamente para o Controle de Produçúo!');
     resetForm();
     loadData();
   };
@@ -200,18 +200,18 @@ export default function ProgramacaoPedidos() {
         atencao: emailData.atencao || undefined,
         importadoDe: 'email',
         arquivoOrigem: 'Email',
-        criadoPor: usuario?.nome || 'Log├¡stica',
+        criadoPor: usuario?.nome || 'Logística',
         dataCriacao: new Date().toISOString(),
       };
 
       programacoesPedidosStorage.add(programacao);
       programacoesCriadas.push(programacao);
       
-      // Criar registro no Controle de Produ├º├úo automaticamente
+      // Criar registro no Controle de Produçúo automaticamente
       criarControleProducaoAutomatico(programacao);
     });
 
-    alert(`${codigos.length} programa├º├úo(├Áes) criada(s) com sucesso e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produ├º├úo!`);
+    alert(`${codigos.length} programaçúo(Çes) criada(s) com sucesso e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produçúo!`);
     setEmailData({
       setor: '',
       linha: '',
@@ -267,7 +267,7 @@ export default function ProgramacaoPedidos() {
     }
   };
 
-  // Confirmar e criar programa├º├Áes ap├│s revis├úo
+  // Confirmar e criar programaçÇes após revisúo
   const handleConfirmarIA = () => {
     if (dadosExtraidosIA.length === 0) {
       alert('Nenhum dado para confirmar');
@@ -295,7 +295,7 @@ export default function ProgramacaoPedidos() {
         estadoPedido: dados.estadoPedido || 'normal',
         revisado: true,
         dadosExtraidosIA: dados,
-        criadoPor: usuario?.nome || 'Log├¡stica',
+        criadoPor: usuario?.nome || 'Logística',
         dataCriacao: new Date().toISOString(),
       };
 
@@ -303,12 +303,12 @@ export default function ProgramacaoPedidos() {
       programacoesCriadas.push(programacao);
     });
 
-    // Criar registros no Controle de Produ├º├úo automaticamente
+    // Criar registros no Controle de Produçúo automaticamente
     programacoesCriadas.forEach(programacao => {
       criarControleProducaoAutomatico(programacao);
     });
 
-    alert(`${programacoesCriadas.length} programa├º├úo(├Áes) criada(s) e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produ├º├úo!`);
+    alert(`${programacoesCriadas.length} programaçúo(Çes) criada(s) e ${programacoesCriadas.length} registro(s) adicionado(s) ao Controle de Produçúo!`);
     
     setDadosExtraidosIA([]);
     setArquivoProcessando(null);
@@ -316,14 +316,14 @@ export default function ProgramacaoPedidos() {
     loadData();
   };
 
-  // Editar dados extra├¡dos pela IA
+  // Editar dados extraídos pela IA
   const handleEditarDadosIA = (index: number, campo: keyof DadosExtraidosIA, valor: any) => {
     const novosDados = [...dadosExtraidosIA];
     novosDados[index] = { ...novosDados[index], [campo]: valor };
     setDadosExtraidosIA(novosDados);
   };
 
-  // Remover item dos dados extra├¡dos
+  // Remover item dos dados extraídos
   const handleRemoverDadosIA = (index: number) => {
     setDadosExtraidosIA(dadosExtraidosIA.filter((_, i) => i !== index));
   };
@@ -338,8 +338,8 @@ export default function ProgramacaoPedidos() {
     }
 
     setExcelFile(file);
-    // Em produ├º├úo, usar biblioteca como xlsx para ler o arquivo
-    alert('Funcionalidade de importa├º├úo Excel ser├í implementada. Por enquanto, use a programa├º├úo manual ou por email.');
+    // Em produçúo, usar biblioteca como xlsx para ler o arquivo
+    alert('Funcionalidade de importaçúo Excel será implementada. Por enquanto, use a programaçúo manual ou por email.');
   };
 
   const handleEdit = (programacao: ProgramacaoPedido) => {
@@ -357,7 +357,7 @@ export default function ProgramacaoPedidos() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta programa├º├úo?')) {
+    if (confirm('Tem certeza que deseja excluir esta programaçúo?')) {
       programacoesPedidosStorage.delete(id);
       loadData();
     }
@@ -384,14 +384,14 @@ export default function ProgramacaoPedidos() {
         status,
         notificacao: notificacao || undefined,
         dataStatus: new Date().toISOString(),
-        atualizadoPor: usuario?.nome || 'Log├¡stica',
+        atualizadoPor: usuario?.nome || 'Logística',
       });
       loadData();
       alert('Status atualizado com sucesso!');
     }
   };
 
-  // Filtrar programa├º├Áes: preparadores veem apenas do seu setor
+  // Filtrar programaçÇes: preparadores veem apenas do seu setor
   const filteredProgramacoes = programacoes.filter(p => {
     // Se for preparador, filtrar apenas do seu setor
     if (isPreparador() && usuario?.setor) {
@@ -403,7 +403,7 @@ export default function ProgramacaoPedidos() {
       }
     }
     
-    // Filtrar por turno (se n├úo for 'todos')
+    // Filtrar por turno (se núo for 'todos')
     if (filtroTurno !== 'todos' && p.turno !== filtroTurno) {
       return false;
     }
@@ -421,19 +421,19 @@ export default function ProgramacaoPedidos() {
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
         <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
-        <p className="text-gray-600">Apenas o setor de Log├¡stica e Preparadores podem acessar esta p├ígina.</p>
+        <p className="text-gray-600">Apenas o setor de Logística e Preparadores podem acessar esta página.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Chamados e Problemas de Produ├º├úo */}
+      {/* Chamados e Problemas de Produçúo */}
       {problemasProducao.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center space-x-3 mb-4">
             <AlertCircle className="w-6 h-6 text-orange-500" />
-            <h2 className="text-xl font-bold text-gray-900">Problemas T├®cnicos Afetando Produ├º├úo</h2>
+            <h2 className="text-xl font-bold text-gray-900">Problemas T├®cnicos Afetando Produçúo</h2>
           </div>
           <div className="space-y-3">
             {problemasProducao.map((problema) => (
@@ -488,15 +488,15 @@ export default function ProgramacaoPedidos() {
 
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Programa├º├úo de Pedidos</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Programaçúo de Pedidos</h1>
           <p className="mt-2 text-gray-600">
-            Gerencie a programa├º├úo de pedidos e status dos c├│digos de produto
+            Gerencie a programaçúo de pedidos e status dos códigos de produto
           </p>
         </div>
         <div className="flex space-x-2">
           {isPreparador() && (
             <div className="flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
-              <span className="text-sm font-medium">Setor: {usuario?.setor || 'N├úo definido'}</span>
+              <span className="text-sm font-medium">Setor: {usuario?.setor || 'Núo definido'}</span>
             </div>
           )}
           {isLogistica() && (
@@ -539,7 +539,7 @@ export default function ProgramacaoPedidos() {
                 className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Nova Programa├º├úo
+                Nova Programaçúo
               </button>
             </>
           )}
@@ -552,7 +552,7 @@ export default function ProgramacaoPedidos() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Buscar por c├│digo, setor ou linha..."
+              placeholder="Buscar por código, setor ou linha..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -576,31 +576,31 @@ export default function ProgramacaoPedidos() {
 
       {/* Status dos Componentes */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Status dos C├│digos de Produto</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Status dos Códigos de Produto</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {componentes.map((componente) => (
             <div key={componente.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-gray-900">C├│digo: {componente.codigo}</h3>
+                <h3 className="font-semibold text-gray-900">Código: {componente.codigo}</h3>
                 <div className="flex space-x-1">
                   <button
-                    onClick={() => updateComponenteStatus(componente.codigo, 'ok', 'OK - Produ├º├úo normal')}
+                    onClick={() => updateComponenteStatus(componente.codigo, 'ok', 'OK - Produçúo normal')}
                     className={`p-1 rounded ${componente.status === 'ok' ? 'bg-green-500 text-white' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
                     title="OK"
                   >
                     <CheckCircle className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => updateComponenteStatus(componente.codigo, 'atencao', 'Aten├º├úo - Verificar estoque')}
+                    onClick={() => updateComponenteStatus(componente.codigo, 'atencao', 'Atençúo - Verificar estoque')}
                     className={`p-1 rounded ${componente.status === 'atencao' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'}`}
-                    title="Aten├º├úo"
+                    title="Atençúo"
                   >
                     <Clock className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => updateComponenteStatus(componente.codigo, 'critico', 'Cr├¡tico - Urgente')}
+                    onClick={() => updateComponenteStatus(componente.codigo, 'critico', 'Crítico - Urgente')}
                     className={`p-1 rounded ${componente.status === 'critico' ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
-                    title="Cr├¡tico"
+                    title="Crítico"
                   >
                     <AlertCircle className="w-4 h-4" />
                   </button>
@@ -620,28 +620,28 @@ export default function ProgramacaoPedidos() {
         </div>
       </div>
 
-      {/* Lista de Programa├º├Áes */}
+      {/* Lista de ProgramaçÇes */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">C├│digo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Setor</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Linha</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turno</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantidade</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origem</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aten├º├úo</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">A├º├Áes</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Atençúo</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">AçÇes</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProgramacoes.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
-                    Nenhuma programa├º├úo encontrada
+                    Nenhuma programaçúo encontrada
                   </td>
                 </tr>
               ) : (
@@ -694,7 +694,7 @@ export default function ProgramacaoPedidos() {
                           programacao.estadoPedido === 'alerta' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-green-100 text-green-800'
                         }`}>
-                          {programacao.estadoPedido === 'critico' ? 'Cr├¡tico' :
+                          {programacao.estadoPedido === 'critico' ? 'Crítico' :
                            programacao.estadoPedido === 'alerta' ? 'Alerta' : 'Normal'}
                         </span>
                       )}
@@ -740,19 +740,19 @@ export default function ProgramacaoPedidos() {
         </div>
       </div>
 
-      {/* Modal de Programa├º├úo Manual */}
+      {/* Modal de Programaçúo Manual */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">{editingProgramacao ? 'Editar' : 'Nova'} Programa├º├úo</h2>
+              <h2 className="text-2xl font-bold">{editingProgramacao ? 'Editar' : 'Nova'} Programaçúo</h2>
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">C├│digo do Produto *</label>
+                <label className="block text-sm font-medium mb-1">Código do Produto *</label>
                 <select
                   required
                   value={formData.codigoProduto}
@@ -812,7 +812,7 @@ export default function ProgramacaoPedidos() {
                     <option value="2">2┬║ Turno (16:18-01:30)</option>
                     <option value="3">3┬║ Turno (01:30-06:30)</option>
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Central n├úo ├® usado para programa├º├Áes de produ├º├úo</p>
+                  <p className="text-xs text-gray-500 mt-1">Central núo ├® usado para programaçÇes de produçúo</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Quantidade Programada *</label>
@@ -826,17 +826,17 @@ export default function ProgramacaoPedidos() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Aten├º├úo/Observa├º├Áes</label>
+                <label className="block text-sm font-medium mb-1">Atençúo/ObservaçÇes</label>
                 <textarea
                   value={formData.atencao}
                   onChange={(e) => setFormData({ ...formData, atencao: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Observa├º├Áes ou aten├º├Áes sobre esta programa├º├úo"
+                  placeholder="ObservaçÇes ou atençÇes sobre esta programaçúo"
                 />
               </div>
               
-              {/* Se├º├úo de Anexos PDF */}
+              {/* Seçúo de Anexos PDF */}
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-lg font-semibold mb-4">Anexos PDF</h3>
                 <div>
@@ -848,7 +848,7 @@ export default function ProgramacaoPedidos() {
                     onChange={handlePDFUpload}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Tamanho m├íximo: 10MB por arquivo</p>
+                  <p className="text-xs text-gray-500 mt-1">Tamanho máximo: 10MB por arquivo</p>
                 </div>
                 {anexosPDF.length > 0 && (
                   <div className="mt-4">
@@ -902,7 +902,7 @@ export default function ProgramacaoPedidos() {
         </div>
       )}
 
-      {/* Modal de Programa├º├úo por Email */}
+      {/* Modal de Programaçúo por Email */}
       {showEmailModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -914,16 +914,16 @@ export default function ProgramacaoPedidos() {
             </div>
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">C├│digos do Produto *</label>
+                <label className="block text-sm font-medium mb-1">Códigos do Produto *</label>
                 <input
                   type="text"
                   required
                   value={emailData.codigos}
                   onChange={(e) => setEmailData({ ...emailData, codigos: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Ex: ABC123, DEF456, GHI789 (separados por v├¡rgula)"
+                  placeholder="Ex: ABC123, DEF456, GHI789 (separados por vírgula)"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separe m├║ltiplos c├│digos por v├¡rgula</p>
+                <p className="text-xs text-gray-500 mt-1">Separe m├║ltiplos códigos por vírgula</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -985,13 +985,13 @@ export default function ProgramacaoPedidos() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Aten├º├Áes</label>
+                <label className="block text-sm font-medium mb-1">AtençÇes</label>
                 <textarea
                   value={emailData.atencao}
                   onChange={(e) => setEmailData({ ...emailData, atencao: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Aten├º├Áes ou observa├º├Áes sobre a programa├º├úo"
+                  placeholder="AtençÇes ou observaçÇes sobre a programaçúo"
                 />
               </div>
               <div className="flex justify-end space-x-4 pt-4 border-t">
@@ -1015,7 +1015,7 @@ export default function ProgramacaoPedidos() {
         </div>
       )}
 
-      {/* Modal de Importa├º├úo Excel */}
+      {/* Modal de Importaçúo Excel */}
       {showExcelModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
@@ -1035,17 +1035,17 @@ export default function ProgramacaoPedidos() {
                   className="w-full px-3 py-2 border rounded-lg"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  O arquivo deve conter colunas: C├│digo, Setor, Linha, Quantidade, Aten├º├úo
+                  O arquivo deve conter colunas: Código, Setor, Linha, Quantidade, Atençúo
                 </p>
               </div>
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-800">
                   <strong>Formato esperado:</strong><br />
-                  Coluna A: C├│digo do Produto<br />
+                  Coluna A: Código do Produto<br />
                   Coluna B: Setor<br />
                   Coluna C: Linha<br />
                   Coluna D: Quantidade Programada<br />
-                  Coluna E: Aten├º├Áes (opcional)
+                  Coluna E: AtençÇes (opcional)
                 </p>
               </div>
               <div className="flex justify-end space-x-4 pt-4 border-t">
@@ -1061,12 +1061,12 @@ export default function ProgramacaoPedidos() {
         </div>
       )}
 
-      {/* Modal de Visualiza├º├úo Detalhada */}
+      {/* Modal de Visualizaçúo Detalhada */}
       {viewingProgramacao && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Detalhes da Programa├º├úo de Pedido</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Detalhes da Programaçúo de Pedido</h2>
               <button
                 onClick={() => setViewingProgramacao(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -1077,10 +1077,10 @@ export default function ProgramacaoPedidos() {
 
             <div className="space-y-6">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Informa├º├Áes Gerais</h3>
+                <h3 className="text-lg font-semibold mb-3">InformaçÇes Gerais</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-700">C├│digo do Produto:</span>
+                    <span className="font-medium text-gray-700">Código do Produto:</span>
                     <p className="text-gray-900">{viewingProgramacao.codigoProduto}</p>
                   </div>
                   {viewingProgramacao.setor && (
@@ -1115,7 +1115,7 @@ export default function ProgramacaoPedidos() {
                   )}
                   {viewingProgramacao.atencao && (
                     <div className="col-span-2">
-                      <span className="font-medium text-gray-700">Aten├º├úo:</span>
+                      <span className="font-medium text-gray-700">Atençúo:</span>
                       <p className="text-gray-900">{viewingProgramacao.atencao}</p>
                     </div>
                   )}
@@ -1139,7 +1139,7 @@ export default function ProgramacaoPedidos() {
                       if (isNaN(data.getTime())) return null;
                       return (
                         <div>
-                          <span className="font-medium text-gray-700">Data de Programa├º├úo:</span>
+                          <span className="font-medium text-gray-700">Data de Programaçúo:</span>
                           <p className="text-gray-900">{format(data, 'dd/MM/yyyy', { locale: ptBR })}</p>
                         </div>
                       );
@@ -1206,14 +1206,14 @@ export default function ProgramacaoPedidos() {
         </div>
       )}
 
-      {/* Modal de Revis├úo de Dados Extra├¡dos pela IA */}
+      {/* Modal de Revisúo de Dados Extraídos pela IA */}
       {showAIModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                 <Sparkles className="w-6 h-6 mr-2 text-purple-600" />
-                Revisar Dados Extra├¡dos pela IA
+                Revisar Dados Extraídos pela IA
               </h2>
               <button
                 onClick={() => {
@@ -1236,7 +1236,7 @@ export default function ProgramacaoPedidos() {
             ) : dadosExtraidosIA.length === 0 ? (
               <div className="text-center py-12">
                 <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-                <p className="text-gray-600">Nenhum dado foi extra├¡do do arquivo.</p>
+                <p className="text-gray-600">Nenhum dado foi extraído do arquivo.</p>
               </div>
             ) : (
               <>
@@ -1248,7 +1248,7 @@ export default function ProgramacaoPedidos() {
                     <strong>Itens encontrados:</strong> {dadosExtraidosIA.length}
                   </p>
                   <p className="text-xs text-blue-600 mt-2">
-                    Revise os dados abaixo e corrija se necess├írio antes de confirmar.
+                    Revise os dados abaixo e corrija se necessário antes de confirmar.
                   </p>
                 </div>
 
@@ -1264,7 +1264,7 @@ export default function ProgramacaoPedidos() {
                               dados.confianca >= 60 ? 'bg-yellow-100 text-yellow-800' :
                               'bg-red-100 text-red-800'
                             }`}>
-                              Confian├ºa: {dados.confianca}%
+                              Confiança: {dados.confianca}%
                             </span>
                           )}
                           <button
@@ -1278,7 +1278,7 @@ export default function ProgramacaoPedidos() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1">C├│digo do Produto *</label>
+                          <label className="block text-xs text-gray-600 mb-1">Código do Produto *</label>
                           <input
                             type="text"
                             value={dados.codigoProduto || ''}
@@ -1343,11 +1343,11 @@ export default function ProgramacaoPedidos() {
                           >
                             <option value="normal">Normal</option>
                             <option value="alerta">Alerta</option>
-                            <option value="critico">Cr├¡tico</option>
+                            <option value="critico">Crítico</option>
                           </select>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs text-gray-600 mb-1">Observa├º├Áes</label>
+                          <label className="block text-xs text-gray-600 mb-1">ObservaçÇes</label>
                           <textarea
                             value={dados.observacoes || ''}
                             onChange={(e) => handleEditarDadosIA(index, 'observacoes', e.target.value)}
@@ -1376,7 +1376,7 @@ export default function ProgramacaoPedidos() {
                     className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    Confirmar e Criar Programa├º├Áes
+                    Confirmar e Criar ProgramaçÇes
                   </button>
                 </div>
               </>
@@ -1385,14 +1385,14 @@ export default function ProgramacaoPedidos() {
         </div>
       )}
 
-      {/* Modal de Configura├º├úo de IA */}
+      {/* Modal de Configuraçúo de IA */}
       {showConfigAI && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                 <Sparkles className="w-6 h-6 mr-2 text-purple-600" />
-                Configura├º├úo de IA
+                Configuraçúo de IA
               </h2>
               <button
                 onClick={() => setShowConfigAI(false)}
@@ -1425,7 +1425,7 @@ export default function ProgramacaoPedidos() {
                 </p>
                 <ol className="text-xs text-blue-700 mt-1 list-decimal list-inside space-y-1">
                   <li>Acesse <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com/api-keys</a></li>
-                  <li>Crie uma conta ou fa├ºa login</li>
+                  <li>Crie uma conta ou faça login</li>
                   <li>Gere uma nova API key</li>
                   <li>Cole a chave aqui</li>
                 </ol>
@@ -1446,7 +1446,7 @@ export default function ProgramacaoPedidos() {
                       localStorage.removeItem('openai_api_key');
                     }
                     setShowConfigAI(false);
-                    alert('Configura├º├úo salva!');
+                    alert('Configuraçúo salva!');
                   }}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                 >

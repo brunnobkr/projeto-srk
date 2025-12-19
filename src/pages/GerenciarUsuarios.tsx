@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Edit, Trash2, Search, X, Save, Eye, EyeOff, UserPlus, CheckCircle, XCircle } from 'lucide-react';
-// Plus removido - n├úo usado
+// Plus removido - núo usado
 import { usuariosStorage, setoresStorage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import type { Usuario, Permissoes, PermissoesModulo, Setor } from '../types';
@@ -69,12 +69,12 @@ export default function GerenciarUsuarios() {
     e.preventDefault();
 
     if (!formData.username.trim() || !formData.nome.trim() || !formData.email.trim()) {
-      alert('Por favor, preencha os campos obrigat├│rios.');
+      alert('Por favor, preencha os campos obrigatórios.');
       return;
     }
 
     if (!editingUsuario && !formData.senha.trim()) {
-      alert('Por favor, defina uma senha para o novo usu├írio.');
+      alert('Por favor, defina uma senha para o novo usuário.');
       return;
     }
 
@@ -107,7 +107,7 @@ export default function GerenciarUsuarios() {
       usuariosStorage.add(usuario);
     }
 
-    alert(editingUsuario ? 'Usu├írio atualizado com sucesso!' : 'Usu├írio criado com sucesso!');
+    alert(editingUsuario ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!');
     resetForm();
     loadUsuarios();
   };
@@ -115,10 +115,10 @@ export default function GerenciarUsuarios() {
   const handleEdit = (usuario: Usuario) => {
     setEditingUsuario(usuario);
     
-    // Migrar permiss├Áes antigas para nova estrutura se necess├írio
+    // Migrar permissÇes antigas para nova estrutura se necessário
     const permissoesMigradas: Permissoes = { ...usuario.permissoes };
     
-    // Se as permiss├Áes ainda est├úo na estrutura antiga, migrar
+    // Se as permissÇes ainda estúo na estrutura antiga, migrar
     if (typeof permissoesMigradas.receitasMaquina === 'boolean') {
       const visualizar = permissoesMigradas.visualizar || false;
       const criar = permissoesMigradas.criar || false;
@@ -168,7 +168,7 @@ export default function GerenciarUsuarios() {
   };
 
   const handleRejeitar = (usuario: Usuario) => {
-    const motivo = prompt(`Informe o motivo da rejei├º├úo do cadastro de ${usuario.nome}:`);
+    const motivo = prompt(`Informe o motivo da rejeiçúo do cadastro de ${usuario.nome}:`);
     if (motivo !== null) {
       usuariosStorage.update(usuario.id, {
         statusAprovacao: 'rejeitado',
@@ -184,10 +184,10 @@ export default function GerenciarUsuarios() {
 
   const handleDelete = (id: string) => {
     if (id === usuarioLogado?.id) {
-      alert('Voc├¬ n├úo pode excluir sua pr├│pria conta.');
+      alert('Você núo pode excluir sua própria conta.');
       return;
     }
-    if (confirm('Tem certeza que deseja excluir este usu├írio?')) {
+    if (confirm('Tem certeza que deseja excluir este usuário?')) {
       usuariosStorage.delete(id);
       loadUsuarios();
     }
@@ -218,7 +218,7 @@ export default function GerenciarUsuarios() {
   const togglePermissao = (permissao: keyof Permissoes) => {
     const valorAtual = formData.permissoes[permissao];
     
-    // Verificar se ├® uma permiss├úo boolean (dashboardAdmin, gerenciarUsuarios, programarPedidos)
+    // Verificar se ├® uma permissúo boolean (dashboardAdmin, gerenciarUsuarios, programarPedidos)
     if (typeof valorAtual === 'boolean') {
       setFormData({
         ...formData,
@@ -228,7 +228,7 @@ export default function GerenciarUsuarios() {
         },
       });
     }
-    // Se for PermissoesModulo, n├úo fazer nada (usar togglePermissaoModulo)
+    // Se for PermissoesModulo, núo fazer nada (usar togglePermissaoModulo)
   };
 
   const togglePermissaoModulo = (modulo: keyof Permissoes, acao: keyof PermissoesModulo) => {
@@ -236,7 +236,7 @@ export default function GerenciarUsuarios() {
     if (typeof moduloPermissao === 'object' && 'visualizar' in moduloPermissao) {
       const novoValor = !moduloPermissao[acao];
       
-      // Se desabilitar visualizar, desabilitar todas as outras permiss├Áes tamb├®m
+      // Se desabilitar visualizar, desabilitar todas as outras permissÇes tamb├®m
       if (acao === 'visualizar' && !novoValor) {
         setFormData({
           ...formData,
@@ -280,7 +280,7 @@ export default function GerenciarUsuarios() {
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <X className="w-16 h-16 text-red-500" />
         <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
-        <p className="text-gray-600">Apenas o administrador padr├úo pode gerenciar usu├írios.</p>
+        <p className="text-gray-600">Apenas o administrador padrúo pode gerenciar usuários.</p>
         <p className="text-sm text-gray-500">Entre em contato com o administrador do sistema.</p>
       </div>
     );
@@ -290,9 +290,9 @@ export default function GerenciarUsuarios() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gerenciar Usu├írios</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Gerenciar Usuários</h1>
           <p className="mt-2 text-gray-600">
-            Crie e gerencie contas de usu├írios e permiss├Áes
+            Crie e gerencie contas de usuários e permissÇes
           </p>
         </div>
         <button
@@ -300,7 +300,7 @@ export default function GerenciarUsuarios() {
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           <UserPlus className="w-5 h-5 mr-2" />
-          Novo Usu├írio
+          Novo Usuário
         </button>
       </div>
 
@@ -309,7 +309,7 @@ export default function GerenciarUsuarios() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por nome, usu├írio, email ou cargo..."
+            placeholder="Buscar por nome, usuário, email ou cargo..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -322,31 +322,31 @@ export default function GerenciarUsuarios() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usu├írio</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cargo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Setor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aprova├º├úo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aprovaçúo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Admin</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">A├º├Áes</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">AçÇes</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsuarios.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                    Nenhum usu├írio encontrado
+                    Nenhum usuário encontrado
                   </td>
                 </tr>
               ) : (
                 <>
-                  {/* Usu├írios Pendentes */}
+                  {/* Usuários Pendentes */}
                   {usuariosPendentes.length > 0 && (
                     <>
                       <tr>
                         <td colSpan={8} className="px-6 py-3 bg-yellow-50">
-                          <span className="font-semibold text-yellow-800">Cadastros Pendentes de Aprova├º├úo</span>
+                          <span className="font-semibold text-yellow-800">Cadastros Pendentes de Aprovaçúo</span>
                         </td>
                       </tr>
                       {usuariosPendentes.map((usuario) => (
@@ -403,7 +403,7 @@ export default function GerenciarUsuarios() {
                       ))}
                     </>
                   )}
-                  {/* Usu├írios Aprovados */}
+                  {/* Usuários Aprovados */}
                   {usuariosAprovados.map((usuario) => (
                     <tr key={usuario.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap font-medium">{usuario.username}</td>
@@ -464,12 +464,12 @@ export default function GerenciarUsuarios() {
         </div>
       </div>
 
-      {/* Modal de Criar/Editar Usu├írio */}
+      {/* Modal de Criar/Editar Usuário */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">{editingUsuario ? 'Editar' : 'Novo'} Usu├írio</h2>
+              <h2 className="text-2xl font-bold">{editingUsuario ? 'Editar' : 'Novo'} Usuário</h2>
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
@@ -478,7 +478,7 @@ export default function GerenciarUsuarios() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Usu├írio (Login) *</label>
+                  <label className="block text-sm font-medium mb-1">Usuário (Login) *</label>
                   <input
                     type="text"
                     required
@@ -554,7 +554,7 @@ export default function GerenciarUsuarios() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Matr├¡cula</label>
+                  <label className="block text-sm font-medium mb-1">Matrícula</label>
                   <input
                     type="text"
                     value={formData.matricula}
@@ -600,7 +600,7 @@ export default function GerenciarUsuarios() {
                       onChange={(e) => setFormData({ ...formData, isAtivo: e.target.checked })}
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium">Usu├írio Ativo</span>
+                    <span className="text-sm font-medium">Usuário Ativo</span>
                   </label>
                 </div>
               </div>
@@ -610,32 +610,32 @@ export default function GerenciarUsuarios() {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
                       <span className="mr-2">Ôä╣´©Å</span>
-                      Permiss├Áes Granulares por M├│dulo
+                      PermissÇes Granulares por Módulo
                     </h3>
                     <p className="text-sm text-blue-800 mb-2">
-                      <strong>Importante:</strong> Voc├¬ pode configurar permiss├Áes independentes para cada m├│dulo:
+                      <strong>Importante:</strong> Você pode configurar permissÇes independentes para cada módulo:
                     </p>
                     <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
-                      <li><strong>Visualizar:</strong> Permite apenas ver as informa├º├Áes (sem editar, criar ou excluir)</li>
-                      <li><strong>Criar:</strong> Permite adicionar novos registros (requer permiss├úo de visualizar)</li>
-                      <li><strong>Editar:</strong> Permite modificar registros existentes (requer permiss├úo de visualizar)</li>
-                      <li><strong>Excluir:</strong> Permite remover registros (requer permiss├úo de visualizar)</li>
+                      <li><strong>Visualizar:</strong> Permite apenas ver as informaçÇes (sem editar, criar ou excluir)</li>
+                      <li><strong>Criar:</strong> Permite adicionar novos registros (requer permissúo de visualizar)</li>
+                      <li><strong>Editar:</strong> Permite modificar registros existentes (requer permissúo de visualizar)</li>
+                      <li><strong>Excluir:</strong> Permite remover registros (requer permissúo de visualizar)</li>
                     </ul>
                     <p className="text-sm text-blue-800 mt-2">
-                      <strong>Exemplo:</strong> Um operador pode ter permiss├úo para <strong>visualizar</strong> o Controle de Produ├º├úo, mas <strong>n├úo pode editar</strong> os registros.
+                      <strong>Exemplo:</strong> Um operador pode ter permissúo para <strong>visualizar</strong> o Controle de Produçúo, mas <strong>núo pode editar</strong> os registros.
                     </p>
                   </div>
                   
                   <div className="space-y-3">
                     {[
-                      { key: 'receitasMaquina', label: 'Receitas de M├íquina' },
-                      { key: 'controleProducao', label: 'Controle de Produ├º├úo' },
-                      { key: 'controleFuncionarios', label: 'Controle de Funcion├írios' },
+                      { key: 'receitasMaquina', label: 'Receitas de Máquina' },
+                      { key: 'controleProducao', label: 'Controle de Produçúo' },
+                      { key: 'controleFuncionarios', label: 'Controle de Funcionários' },
                       { key: 'problemasTecnicos', label: 'Problemas T├®cnicos' },
-                      { key: 'mudancasMelhorias', label: 'Mudan├ºas e Melhorias' },
-                      { key: 'instrucoesTrabalho', label: 'Instru├º├Áes de Trabalho' },
-                      { key: 'componentesProduto', label: 'Componentes por C├│digo' },
-                      { key: 'segurancaTrabalho', label: 'Seguran├ºa do Trabalho' },
+                      { key: 'mudancasMelhorias', label: 'Mudanças e Melhorias' },
+                      { key: 'instrucoesTrabalho', label: 'InstruçÇes de Trabalho' },
+                      { key: 'componentesProduto', label: 'Componentes por Código' },
+                      { key: 'segurancaTrabalho', label: 'Segurança do Trabalho' },
                     ].map(({ key, label }) => {
                       const moduloPermissao = formData.permissoes[key as keyof Permissoes];
                       const permissoesModulo = typeof moduloPermissao === 'object' && 'visualizar' in moduloPermissao 
@@ -678,7 +678,7 @@ export default function GerenciarUsuarios() {
                                   });
                                 }}
                                 className={`text-xs px-2 py-1 rounded ${todasPermissoes ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                                title="Todas as permiss├Áes"
+                                title="Todas as permissÇes"
                               >
                                 Todas
                               </button>
@@ -694,7 +694,7 @@ export default function GerenciarUsuarios() {
                                   });
                                 }}
                                 className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                title="Nenhuma permiss├úo"
+                                title="Nenhuma permissúo"
                               >
                                 Nenhuma
                               </button>
@@ -710,7 +710,7 @@ export default function GerenciarUsuarios() {
                               />
                               <div className="flex flex-col">
                                 <span className="text-sm font-medium text-gray-900">Visualizar</span>
-                                <span className="text-xs text-gray-500">Ver informa├º├Áes</span>
+                                <span className="text-xs text-gray-500">Ver informaçÇes</span>
                               </div>
                             </label>
                             <label className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors">
@@ -756,13 +756,13 @@ export default function GerenciarUsuarios() {
                           {!permissoesModulo.visualizar && (
                             <p className="text-xs text-amber-600 mt-2 flex items-center">
                               <span className="mr-1">ÔÜá´©Å</span>
-                              Sem permiss├úo de visualiza├º├úo. O usu├írio n├úo poder├í acessar este m├│dulo.
+                              Sem permissúo de visualizaçúo. O usuário núo poderá acessar este módulo.
                             </p>
                           )}
                           {permissoesModulo.visualizar && !permissoesModulo.editar && (
                             <p className="text-xs text-blue-600 mt-2 flex items-center">
                               <span className="mr-1">Ôä╣´©Å</span>
-                              Usu├írio pode apenas visualizar este m├│dulo, sem editar.
+                              Usuário pode apenas visualizar este módulo, sem editar.
                             </p>
                           )}
                         </div>
@@ -771,7 +771,7 @@ export default function GerenciarUsuarios() {
                   </div>
 
                   <div className="mt-4 pt-4 border-t">
-                    <h4 className="font-medium text-sm mb-3 text-gray-700">Permiss├Áes Especiais</h4>
+                    <h4 className="font-medium text-sm mb-3 text-gray-700">PermissÇes Especiais</h4>
                     <div className="space-y-2">
                       <label className="flex items-center">
                         <input
@@ -789,7 +789,7 @@ export default function GerenciarUsuarios() {
                           onChange={() => togglePermissao('programarPedidos')}
                           className="mr-2"
                         />
-                        <span className="text-sm">Programar Pedidos (Log├¡stica)</span>
+                        <span className="text-sm">Programar Pedidos (Logística)</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -798,8 +798,8 @@ export default function GerenciarUsuarios() {
                           onChange={() => togglePermissao('atualizarProducaoHora')}
                           className="mr-2"
                         />
-                        <span className="text-sm">Atualizar Produ├º├úo Hora a Hora</span>
-                        <span className="ml-2 text-xs text-gray-500">(Preparadores t├¬m permiss├úo autom├ítica)</span>
+                        <span className="text-sm">Atualizar Produçúo Hora a Hora</span>
+                        <span className="ml-2 text-xs text-gray-500">(Preparadores têm permissúo automática)</span>
                       </label>
                     </div>
                   </div>

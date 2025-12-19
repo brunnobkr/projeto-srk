@@ -31,7 +31,7 @@ export default function GerenciarSetoresLinhas() {
       loadSetores();
       loadProblemasTecnicos();
       loadChamadosManutencao();
-      // Inicializar setores padr├úo se n├úo existirem
+      // Inicializar setores padrúo se núo existirem
       const todosSetores = setoresStorage.getAll();
       if (todosSetores.length === 0 && usuario) {
         inicializarSetoresPadrao();
@@ -50,7 +50,7 @@ export default function GerenciarSetoresLinhas() {
 
   const loadChamadosManutencao = () => {
     const todosChamados = chamadosStorage.getAll();
-    // Filtrar chamados de mec├ónica e el├®trica que est├úo abertos ou em andamento
+    // Filtrar chamados de mec├ónica e el├®trica que estúo abertos ou em andamento
     const chamadosAtivos = todosChamados.filter(c => 
       (c.tipo === 'mecanica' || c.tipo === 'eletrica') &&
       (c.status === 'aberto' || c.status === 'em-andamento')
@@ -168,7 +168,7 @@ export default function GerenciarSetoresLinhas() {
       criadoPor,
     };
 
-    // Setor Caminh├Áes (C1-C6, CL, CI, CG, CH, CK, CJ)
+    // Setor CaminhÇes (C1-C6, CL, CI, CG, CH, CK, CJ)
     const linhasCaminhoes: Linha[] = [];
     for (let i = 1; i <= 6; i++) {
       linhasCaminhoes.push({
@@ -195,8 +195,8 @@ export default function GerenciarSetoresLinhas() {
 
     const setorCaminhoes: Setor = {
       id: 'setor_caminhoes',
-      nome: 'Caminh├Áes',
-      descricao: 'Setor Caminh├Áes',
+      nome: 'CaminhÇes',
+      descricao: 'Setor CaminhÇes',
       linhas: linhasCaminhoes,
       ativo: true,
       dataCriacao: agora,
@@ -226,14 +226,14 @@ export default function GerenciarSetoresLinhas() {
       criadoPor,
     };
 
-    // Linha Canister (M├íquinas 1-20)
+    // Linha Canister (Máquinas 1-20)
     const linhasCanister: Linha[] = [];
     for (let i = 1; i <= 20; i++) {
       linhasCanister.push({
         id: `canister_${i}`,
         nome: i.toString(),
         setorId: 'setor_canister',
-        descricao: `M├íquina ${i}`,
+        descricao: `Máquina ${i}`,
         ativo: true,
         dataCriacao: agora,
         dataAtualizacao: agora,
@@ -407,7 +407,7 @@ export default function GerenciarSetoresLinhas() {
   };
 
   const handleDeleteSetor = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este setor? Todas as linhas ser├úo exclu├¡das tamb├®m.')) {
+    if (confirm('Tem certeza que deseja excluir este setor? Todas as linhas serúo excluídas tamb├®m.')) {
       setoresStorage.delete(id);
       loadSetores();
     }
@@ -538,10 +538,10 @@ export default function GerenciarSetoresLinhas() {
             </div>
           )}
 
-          {/* Chamados de Manuten├º├úo */}
+          {/* Chamados de Manutençúo */}
           {chamadosManutencao.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Chamados de Manuten├º├úo</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Chamados de Manutençúo</h3>
               <div className="space-y-3">
                 {chamadosManutencao.map((chamado) => (
                   <div key={chamado.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
@@ -577,7 +577,7 @@ export default function GerenciarSetoresLinhas() {
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                           {chamado.setor && <span><strong>Setor:</strong> {chamado.setor}</span>}
                           {chamado.linha && <span><strong>Linha:</strong> {chamado.linha}</span>}
-                          {chamado.maquina && <span><strong>M├íquina:</strong> {chamado.maquina}</span>}
+                          {chamado.maquina && <span><strong>Máquina:</strong> {chamado.maquina}</span>}
                           <span className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
                             {(() => {
@@ -729,13 +729,13 @@ export default function GerenciarSetoresLinhas() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Descri├º├úo</label>
+                <label className="block text-sm font-medium mb-1">Descriçúo</label>
                 <textarea
                   value={formDataSetor.descricao}
                   onChange={(e) => setFormDataSetor({ ...formDataSetor, descricao: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Descri├º├úo opcional do setor"
+                  placeholder="Descriçúo opcional do setor"
                 />
               </div>
               <div className="flex justify-end space-x-4 pt-4 border-t">
@@ -800,13 +800,13 @@ export default function GerenciarSetoresLinhas() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Descri├º├úo</label>
+                <label className="block text-sm font-medium mb-1">Descriçúo</label>
                 <input
                   type="text"
                   value={formDataLinha.descricao}
                   onChange={(e) => setFormDataLinha({ ...formDataLinha, descricao: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Descri├º├úo opcional da linha"
+                  placeholder="Descriçúo opcional da linha"
                 />
               </div>
               <div className="flex justify-end space-x-4 pt-4 border-t">
