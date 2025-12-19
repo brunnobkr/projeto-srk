@@ -278,11 +278,38 @@ export default function ProblemasTecnicos() {
     return labels[status] || status;
   };
 
-  const filteredProblemas = problemas.filter(p =>
-    p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProblemas = problemas.filter(p => {
+    // Filtro de busca geral (searchTerm)
+    const matchesSearch = !searchTerm ||
+      p.maquina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.numeroChamado && p.numeroChamado.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Filtros adicionais apenas para preparadores
+    if (isPreparador()) {
+      // Filtro por linha
+      if (filtroLinha && p.linha && !p.linha.toLowerCase().includes(filtroLinha.toLowerCase())) {
+        return false;
+      }
+
+      // Filtro por ID do chamado
+      if (filtroIdChamado && (!p.numeroChamado || !p.numeroChamado.toLowerCase().includes(filtroIdChamado.toLowerCase()))) {
+        return false;
+      }
+
+      // Filtro por turno
+      if (filtroTurno !== 'todos' && p.turno !== filtroTurno) {
+        return false;
+      }
+
+      // Filtro para mostrar apenas meus chamados
+      if (mostrarSomenteMeus && p.reportadoPor !== usuario?.nome) {
+        return false;
+      }
+    }
+
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-6">
