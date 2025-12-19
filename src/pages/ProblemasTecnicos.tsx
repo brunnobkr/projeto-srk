@@ -93,6 +93,13 @@ export default function ProblemasTecnicos() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Verificar se apenas mecânicos podem concluir chamados
+    if (formData.status === 'resolvido' && !isCentralMecanica()) {
+      alert('Apenas usuários da Central Mecânica podem marcar chamados como resolvidos.');
+      return;
+    }
+    
     // Determinar turno se não foi definido
     const turno = formData.turno || determinarTurno(formData.hora);
     

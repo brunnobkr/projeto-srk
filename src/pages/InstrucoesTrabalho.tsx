@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Edit, Trash2, X, Eye } from 'lucide-react';
 import { instrucoesStorage } from '../utils/storage';
+import { useAuth } from '../contexts/AuthContext';
 import type { InstrucaoTrabalho } from '../types';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
+  const { usuario, canView } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
   const [viewingInstrucao, setViewingInstrucao] = useState<InstrucaoTrabalho | null>(null);
 
@@ -25,7 +27,18 @@ export default function InstrucoesTrabalho() {
       ...inst,
       tipoInstrucao: inst.tipoInstrucao || 'insercao',
     }));
-    setInstrucoes(instrucoesMigradas);
+    
+    // Filtrar instruções baseado em permissões e setor do usuário
+    let instrucoesFiltradas = instrucoesMigradas;
+    
+    if (!usuario?.isAdmin) {
+      // Usuários não-admin veem apenas instruções do seu setor ou gerais
+      instrucoesFiltradas = instrucoesMigradas.filter(inst => 
+        !inst.setor || inst.setor === usuario?.setor || inst.setor === ''
+      );
+    }
+    
+    setInstrucoes(instrucoesFiltradas);
   };
 
   const handleEdit = () => {
@@ -53,6 +66,9 @@ export default function InstrucoesTrabalho() {
       marcacao: 'Marcação',
       start: 'Start na Máquina',
       botao: 'Botão',
+      limpeza: 'Limpeza',
+      manutencao: 'Manutenção',
+      qualidade: 'Controle de Qualidade',
       outro: 'Outro',
     };
     return labels[tipo] || tipo;
@@ -123,6 +139,9 @@ export default function InstrucoesTrabalho() {
                 instrucao.tipoInstrucao === 'marcacao' ? 'bg-purple-100 text-purple-800' :
                 instrucao.tipoInstrucao === 'start' ? 'bg-orange-100 text-orange-800' :
                 instrucao.tipoInstrucao === 'botao' ? 'bg-yellow-100 text-yellow-800' :
+                instrucao.tipoInstrucao === 'limpeza' ? 'bg-cyan-100 text-cyan-800' :
+                instrucao.tipoInstrucao === 'manutencao' ? 'bg-indigo-100 text-indigo-800' :
+                instrucao.tipoInstrucao === 'qualidade' ? 'bg-pink-100 text-pink-800' :
                 'bg-gray-100 text-gray-800'
               }`}>
                 {getTipoInstrucaoLabel(instrucao.tipoInstrucao || 'insercao')}
