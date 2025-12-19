@@ -8,7 +8,8 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { determinarTurno } from '../utils/turno';
 
 export default function ControleFuncionarios() {
-  const { usuario } = useAuth();
+  const { usuario, canCreate, canEdit } = useAuth();
+  const podeCriarEditar = canCreate('controleFuncionarios') || canEdit('controleFuncionarios');
   const [controles, setControles] = useState<ControleFuncionarios[]>([]);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
