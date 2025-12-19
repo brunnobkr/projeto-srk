@@ -331,6 +331,7 @@ export interface InstrucaoTrabalho {
   dataCriacao: string;
   dataAtualizacao: string;
   criadoPor: string;
+  atualizadoPor?: string; // Quem atualizou a instrução
 }
 
 export interface PassoInstrucao {
