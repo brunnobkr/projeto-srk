@@ -475,6 +475,13 @@ export interface ChamadoManutencao {
   pecasUtilizadas?: PecaUtilizada[];
   custoEstimado?: number;
   custoReal?: number;
+  // Campos de auditoria
+  excluido?: boolean;
+  exclusaoAutorizadaPorNome?: string;
+  exclusaoAutorizadaPorMatricula?: string;
+  dataExclusao?: string;
+  atualizadoPor?: string;
+  matriculaAtualizadoPor?: string;
 }
 
 export interface PecaUtilizada {
