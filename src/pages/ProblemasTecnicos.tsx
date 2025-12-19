@@ -9,13 +9,22 @@ import { determinarTurno } from '../utils/turno';
 
 export default function ProblemasTecnicos() {
   const { usuario, canEdit, canCreate, isCentralMecanica } = useAuth();
+  const podeCriarEditar = canCreate('problemasTecnicos') || canEdit('problemasTecnicos');
+  const isPreparador = () => usuario?.cargo?.toLowerCase().includes('preparador') || false;
   const [problemas, setProblemas] = useState<ProblemaTecnico[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProblema, setEditingProblema] = useState<ProblemaTecnico | null>(null);
   const [viewingProblema, setViewingProblema] = useState<ProblemaTecnico | null>(null);
+  const [showResolveModal, setShowResolveModal] = useState(false);
+  const [problemaParaResolver, setProblemaParaResolver] = useState<ProblemaTecnico | null>(null);
+  const [resolveFormData, setResolveFormData] = useState({ resolvidoPor: '', matriculaResolvidoPor: '' });
   const [setores, setSetores] = useState<Setor[]>([]);
   const [linhas, setLinhas] = useState<any[]>([]);
+  const [filtroLinha, setFiltroLinha] = useState('');
+  const [filtroIdChamado, setFiltroIdChamado] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState<'todos' | '1' | '2' | '3' | 'central'>('todos');
+  const [mostrarSomenteMeus, setMostrarSomenteMeus] = useState(false);
   const [formData, setFormData] = useState({
     tipo: 'mecanico' as 'mecanico' | 'eletrico' | 'sistema' | 'ferramentaria',
     maquina: '',

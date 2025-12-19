@@ -283,6 +283,7 @@ export interface ProblemaTecnico {
   linha: string; // Linha onde ocorreu o problema (obrigatório)
   causa?: string; // Causa do problema
   resolvidoPor?: string;
+  matriculaResolvidoPor?: string;
   dataResolucao?: string;
   tempoResolucao?: number; // em minutos
   observacoes?: string;
