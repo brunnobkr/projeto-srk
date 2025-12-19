@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export default function InstrucoesTrabalho() {
-  const { usuario, canView } = useAuth();
+  const { usuario } = useAuth();
   const [instrucoes, setInstrucoes] = useState<InstrucaoTrabalho[]>([]);
   const [viewingInstrucao, setViewingInstrucao] = useState<InstrucaoTrabalho | null>(null);
 

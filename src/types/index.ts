@@ -327,7 +327,7 @@ export interface InstrucaoTrabalho {
   codigoProduto: string;
   setor?: string;
   linha?: string;
-  tipoInstrucao: 'insercao' | 'fechamento' | 'emergencia' | 'marcacao' | 'start' | 'botao' | 'outro';
+  tipoInstrucao: 'insercao' | 'fechamento' | 'emergencia' | 'marcacao' | 'start' | 'botao' | 'limpeza' | 'manutencao' | 'qualidade' | 'outro';
   titulo: string;
   passos: PassoInstrucao[];
   preparador: boolean;
