@@ -111,7 +111,14 @@ export default function ProblemasTecnicos() {
       status: formData.status,
       reportadoPor: editingProblema?.reportadoPor || usuario?.nome || undefined,
       resolvidoPor: formData.resolvidoPor || undefined,
-      dataResolucao: formData.status === 'resolvido' ? new Date().toISOString() : undefined,
+      matriculaResolvidoPor: formData.status === 'resolvido' && formData.resolvidoPor
+        ? (editingProblema?.status !== 'resolvido' && usuario?.matricula 
+            ? usuario.matricula 
+            : editingProblema?.matriculaResolvidoPor)
+        : editingProblema?.matriculaResolvidoPor,
+      dataResolucao: formData.status === 'resolvido' && editingProblema?.status !== 'resolvido'
+        ? new Date().toISOString()
+        : editingProblema?.dataResolucao,
       observacoes: formData.observacoes || undefined,
       engenhariaChamada: formData.engenhariaChamada,
       dataChamadaEngenharia: formData.engenhariaChamada && !editingProblema?.engenhariaChamada 
@@ -212,9 +219,11 @@ export default function ProblemasTecnicos() {
     if (problema) {
       const resolvidoPor = prompt('Quem resolveu o problema?');
       if (resolvidoPor) {
+        const matriculaResolvidoPor = prompt('Matrícula de quem resolveu o problema? (opcional)') || undefined;
         problemasStorage.update(id, {
           status: 'resolvido',
           resolvidoPor,
+          matriculaResolvidoPor,
           dataResolucao: new Date().toISOString(),
         });
         loadProblemas();
@@ -475,7 +484,16 @@ export default function ProblemasTecnicos() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{problema.resolvidoPor || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {problema.resolvidoPor ? (
+                        <div>
+                          <div>{problema.resolvidoPor}</div>
+                          {problema.matriculaResolvidoPor && (
+                            <div className="text-xs text-gray-500">Mat: {problema.matriculaResolvidoPor}</div>
+                          )}
+                        </div>
+                      ) : '-'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button onClick={() => setViewingProblema(problema)} className="text-blue-600 hover:text-blue-900 mr-4" title="Ver detalhes">
                         <Eye className="w-5 h-5" />
@@ -606,10 +624,26 @@ export default function ProblemasTecnicos() {
                   </select>
                 </div>
                 {formData.status === 'resolvido' && (
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Resolvido Por</label>
-                    <input type="text" value={formData.resolvidoPor} onChange={(e) => setFormData({ ...formData, resolvidoPor: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                  </div>
+                  <>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium mb-1">Resolvido Por *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.resolvidoPor} 
+                        onChange={(e) => setFormData({ ...formData, resolvidoPor: e.target.value })} 
+                        className="w-full px-3 py-2 border rounded-lg" 
+                        placeholder="Nome de quem resolveu"
+                      />
+                    </div>
+                    {usuario?.matricula && (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium mb-1 text-gray-500">
+                          Matrícula será registrada automaticamente: {usuario.matricula}
+                        </label>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <div>
@@ -744,7 +778,10 @@ export default function ProblemasTecnicos() {
                   {viewingProblema.resolvidoPor && (
                     <div>
                       <span className="font-medium text-gray-700">Resolvido por:</span>
-                      <p className="text-gray-900">{viewingProblema.resolvidoPor}</p>
+                      <p className="text-gray-900">
+                        {viewingProblema.resolvidoPor}
+                        {viewingProblema.matriculaResolvidoPor && ` (Matrícula: ${viewingProblema.matriculaResolvidoPor})`}
+                      </p>
                     </div>
                   )}
                   {viewingProblema.dataResolucao && (

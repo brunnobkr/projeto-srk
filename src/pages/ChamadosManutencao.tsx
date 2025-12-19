@@ -56,7 +56,9 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
 
   const loadChamados = () => {
     const todosChamados = chamadosStorage.getByTipo(tipo);
-    setChamados(todosChamados);
+    // Filtrar chamados excluídos da lista padrão
+    const chamadosAtivos = todosChamados.filter(c => !c.excluido);
+    setChamados(chamadosAtivos);
   };
 
   const podeEditarChamado = () => {
@@ -146,6 +148,13 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
       pecasUtilizadas: editingChamado?.pecasUtilizadas,
       custoEstimado: editingChamado?.custoEstimado,
       custoReal: editingChamado?.custoReal,
+      // Preservar campos de auditoria ao editar
+      excluido: editingChamado?.excluido,
+      exclusaoAutorizadaPorNome: editingChamado?.exclusaoAutorizadaPorNome,
+      exclusaoAutorizadaPorMatricula: editingChamado?.exclusaoAutorizadaPorMatricula,
+      dataExclusao: editingChamado?.dataExclusao,
+      atualizadoPor: editingChamado ? usuario.nome : editingChamado?.atualizadoPor,
+      matriculaAtualizadoPor: editingChamado ? usuario.matricula : editingChamado?.matriculaAtualizadoPor,
     };
 
     if (editingChamado) {
@@ -652,6 +661,31 @@ export default function ChamadosManutencao({ tipo, titulo, icone: Icone }: Chama
                   {viewingChamado.observacoes && (
                     <div className="col-span-2">
                       <strong className="text-gray-700">Observações:</strong> {viewingChamado.observacoes}
+                    </div>
+                  )}
+                  {/* Campos de auditoria */}
+                  {viewingChamado.excluido && (
+                    <>
+                      <div className="col-span-2">
+                        <strong className="text-gray-700 text-red-600">Chamado Excluído/Cancelado</strong>
+                      </div>
+                      {viewingChamado.exclusaoAutorizadaPorNome && (
+                        <div>
+                          <strong className="text-gray-700">Exclusão autorizada por:</strong> {viewingChamado.exclusaoAutorizadaPorNome}
+                          {viewingChamado.exclusaoAutorizadaPorMatricula && ` (Matrícula: ${viewingChamado.exclusaoAutorizadaPorMatricula})`}
+                        </div>
+                      )}
+                      {viewingChamado.dataExclusao && (
+                        <div>
+                          <strong className="text-gray-700">Data de exclusão:</strong> {format(new Date(viewingChamado.dataExclusao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {viewingChamado.atualizadoPor && (
+                    <div>
+                      <strong className="text-gray-700">Última atualização por:</strong> {viewingChamado.atualizadoPor}
+                      {viewingChamado.matriculaAtualizadoPor && ` (Matrícula: ${viewingChamado.matriculaAtualizadoPor})`}
                     </div>
                   )}
                 </div>
